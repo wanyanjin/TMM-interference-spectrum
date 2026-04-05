@@ -10,7 +10,7 @@
 - 当前可用能力：
   - 已有 `step01_absolute_calibration.py`，可将样品与银镜原始计数转换为绝对反射率
   - 已有 `step01b_cauchy_extrapolation.py`，可基于 [LIT-0001] 的 `ITO/CsFAPI` 数字化折射率曲线生成 `750-1100 nm` 的 CsFAPI 扩展 `n-k` 中间件
-  - 已有 `step02_tmm_inversion.py`，可读取目标反射率、ITO 色散和 CsFAPI 扩展 `n-k` 中间件，执行单参数 PVK 厚度反演
+  - 已有 `step02_tmm_inversion.py`，可读取目标反射率、ITO 色散和 CsFAPI 扩展 `n-k` 中间件，执行包含 50/50 BEMA 粗糙度修正的双参数 `d_bulk + d_rough` 反演
   - 已有 `step02_digitize_fapi_optical_constants.py`，可从 `LIT-0001` 的 Fig. 2 原图数字化提取 FAPI 的 `n/κ` 曲线并输出 QA 图
   - 已有 `step02_digitize_csfapi_optical_constants.py`，可从 `LIT-0001` 的 Fig. 3 原图数字化提取 CsFAPI 的 `n/κ` 曲线并输出 QA 图
   - 已产出标准中间文件 `data/processed/target_reflectance.csv` 与 `data/processed/CsFAPI_nk_extended.csv`
@@ -141,7 +141,7 @@ TMM-interference-spectrum/
 ### 4.3 `step02_tmm_inversion.py`
 
 - 文件位置：`src/scripts/step02_tmm_inversion.py`
-- 主要职责：读取 `step01` 输出的目标反射率、ITO 色散和 `step01b` 生成的 CsFAPI 扩展 `n-k` 中间件，执行单参数厚度反演
+- 主要职责：读取 `step01` 输出的目标反射率、ITO 色散和 `step01b` 生成的 CsFAPI 扩展 `n-k` 中间件，执行包含 BEMA 表面粗糙度修正的双参数厚度反演
 
 输入：
 - `data/processed/target_reflectance.csv`
@@ -163,9 +163,11 @@ TMM-interference-spectrum/
 - ITO 厚度固定：`105 nm`
 - NiOx 厚度固定：`20 nm`
 - SAM 厚度固定：`2 nm`
-- PVK 为唯一反演参数
-- PVK 厚度搜索范围：`400-650 nm`
+- PVK 块体厚度 `d_bulk` 搜索范围：`400-650 nm`
+- PVK 表面粗糙层厚度 `d_rough` 搜索范围：`0-80 nm`
 - PVK 采用 `step01b` 生成的 CsFAPI 扩展 `n-k` 中间件，并通过线性插值映射到目标波长网格
+- 粗糙层采用 `50% PVK + 50% Air` 的 Bruggeman EMA 有效介质模型
+- 相干层堆栈为：`Glass -> ITO -> NiOx -> SAM -> PVK_Bulk -> PVK_Roughness -> Air`
 
 核心处理流程：
 - 读取目标绝对反射率
@@ -173,11 +175,12 @@ TMM-interference-spectrum/
 - 解析 ITO 的 `e1/e2` 数据并转为 `n + ik`
 - 构建 ITO 复折射率插值器
 - 构建 PVK 复折射率插值器
+- 根据块体 PVK 复介电常数计算 50/50 BEMA 粗糙层复折射率
 - 计算宏观反射率：
   - 玻璃前表面菲涅尔反射
-  - 玻璃后方薄膜堆栈相干 TMM
+  - 玻璃后方包含粗糙层的薄膜堆栈相干 TMM
   - 再按非相干强度级联公式合成总反射率
-- 使用 `lmfit` 的 `leastsq` 做单参数厚度反演
+- 使用 `lmfit` 的 `leastsq` 做双参数厚度反演
 - 输出最佳拟合图
 
 输出：
@@ -229,7 +232,7 @@ resources/digitized/phase02_fig3_csfapi_optical_constants_digitized.csv
 data/processed/target_reflectance.csv
 data/processed/CsFAPI_nk_extended.csv
 resources/ITO_20 Ohm_105 nm_e1e2.mat
-    -> step02_tmm_inversion.py
+    -> step02_tmm_inversion.py (CsFAPI 扩展 n-k -> BEMA 粗糙层修正 -> d_bulk + d_rough 双参数反演)
     -> results/figures/tmm_inversion_result.png
 
 reference/Khan.../images/b3c499f799...
@@ -246,8 +249,8 @@ reference/Khan.../images/885e29d3...
 
 1. `step01` 负责把原始计数校准成可用于物理建模的绝对反射率
 2. `step01b` 把 [LIT-0001] 数字化 CsFAPI 曲线转换成标准近红外 `n-k` 中间件
-3. `step02` 只消费标准中间文件，不再在脚本内部硬编码 PVK 常数折射率
-4. 当前脚本链已经具备“测量数据 -> 标准中间数据 + 文献外推中间数据 -> TMM 反演图表”的最小闭环
+3. `step02` 在消费标准 `n-k` 中间件后，进一步通过 50/50 BEMA 将 PVK-Air 表面粗糙度折算为有效介质层
+4. 当前脚本链已经具备“测量数据 -> 标准中间数据 + 文献外推中间数据 -> BEMA 修正 TMM 双参数反演图表”的最小闭环
 
 ## 6. Key Physical / Numerical Assumptions
 
@@ -260,7 +263,8 @@ reference/Khan.../images/885e29d3...
 - PVK 的近红外色散来源为 [LIT-0001] Fig. 3 的 `ITO/CsFAPI` 数字化 `n` 曲线，并通过 Cauchy 模型外推到 `1100 nm`
 - `750-1100 nm` 内强制采用 `k = 0`
 - `1000-1100 nm` 属于超出原始椭偏测量窗口的模型外推区
-- 反演当前仅对 `d_pvk` 一个参数进行拟合
+- 粗糙层采用 `50% PVK + 50% Air` 的 BEMA 有效介质
+- 反演当前同时拟合 `d_bulk` 与 `d_rough` 两个参数
 
 这些假设是理解结果与后续扩展的关键锚点；若后续有改动，必须同步更新本文件。
 
@@ -293,13 +297,13 @@ reference/Khan.../images/885e29d3...
 ### 7.3 当前反演模型参数自由度较低
 
 - 表现：
-  - 目前仅反演 PVK 厚度 `d_pvk`
+  - 当前仅反演 `d_bulk` 与 `d_rough`
   - ITO/NiOx/SAM 厚度与材料参数均固定
 - 影响：
-  - 单参数收敛不等于结构解释唯一
+  - 双参数收敛仍不等于结构解释唯一
   - 对模型误差与参数耦合的吸收能力有限
 - 当前状态：
-  - 适合作为基准闭环
+  - 已比单参数模型更能吸收表面粗糙度导致的振幅偏差
   - 不适合作为最终物理解译结论
 
 ### 7.4 图像数字化结果不是原始实验表
@@ -323,6 +327,16 @@ reference/Khan.../images/885e29d3...
   - “临时常数折射率”不再是主流程隐含假设
 - 当前状态：
   - 已解决
+
+### 7.6 BEMA 粗糙层升级直接用于压低理论振幅
+
+- 表现：
+  - 在相位已经基本对齐的前提下，平滑界面模型的理论振幅高于实测振幅
+- 影响：
+  - 引入 `PVK_Roughness` 有效介质层后，模型可通过顶部减反效应压低理论峰值，更接近实测约 `30%` 的振幅水平
+- 当前状态：
+  - 已纳入 `step02_tmm_inversion.py` 主流程
+  - 后续仍需结合拟合结果持续验证振幅改进是否稳定
 
 ## 8. Architecture Risks
 
@@ -366,7 +380,13 @@ reference/Khan.../images/885e29d3...
   - 当前将 `k` 在近红外全部强制为 `0`
   - 数字化误差会直接传递到 Cauchy 参数 `A, B`
 
-### 8.6 结果文件命名尚未 Phase 化
+### 8.6 BEMA 双参数反演存在参数相关性风险
+
+- `d_bulk` 与 `d_rough` 都会影响干涉振幅与相位，二者可能存在相关性
+- 因此双参数数值收敛不自动等价于唯一物理解
+- 当前升级可直接改善振幅匹配，但后续若用于定量结论，仍需通过更多先验或更多观测量约束参数空间
+
+### 8.7 结果文件命名尚未 Phase 化
 
 - 当前图像文件名尚未显式带上 `phaseXX`
 - 后续结果积累后，可能不利于多轮实验比较和回滚定位
@@ -379,21 +399,22 @@ reference/Khan.../images/885e29d3...
   - 新增 `step01b_cauchy_extrapolation.py`
   - 新增 `data/processed/CsFAPI_nk_extended.csv`
   - 新增 `results/figures/cauchy_extrapolation_check.png`
-  - 重构 `step02_tmm_inversion.py`，改为读取 CsFAPI 扩展 `n-k` 中间件
-  - 删除 `step02` 中的 PVK 常数折射率 smoke test 主流程依赖
+  - 重构 `step02_tmm_inversion.py`，改为执行包含 BEMA 粗糙层修正的双参数 `d_bulk + d_rough` 反演
+  - 删除 `step02` 中的平滑单层 `d_pvk` 主流程接口
 - 已验证结论：
   - 已成功从 [LIT-0001] Fig. 3 的 `ITO/CsFAPI` 数字化 `n` 曲线拟合 Cauchy 参数并外推到 `1100 nm`
-  - `step02` 已成功消费 `CsFAPI_nk_extended.csv` 并保持厚玻璃非相干修正与 LM 反演闭环
+  - `step02` 已成功消费 `CsFAPI_nk_extended.csv` 并保持厚玻璃非相干修正与 LM 双参数反演闭环
 - 仍待验证：
   - `1000-1100 nm` 外推段的物理可信度仍需后续用原始数据或独立测量交叉验证
   - 当前 `k=0` 假设在近红外是否足够严格，还需结合后续实验或文献继续审查
+  - `d_bulk` 与 `d_rough` 的相关性是否会影响最终物理解读，还需后续继续评估
 
 ## 10. Recommended Next Actions
 
 建议后续优先处理以下事项：
 
 1. 建立 `data/raw/`，并把 `test_data/` 中实际原始测量 CSV 迁移到规范目录
-2. 创建结构化反演结果输出文件，记录 `d_pvk`、`chi-square` 与外推参数 `A/B`
+2. 创建结构化反演结果输出文件，记录 `d_bulk`、`d_rough`、`chi-square` 与外推参数 `A/B`
 3. 将 `step01`/`step01b`/`step02` 中可复用逻辑下沉到 `src/core/`
 4. 建立 `docs/RESOURCE_INDEX.md`，说明 ITO、银镜基准、论文资料与数字化资源的来源和格式
 5. 建立 `README.md`，补齐项目运行入口、依赖安装和 Phase 概览

@@ -7,9 +7,10 @@
 1. 目标曲线读取
 2. ITO 色散解析与插值
 3. PVK 外推 n-k 中间件加载与插值
-4. 厚玻璃非相干修正 + 相干薄膜 TMM
-5. lmfit 单参数厚度反演
-6. 结果绘图
+4. BEMA 表面粗糙度修正
+5. 厚玻璃非相干修正 + 相干薄膜 TMM
+6. lmfit 双参数厚度反演
+7. 结果绘图
 """
 
 from __future__ import annotations
@@ -40,9 +41,12 @@ SAM_THICKNESS_NM = 2.0
 NIOX_NK = 2.1 + 0.0j
 SAM_NK = 1.8 + 0.0j
 
-INITIAL_PVK_THICKNESS_NM = 500.0
-MIN_PVK_THICKNESS_NM = 400.0
-MAX_PVK_THICKNESS_NM = 650.0
+INITIAL_PVK_BULK_THICKNESS_NM = 480.0
+MIN_PVK_BULK_THICKNESS_NM = 400.0
+MAX_PVK_BULK_THICKNESS_NM = 650.0
+INITIAL_PVK_ROUGHNESS_THICKNESS_NM = 20.0
+MIN_PVK_ROUGHNESS_THICKNESS_NM = 0.0
+MAX_PVK_ROUGHNESS_THICKNESS_NM = 80.0
 
 
 def get_project_root() -> Path:
@@ -336,15 +340,27 @@ def build_pvk_interpolator(
     return get_pvk_nk
 
 
+def calc_bema_rough_nk(bulk_nk: np.ndarray) -> np.ndarray:
+    """计算 50/50 PVK-Air Bruggeman EMA 粗糙层复折射率。"""
+    eps1 = np.asarray(bulk_nk, dtype=np.complex128) ** 2
+    eps2 = 1.0 + 0.0j
+    b_term = 0.5 * (eps1 + eps2)
+    eps_eff = 0.5 * (b_term + np.sqrt(b_term**2 + 2.0 * eps1 * eps2))
+    return np.sqrt(eps_eff)
+
+
 def calc_macro_reflectance(
-    d_pvk_nm: float,
+    d_bulk_nm: float,
+    d_rough_nm: float,
     wavelength_nm: np.ndarray,
     get_ito_nk: Callable[[np.ndarray], np.ndarray],
     get_pvk_nk: Callable[[np.ndarray], np.ndarray],
 ) -> np.ndarray:
     """计算包含厚玻璃非相干修正的宏观反射率。
 
-    真实样品结构是 Air -> 1.1 mm Glass -> ITO -> NiOx -> SAM -> PVK -> Air。
+    真实样品结构是：
+    Air -> 1.1 mm Glass -> ITO -> NiOx -> SAM -> PVK_Bulk -> PVK_Roughness -> Air。
+
     关键点在于：1.1 mm 玻璃厚板绝不能直接放进相干 TMM 相位矩阵。
 
     原因是：
@@ -358,7 +374,8 @@ def calc_macro_reflectance(
     """
     wavelength = np.asarray(wavelength_nm, dtype=float)
     ito_nk = get_ito_nk(wavelength)
-    pvk_nk = get_pvk_nk(wavelength)
+    pvk_bulk_nk = get_pvk_nk(wavelength)
+    pvk_rough_nk = calc_bema_rough_nk(pvk_bulk_nk)
 
     r_coh = np.empty_like(wavelength, dtype=float)
 
@@ -368,10 +385,19 @@ def calc_macro_reflectance(
             ito_nk[index],
             NIOX_NK,
             SAM_NK,
-            pvk_nk[index],
+            pvk_bulk_nk[index],
+            pvk_rough_nk[index],
             AIR_INDEX + 0.0j,
         ]
-        d_list = [np.inf, ITO_THICKNESS_NM, NIOX_THICKNESS_NM, SAM_THICKNESS_NM, d_pvk_nm, np.inf]
+        d_list = [
+            np.inf,
+            ITO_THICKNESS_NM,
+            NIOX_THICKNESS_NM,
+            SAM_THICKNESS_NM,
+            d_bulk_nm,
+            d_rough_nm,
+            np.inf,
+        ]
         tmm_result = coh_tmm("s", n_list, d_list, 0.0, wl_nm)
         r_coh[index] = float(tmm_result["R"])
 
@@ -388,8 +414,9 @@ def residual(
     get_pvk_nk: Callable[[np.ndarray], np.ndarray],
 ) -> np.ndarray:
     """lmfit 残差函数。"""
-    d_pvk_nm = params["d_pvk"].value
-    r_model = calc_macro_reflectance(d_pvk_nm, wavelength_nm, get_ito_nk, get_pvk_nk)
+    d_bulk_nm = params["d_bulk"].value
+    d_rough_nm = params["d_rough"].value
+    r_model = calc_macro_reflectance(d_bulk_nm, d_rough_nm, wavelength_nm, get_ito_nk, get_pvk_nk)
     return r_model - r_target
 
 
@@ -397,7 +424,9 @@ def plot_fit_result(
     wavelength_nm: np.ndarray,
     r_target: np.ndarray,
     r_fit: np.ndarray,
-    d_best_nm: float,
+    d_bulk_nm: float,
+    d_rough_nm: float,
+    d_total_nm: float,
     chisqr: float,
     output_path: Path,
 ) -> None:
@@ -421,7 +450,12 @@ def plot_fit_result(
         label="Best TMM Fit",
     )
 
-    textbox = f"Fitted d_pvk = {d_best_nm:.1f} nm\nChi-Square = {chisqr:.3f}"
+    textbox = (
+        f"Fitted d_bulk = {d_bulk_nm:.1f} nm\n"
+        f"Fitted d_rough = {d_rough_nm:.1f} nm\n"
+        f"Total d_total = {d_total_nm:.1f} nm\n"
+        f"Chi-Square = {chisqr:.3f}"
+    )
     ax.text(
         0.03,
         0.97,
@@ -436,7 +470,7 @@ def plot_fit_result(
     ax.set_xlim(WAVELENGTH_MIN_NM, WAVELENGTH_MAX_NM)
     ax.set_xlabel("Wavelength (nm)")
     ax.set_ylabel("Absolute Reflectance (%)")
-    ax.set_title("TMM Inversion for Perovskite Thickness (850-1100 nm)")
+    ax.set_title("TMM Inversion with BEMA Roughness (850-1100 nm)")
     ax.grid(True, linestyle="--", alpha=0.35)
     ax.legend()
 
@@ -467,10 +501,16 @@ def main() -> None:
 
     params = Parameters()
     params.add(
-        "d_pvk",
-        value=INITIAL_PVK_THICKNESS_NM,
-        min=MIN_PVK_THICKNESS_NM,
-        max=MAX_PVK_THICKNESS_NM,
+        "d_bulk",
+        value=INITIAL_PVK_BULK_THICKNESS_NM,
+        min=MIN_PVK_BULK_THICKNESS_NM,
+        max=MAX_PVK_BULK_THICKNESS_NM,
+    )
+    params.add(
+        "d_rough",
+        value=INITIAL_PVK_ROUGHNESS_THICKNESS_NM,
+        min=MIN_PVK_ROUGHNESS_THICKNESS_NM,
+        max=MAX_PVK_ROUGHNESS_THICKNESS_NM,
     )
 
     result = minimize(
@@ -480,8 +520,10 @@ def main() -> None:
         method="leastsq",
     )
 
-    d_best_nm = float(result.params["d_pvk"].value)
-    r_best_fit = calc_macro_reflectance(d_best_nm, wavelength_nm, get_ito_nk, get_pvk_nk)
+    d_bulk_best_nm = float(result.params["d_bulk"].value)
+    d_rough_best_nm = float(result.params["d_rough"].value)
+    d_total_best_nm = d_bulk_best_nm + d_rough_best_nm
+    r_best_fit = calc_macro_reflectance(d_bulk_best_nm, d_rough_best_nm, wavelength_nm, get_ito_nk, get_pvk_nk)
 
     if np.any(~np.isfinite(r_best_fit)):
         raise ValueError("最佳拟合反射率中出现 NaN 或 Inf，说明模型数值计算失败。")
@@ -490,15 +532,19 @@ def main() -> None:
         wavelength_nm=wavelength_nm,
         r_target=r_target,
         r_fit=r_best_fit,
-        d_best_nm=d_best_nm,
+        d_bulk_nm=d_bulk_best_nm,
+        d_rough_nm=d_rough_best_nm,
+        d_total_nm=d_total_best_nm,
         chisqr=float(result.chisqr),
         output_path=output_path,
     )
 
-    print("TMM 厚度反演完成。")
+    print("TMM 双参数厚度反演完成。")
     print(f"目标曲线输入: {target_csv}")
     print(f"反演结果图片: {output_path}")
-    print(f"Fitted d_pvk = {d_best_nm:.3f} nm")
+    print(f"Fitted d_bulk = {d_bulk_best_nm:.3f} nm")
+    print(f"Fitted d_rough = {d_rough_best_nm:.3f} nm")
+    print(f"Fitted d_total = {d_total_best_nm:.3f} nm")
     print(f"Chi-Square = {float(result.chisqr):.6f}")
     print(f"拟合状态: success={result.success}, nfev={result.nfev}")
 
