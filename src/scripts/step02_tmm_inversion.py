@@ -6,7 +6,7 @@
 模块划分：
 1. 目标曲线读取
 2. ITO 色散解析与插值
-3. PVK 的 Tauc-Lorentz 色散模型
+3. PVK 外推 n-k 中间件加载与插值
 4. 厚玻璃非相干修正 + 相干薄膜 TMM
 5. lmfit 单参数厚度反演
 6. 结果绘图
@@ -43,14 +43,6 @@ SAM_NK = 1.8 + 0.0j
 INITIAL_PVK_THICKNESS_NM = 500.0
 MIN_PVK_THICKNESS_NM = 400.0
 MAX_PVK_THICKNESS_NM = 650.0
-
-PVK_EPS_INF = 1.10
-PVK_EG_EV = 1.556
-PVK_OSCILLATORS = (
-    (24.53, 1.57, 0.13),
-    (7.60, 2.46, 0.49),
-    (6.50, 3.31, 3.89),
-)
 
 
 def get_project_root() -> Path:
@@ -295,84 +287,60 @@ def build_ito_interpolator(wavelength_nm: np.ndarray, nk: np.ndarray) -> Callabl
     return get_ito_nk
 
 
-def tauc_lorentz_eps2_single_oscillator(
-    energy_ev: np.ndarray,
-    amplitude: float,
-    resonance_ev: float,
-    broadening_ev: float,
-    bandgap_ev: float,
-) -> np.ndarray:
-    """计算单个 Tauc-Lorentz 振子的虚部介电常数 eps2。"""
-    energy = np.asarray(energy_ev, dtype=float)
-    eps2 = np.zeros_like(energy, dtype=float)
-    valid_mask = energy > bandgap_ev
-    if not np.any(valid_mask):
-        return eps2
-
-    e = energy[valid_mask]
-    numerator = amplitude * resonance_ev * broadening_ev * (e - bandgap_ev) ** 2
-    denominator = e * ((e**2 - resonance_ev**2) ** 2 + broadening_ev**2 * e**2)
-    eps2[valid_mask] = numerator / denominator
-    return eps2
-
-
-def tauc_lorentz_eps1_from_kkr(energy_ev: np.ndarray) -> np.ndarray:
-    """用 Kramers-Kronig 数值积分求 Tauc-Lorentz 的 eps1。
-
-    资源文档给出了 eps1 的闭式表达，但在当前参数和子带隙反演区间里，
-    闭式各项会发生强烈数值抵消，直接计算会把 eps1 推到非物理负值，
-    继而导致 PVK 折射率塌缩到 0。这里改用同一 TL 模型下与之等价的
-    Kramers-Kronig 数值积分形式，提高稳定性。
-
-    对本任务关心的 850-1100 nm 而言，所有能量 E 都满足 E < Eg，
-    积分区间从 Eg 起始，因此分母 xi^2 - E^2 不会穿过 0，不需要处理主值奇点。
-    """
-    energy = np.asarray(energy_ev, dtype=float)
-    integration_energy = np.linspace(PVK_EG_EV, 6.5, 4000)
-
-    eps2_total = np.zeros_like(integration_energy)
-    for amplitude, resonance_ev, broadening_ev in PVK_OSCILLATORS:
-        eps2_total += tauc_lorentz_eps2_single_oscillator(
-            energy_ev=integration_energy,
-            amplitude=amplitude,
-            resonance_ev=resonance_ev,
-            broadening_ev=broadening_ev,
-            bandgap_ev=PVK_EG_EV,
+def load_pvk_dispersion(csv_path: Path) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """读取 [LIT-0001] 数字化后经 Cauchy 外推得到的 CsFAPI n-k 中间件。"""
+    if not csv_path.exists():
+        raise FileNotFoundError(
+            f"未找到 PVK 扩展光谱文件: {csv_path}\n"
+            "请先运行 src/scripts/step01b_cauchy_extrapolation.py 生成 data/processed/CsFAPI_nk_extended.csv。"
         )
 
-    numerator = integration_energy[None, :] * eps2_total[None, :]
-    denominator = integration_energy[None, :] ** 2 - energy[:, None] ** 2
-    integral = np.trapezoid(numerator / denominator, integration_energy, axis=1)
-    return PVK_EPS_INF + (2.0 / np.pi) * integral
+    data = pd.read_csv(csv_path)
+    wavelength_col = find_required_column(data.columns.tolist(), "Wavelength")
+    n_col = find_required_column(data.columns.tolist(), "n")
+    k_col = find_required_column(data.columns.tolist(), "k")
+
+    wavelength_nm = pd.to_numeric(data[wavelength_col], errors="coerce").to_numpy(dtype=float)
+    refractive_index = pd.to_numeric(data[n_col], errors="coerce").to_numpy(dtype=float)
+    extinction_coefficient = pd.to_numeric(data[k_col], errors="coerce").to_numpy(dtype=float)
+
+    valid_mask = np.isfinite(wavelength_nm) & np.isfinite(refractive_index) & np.isfinite(extinction_coefficient)
+    wavelength_nm = wavelength_nm[valid_mask]
+    refractive_index = refractive_index[valid_mask]
+    extinction_coefficient = extinction_coefficient[valid_mask]
+
+    sort_index = np.argsort(wavelength_nm)
+    wavelength_nm = wavelength_nm[sort_index]
+    refractive_index = refractive_index[sort_index]
+    extinction_coefficient = extinction_coefficient[sort_index]
+
+    if wavelength_nm.size == 0:
+        raise ValueError("PVK 扩展光谱清洗后为空。")
+    return wavelength_nm, refractive_index, extinction_coefficient
 
 
-def get_pvk_nk(wavelength_nm: np.ndarray) -> np.ndarray:
-    """根据 Glass/CsFAPI 参数计算 PVK 的复折射率。
+def build_pvk_interpolator(
+    wavelength_nm: np.ndarray,
+    refractive_index: np.ndarray,
+    extinction_coefficient: np.ndarray,
+) -> Callable[[np.ndarray], np.ndarray]:
+    """构造 PVK 复折射率插值函数。"""
 
-    本任务限定 850-1100 nm 波段，对应能量低于 Eg=1.556 eV，
-    因此按要求强制 eps2=0，也即 k=0。
-    """
-    wavelength = np.asarray(wavelength_nm, dtype=float)
-    energy_ev = 1239.841984 / wavelength
+    def get_pvk_nk(query_wavelength_nm: np.ndarray) -> np.ndarray:
+        query = np.asarray(query_wavelength_nm, dtype=float)
+        validate_interp_domain(query, wavelength_nm, "PVK 扩展光谱")
+        real_part = np.interp(query, wavelength_nm, refractive_index)
+        imag_part = np.interp(query, wavelength_nm, extinction_coefficient)
+        return real_part + 1j * imag_part
 
-    # 这里仍然遵循 Tauc-Lorentz 模型，只是用 KK 数值积分求实部，
-    # 避免闭式表达在当前参数区间出现的严重数值抵消。
-    eps1_total = tauc_lorentz_eps1_from_kkr(energy_ev)
-
-    # 在本波段 E < Eg，按模型要求将虚部严格置零，因此 PVK 为无吸收层。
-    eps2_total = np.zeros_like(eps1_total)
-
-    # 数值上若 eps1_total 出现接近 0 的微小负值，通常是浮点误差而不是物理结果。
-    eps1_total = np.maximum(eps1_total, 0.0)
-    n = np.sqrt(eps1_total)
-    k = np.zeros_like(eps2_total)
-    return n + 1j * k
+    return get_pvk_nk
 
 
 def calc_macro_reflectance(
     d_pvk_nm: float,
     wavelength_nm: np.ndarray,
     get_ito_nk: Callable[[np.ndarray], np.ndarray],
+    get_pvk_nk: Callable[[np.ndarray], np.ndarray],
 ) -> np.ndarray:
     """计算包含厚玻璃非相干修正的宏观反射率。
 
@@ -417,10 +385,11 @@ def residual(
     wavelength_nm: np.ndarray,
     r_target: np.ndarray,
     get_ito_nk: Callable[[np.ndarray], np.ndarray],
+    get_pvk_nk: Callable[[np.ndarray], np.ndarray],
 ) -> np.ndarray:
     """lmfit 残差函数。"""
     d_pvk_nm = params["d_pvk"].value
-    r_model = calc_macro_reflectance(d_pvk_nm, wavelength_nm, get_ito_nk)
+    r_model = calc_macro_reflectance(d_pvk_nm, wavelength_nm, get_ito_nk, get_pvk_nk)
     return r_model - r_target
 
 
@@ -480,6 +449,7 @@ def main() -> None:
     project_root = get_project_root()
 
     target_csv = project_root / "data" / "processed" / "target_reflectance.csv"
+    pvk_csv = project_root / "data" / "processed" / "CsFAPI_nk_extended.csv"
     ito_path = project_root / "resources" / "ITO_20 Ohm_105 nm_e1e2.mat"
     output_path = project_root / "results" / "figures" / "tmm_inversion_result.png"
     output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -490,6 +460,10 @@ def main() -> None:
     validate_interp_domain(wavelength_nm, ito_wavelength_nm, "ITO 数据库")
     ito_nk = convert_dielectric_to_nk(ito_e1, ito_e2)
     get_ito_nk = build_ito_interpolator(ito_wavelength_nm, ito_nk)
+
+    pvk_wavelength_nm, pvk_n, pvk_k = load_pvk_dispersion(pvk_csv)
+    validate_interp_domain(wavelength_nm, pvk_wavelength_nm, "PVK 扩展光谱")
+    get_pvk_nk = build_pvk_interpolator(pvk_wavelength_nm, pvk_n, pvk_k)
 
     params = Parameters()
     params.add(
@@ -502,12 +476,12 @@ def main() -> None:
     result = minimize(
         residual,
         params,
-        args=(wavelength_nm, r_target, get_ito_nk),
+        args=(wavelength_nm, r_target, get_ito_nk, get_pvk_nk),
         method="leastsq",
     )
 
     d_best_nm = float(result.params["d_pvk"].value)
-    r_best_fit = calc_macro_reflectance(d_best_nm, wavelength_nm, get_ito_nk)
+    r_best_fit = calc_macro_reflectance(d_best_nm, wavelength_nm, get_ito_nk, get_pvk_nk)
 
     if np.any(~np.isfinite(r_best_fit)):
         raise ValueError("最佳拟合反射率中出现 NaN 或 Inf，说明模型数值计算失败。")

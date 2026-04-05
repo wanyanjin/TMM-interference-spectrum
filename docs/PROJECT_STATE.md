@@ -6,17 +6,18 @@
 
 - 更新时间：2026-04-05
 - 当前判断 Phase：`Phase 02`
-- 阶段定义：`绝对反射率标定 -> TMM 基准前向/反演闭环`
+- 阶段定义：`绝对反射率标定 -> 文献数字化 -> CsFAPI 近红外外推 -> TMM 基准前向/反演闭环`
 - 当前可用能力：
   - 已有 `step01_absolute_calibration.py`，可将样品与银镜原始计数转换为绝对反射率
-  - 已有 `step02_tmm_inversion.py`，可基于 TMM + LM 对 PVK 厚度进行单参数反演
+  - 已有 `step01b_cauchy_extrapolation.py`，可基于 [LIT-0001] 的 `ITO/CsFAPI` 数字化折射率曲线生成 `750-1100 nm` 的 CsFAPI 扩展 `n-k` 中间件
+  - 已有 `step02_tmm_inversion.py`，可读取目标反射率、ITO 色散和 CsFAPI 扩展 `n-k` 中间件，执行单参数 PVK 厚度反演
   - 已有 `step02_digitize_fapi_optical_constants.py`，可从 `LIT-0001` 的 Fig. 2 原图数字化提取 FAPI 的 `n/κ` 曲线并输出 QA 图
-  - 已产出基础图表结果与标准中间文件 `data/processed/target_reflectance.csv`
-  - 已加入 `step02_tmm_inversion.py` 的 PVK 常数折射率 smoke test 分支，用于验证振幅是否受 PVK 近红外折射率锚定支配
+  - 已有 `step02_digitize_csfapi_optical_constants.py`，可从 `LIT-0001` 的 Fig. 3 原图数字化提取 CsFAPI 的 `n/κ` 曲线并输出 QA 图
+  - 已产出标准中间文件 `data/processed/target_reflectance.csv` 与 `data/processed/CsFAPI_nk_extended.csv`
 - 当前未完成内容：
   - 尚未建立 `src/core/` 公共物理模块
   - 尚未把历史目录完全迁移到 `AGENTS.md` 规定的新结构
-  - 尚未形成规范化的 Phase 日志、资源索引和问题台账
+  - 尚未形成规范化的 Phase 日志、资源索引和结构化结果台账
 
 ## 2. Current Directory Tree
 
@@ -26,18 +27,23 @@
 TMM-interference-spectrum/
 ├── AGENTS.md
 ├── docs/
+│   ├── LITERATURE_MAP.md
 │   └── PROJECT_STATE.md
 ├── src/
 │   └── scripts/
 │       ├── step01_absolute_calibration.py
+│       ├── step01b_cauchy_extrapolation.py
+│       ├── step02_digitize_csfapi_optical_constants.py
 │       ├── step02_digitize_fapi_optical_constants.py
 │       └── step02_tmm_inversion.py
 ├── data/
 │   └── processed/
+│       ├── CsFAPI_nk_extended.csv
 │       └── target_reflectance.csv
 ├── resources/
 │   ├── digitized/
-│   │   └── phase02_fig2_fapi_optical_constants_digitized.csv
+│   │   ├── phase02_fig2_fapi_optical_constants_digitized.csv
+│   │   └── phase02_fig3_csfapi_optical_constants_digitized.csv
 │   ├── GCC-1022系列xlsx.xlsx
 │   ├── ITO_20 Ohm_105 nm_e1e2.mat
 │   ├── CsFAPI_TL_parameters_and_formulas.md
@@ -45,11 +51,16 @@ TMM-interference-spectrum/
 ├── results/
 │   ├── figures/
 │   │   ├── absolute_reflectance_interference.png
+│   │   ├── cauchy_extrapolation_check.png
 │   │   ├── phase02_fig2_fapi_optical_constants_digitized.png
 │   │   ├── phase02_fig2_fapi_optical_constants_overlay.png
+│   │   ├── phase02_fig3_csfapi_optical_constants_digitized.png
+│   │   ├── phase02_fig3a_csfapi_optical_constants_overlay.png
+│   │   ├── phase02_fig3b_csfapi_optical_constants_overlay.png
 │   │   └── tmm_inversion_result.png
 │   └── logs/
-│       └── phase02_fig2_fapi_digitization_notes.md
+│       ├── phase02_fig2_fapi_digitization_notes.md
+│       └── phase02_fig3_csfapi_digitization_notes.md
 ├── test_data/
 │   ├── sample.csv
 │   ├── glass-1mm.csv
@@ -63,9 +74,8 @@ TMM-interference-spectrum/
 当前仓库与项目级 `AGENTS.md` 规范相比，存在以下结构偏差：
 
 - `test_data/` 仍然承担原始测量数据目录职责，后续应迁移或重命名到 `data/raw/`
-- `reference/` 目前存放论文拆解结果，按新规范更适合逐步并入 `resources/` 或 `docs/`
+- `reference/` 目前存放论文拆解结果，按新规范更适合逐步并入 `resources/references/`
 - `src/core/` 尚不存在，脚本中的复用逻辑目前仍散落在 `src/scripts/`
-- `results/logs/` 尚未建立
 - 项目根尚无 `README.md`
 
 这些偏差当前不会阻断现有流程，但属于后续需要收敛的结构债务。
@@ -75,7 +85,7 @@ TMM-interference-spectrum/
 ### 4.1 `step01_absolute_calibration.py`
 
 - 文件位置：`src/scripts/step01_absolute_calibration.py`
-- 主要职责：将样品和银镜测量计数转换为 850-1100 nm 波段的绝对反射率，并输出图表和标准中间 CSV
+- 主要职责：将样品和银镜测量计数转换为 `850-1100 nm` 波段的绝对反射率，并输出图表和标准中间 CSV
 
 输入：
 - `test_data/sample.csv`
@@ -89,7 +99,7 @@ TMM-interference-spectrum/
 
 核心处理流程：
 - 自动识别 CSV 的波长列和强度列
-- 截取 850-1100 nm 目标波段
+- 截取 `850-1100 nm` 目标波段
 - 对银镜信号按曝光时间做归一化
 - 将厂家银镜基准插值到样品波长网格
 - 计算绝对反射率：
@@ -98,20 +108,47 @@ TMM-interference-spectrum/
 
 输出：
 - `data/processed/target_reflectance.csv`
-  - 当前是 `step02` 的标准输入
   - 关键列约定至少包含：
     - `Wavelength`
     - `R_smooth`
 - `results/figures/absolute_reflectance_interference.png`
 
-### 4.2 `step02_tmm_inversion.py`
+### 4.2 `step01b_cauchy_extrapolation.py`
+
+- 文件位置：`src/scripts/step01b_cauchy_extrapolation.py`
+- 主要职责：从 [LIT-0001] Fig. 3 的数字化 `ITO/CsFAPI` 折射率曲线中提取透明区，用 Cauchy 模型外推到 `1100 nm`，生成 step02 可直接消费的标准 `n-k` 中间件
+
+输入：
+- `resources/digitized/phase02_fig3_csfapi_optical_constants_digitized.csv`
+  - [LIT-0001] Fig. 3 的数字化光学常数数据
+  - 本步骤只使用 `series = ITO/CsFAPI` 且 `quantity = n` 的数据
+
+当前模型假设：
+- 只截取 `750-1000 nm` 的近红外透明区拟合 Cauchy 模型
+- Cauchy 模型写作 `n(lambda) = A + B / (lambda_um^2)`
+- 为保证数值稳定性，拟合时使用 `lambda_um = wavelength_nm / 1000`
+- `750-1100 nm` 内统一强制 `k = 0`
+- `1000-1100 nm` 为超出 [LIT-0001] 原始测量窗口的解析外推区
+
+输出：
+- `data/processed/CsFAPI_nk_extended.csv`
+  - 列约定：
+    - `Wavelength`
+    - `n`
+    - `k`
+- `results/figures/cauchy_extrapolation_check.png`
+
+### 4.3 `step02_tmm_inversion.py`
 
 - 文件位置：`src/scripts/step02_tmm_inversion.py`
-- 主要职责：读取 `step01` 输出的目标反射率，结合 ITO 色散和 PVK 近红外折射率模型，执行单参数厚度反演
+- 主要职责：读取 `step01` 输出的目标反射率、ITO 色散和 `step01b` 生成的 CsFAPI 扩展 `n-k` 中间件，执行单参数厚度反演
 
 输入：
 - `data/processed/target_reflectance.csv`
   - 来自 `step01`
+- `data/processed/CsFAPI_nk_extended.csv`
+  - 来自 `step01b`
+  - 用作 PVK 层在 `850-1100 nm` 的复折射率输入
 - `resources/ITO_20 Ohm_105 nm_e1e2.mat`
   - ITO 介电函数数据库
   - 脚本兼容两类情况：
@@ -119,22 +156,23 @@ TMM-interference-spectrum/
     - 实际为三列表格文本
 
 当前模型假设：
-- 波段：850-1100 nm
-- 入射角：0 度
+- 波段：`850-1100 nm`
+- 入射角：`0` 度
 - 玻璃前表面按非相干处理
 - 后侧薄膜堆栈按相干 TMM 处理
-- ITO 厚度固定：105 nm
-- NiOx 厚度固定：20 nm
-- SAM 厚度固定：2 nm
+- ITO 厚度固定：`105 nm`
+- NiOx 厚度固定：`20 nm`
+- SAM 厚度固定：`2 nm`
 - PVK 为唯一反演参数
-- PVK 厚度搜索范围：400-650 nm
-- 当前临时 smoke test 分支中，`get_pvk_nk()` 直接将 PVK 视为 `n=2.45, k=0` 的常数无吸收层
+- PVK 厚度搜索范围：`400-650 nm`
+- PVK 采用 `step01b` 生成的 CsFAPI 扩展 `n-k` 中间件，并通过线性插值映射到目标波长网格
 
 核心处理流程：
 - 读取目标绝对反射率
+- 读取 `step01b` 生成的 CsFAPI 扩展 `n-k` 表
 - 解析 ITO 的 `e1/e2` 数据并转为 `n + ik`
 - 构建 ITO 复折射率插值器
-- 构造 PVK 近红外常数折射率 smoke test 模型
+- 构建 PVK 复折射率插值器
 - 计算宏观反射率：
   - 玻璃前表面菲涅尔反射
   - 玻璃后方薄膜堆栈相干 TMM
@@ -149,27 +187,28 @@ TMM-interference-spectrum/
   - `chi-square`
   - 优化状态
 
-### 4.3 `step02_digitize_fapi_optical_constants.py`
+### 4.4 `step02_digitize_fapi_optical_constants.py`
 
 - 文件位置：`src/scripts/step02_digitize_fapi_optical_constants.py`
 - 主要职责：从 `LIT-0001` 的 Fig. 2 原图中提取 FAPI 的折射率 `n` 与消光系数 `κ` 两个子图数据，并输出单一 CSV 与 QA 图
-
-输入：
-- `reference/Khan.../images/b3c499f799c0be47f32bf58a0c588af9c30db72b33cb6d3577d4c4317a76a48d.jpg`
-  - `LIT-0001` 的 Fig. 2 原图
-
-核心处理流程：
-- 基于原图而不是截图做数字化
-- 对 Panel (a)/(b) 分别做图框坐标标定
-- 通过红/蓝曲线颜色分割提取 `Glass/FAPI` 与 `ITO/FAPI`
-- 对提取结果生成重绘图和原图叠加图进行 QA
-- 输出数字化说明日志，明确“图像数字化数据”而非作者原始数值表
 
 输出：
 - `resources/digitized/phase02_fig2_fapi_optical_constants_digitized.csv`
 - `results/figures/phase02_fig2_fapi_optical_constants_digitized.png`
 - `results/figures/phase02_fig2_fapi_optical_constants_overlay.png`
 - `results/logs/phase02_fig2_fapi_digitization_notes.md`
+
+### 4.5 `step02_digitize_csfapi_optical_constants.py`
+
+- 文件位置：`src/scripts/step02_digitize_csfapi_optical_constants.py`
+- 主要职责：从 `LIT-0001` 的 Fig. 3 原图中提取 CsFAPI 的折射率 `n` 与消光系数 `κ` 两个子图数据，并输出单一 CSV 与 QA 图
+
+输出：
+- `resources/digitized/phase02_fig3_csfapi_optical_constants_digitized.csv`
+- `results/figures/phase02_fig3_csfapi_optical_constants_digitized.png`
+- `results/figures/phase02_fig3a_csfapi_optical_constants_overlay.png`
+- `results/figures/phase02_fig3b_csfapi_optical_constants_overlay.png`
+- `results/logs/phase02_fig3_csfapi_digitization_notes.md`
 
 ## 5. Data Flow
 
@@ -181,31 +220,46 @@ test_data/Ag-mirro.csv
 resources/GCC-1022系列xlsx.xlsx
     -> step01_absolute_calibration.py
     -> data/processed/target_reflectance.csv
-    -> step02_tmm_inversion.py + resources/ITO_20 Ohm_105 nm_e1e2.mat
+
+resources/digitized/phase02_fig3_csfapi_optical_constants_digitized.csv
+    -> step01b_cauchy_extrapolation.py
+    -> data/processed/CsFAPI_nk_extended.csv
+    -> results/figures/cauchy_extrapolation_check.png
+
+data/processed/target_reflectance.csv
+data/processed/CsFAPI_nk_extended.csv
+resources/ITO_20 Ohm_105 nm_e1e2.mat
+    -> step02_tmm_inversion.py
     -> results/figures/tmm_inversion_result.png
 
 reference/Khan.../images/b3c499f799...
     -> step02_digitize_fapi_optical_constants.py
     -> resources/digitized/phase02_fig2_fapi_optical_constants_digitized.csv
-    -> results/figures/phase02_fig2_fapi_optical_constants_digitized.png
-    -> results/figures/phase02_fig2_fapi_optical_constants_overlay.png
+
+reference/Khan.../images/4ad6d508...
+reference/Khan.../images/885e29d3...
+    -> step02_digitize_csfapi_optical_constants.py
+    -> resources/digitized/phase02_fig3_csfapi_optical_constants_digitized.csv
 ```
 
 可按 SOP 理解为：
 
 1. `step01` 负责把原始计数校准成可用于物理建模的绝对反射率
-2. `step02` 只消费标准中间文件，不再复制前置标定逻辑
-3. 当前脚本链已经具备“测量数据 -> 标准中间数据 -> TMM 反演图表”的最小闭环
+2. `step01b` 把 [LIT-0001] 数字化 CsFAPI 曲线转换成标准近红外 `n-k` 中间件
+3. `step02` 只消费标准中间文件，不再在脚本内部硬编码 PVK 常数折射率
+4. 当前脚本链已经具备“测量数据 -> 标准中间数据 + 文献外推中间数据 -> TMM 反演图表”的最小闭环
 
 ## 6. Key Physical / Numerical Assumptions
 
 当前实现中最重要的物理和数值假设如下：
 
-- 仅处理 850-1100 nm 波段
+- 仅处理 `850-1100 nm` 波段
 - 玻璃厚板不作为相干层直接进入 TMM 相位矩阵
-- ITO 数据若波长量级大于 2000，则按 Angstrom 自动转为 nm
-- 厂家银镜基准若数值范围大于 1.5，则按百分比转为 0-1 小数
-- PVK 的正式文献色散来源仍是 `LIT-0001` 对应的三振子 Tauc-Lorentz 参数，但当前脚本已临时切换为用户指定的 `n=2.45, k=0` 常数锚定分支
+- ITO 数据若波长量级大于 `2000`，则按 Angstrom 自动转为 nm
+- 厂家银镜基准若数值范围大于 `1.5`，则按百分比转为 `0-1` 小数
+- PVK 的近红外色散来源为 [LIT-0001] Fig. 3 的 `ITO/CsFAPI` 数字化 `n` 曲线，并通过 Cauchy 模型外推到 `1100 nm`
+- `750-1100 nm` 内强制采用 `k = 0`
+- `1000-1100 nm` 属于超出原始椭偏测量窗口的模型外推区
 - 反演当前仅对 `d_pvk` 一个参数进行拟合
 
 这些假设是理解结果与后续扩展的关键锚点；若后续有改动，必须同步更新本文件。
@@ -251,7 +305,7 @@ reference/Khan.../images/b3c499f799...
 ### 7.4 图像数字化结果不是原始实验表
 
 - 表现：
-  - `phase02_fig2_fapi_optical_constants_digitized.csv` 来自论文图像数字化
+  - `phase02_fig2_fapi_optical_constants_digitized.csv` 与 `phase02_fig3_csfapi_optical_constants_digitized.csv` 来自论文图像数字化
   - 不是作者公开补充材料中的原始数值表
 - 影响：
   - 可用于复核趋势、建立先验或做近似对照
@@ -259,6 +313,16 @@ reference/Khan.../images/b3c499f799...
 - 当前状态：
   - 已优先使用论文原图而非截图
   - 已输出重绘图与叠加图作为 QA 留痕
+
+### 7.5 PVK 常数折射率临时分支已关闭
+
+- 表现：
+  - 先前用于 smoke test 的 `n=2.45, k=0` 常数锚定分支已从 `step02` 删除
+- 影响：
+  - 当前主流程已改为消费基于真实 CsFAPI 数字化数据外推得到的标准 `n-k` 中间件
+  - “临时常数折射率”不再是主流程隐含假设
+- 当前状态：
+  - 已解决
 
 ## 8. Architecture Risks
 
@@ -270,7 +334,7 @@ reference/Khan.../images/b3c499f799...
   - 列名识别与 CSV 读取
   - 波段裁剪与插值域校验
   - ITO 数据解析
-  - Tauc-Lorentz 色散计算
+  - Cauchy 外推
   - TMM 反射率计算
 
 ### 8.2 资源文件格式存在隐式脆弱性
@@ -289,15 +353,18 @@ reference/Khan.../images/b3c499f799...
 
 ### 8.4 图像数字化链路仍带有手工标定假设
 
-- 当前 Fig. 2 数字化脚本依赖固定图框坐标和坐标轴范围
+- 当前 Fig. 2 / Fig. 3 数字化脚本依赖固定图框坐标和坐标轴范围
 - 若后续换成新版 MinerU 图、原 PDF 裁图或其他论文图片，不能直接假定这套标定仍成立
 - 建议后续把坐标框识别和图例剔除规则继续模块化，必要时加入人工校核步骤
 
-### 8.5 PVK 常数折射率锚定仍属临时验证假设
+### 8.5 PVK 色散已改为真实光谱外推，但外推边界仍需审慎
 
-- 当前 `step02_tmm_inversion.py` 已按用户要求将 `get_pvk_nk()` 切换为常数 `n=2.45, k=0`
-- 该值用于 smoke test，目的是验证振幅偏低是否主要来自 PVK 与邻层阻抗匹配失真
-- 若该分支显著改善拟合振幅，下一步仍需回到可追溯的文献或实验数据，建立正式近红外 `n-k` 基准
+- “PVK 常数折射率锚定仍属临时验证假设”这一风险已关闭
+- 当前主流程已基于 [LIT-0001] Fig. 3 的 `ITO/CsFAPI` 数字化数据，在 `750-1000 nm` 透明区进行 Cauchy 拟合并外推到 `1100 nm`
+- 当前新增的主要风险是：
+  - `1000-1100 nm` 属于超出原文测量窗口的外推区
+  - 当前将 `k` 在近红外全部强制为 `0`
+  - 数字化误差会直接传递到 Cauchy 参数 `A, B`
 
 ### 8.6 结果文件命名尚未 Phase 化
 
@@ -309,23 +376,26 @@ reference/Khan.../images/b3c499f799...
 - 更新时间：`2026-04-05`
 - 当前 Phase：`Phase 02`
 - 本次新增/修改：
-  - 新增 `step02_digitize_fapi_optical_constants.py`
-  - 新增 `resources/digitized/phase02_fig2_fapi_optical_constants_digitized.csv`
-  - 新增 Fig. 2 数字化 QA 图与日志
+  - 新增 `step01b_cauchy_extrapolation.py`
+  - 新增 `data/processed/CsFAPI_nk_extended.csv`
+  - 新增 `results/figures/cauchy_extrapolation_check.png`
+  - 重构 `step02_tmm_inversion.py`，改为读取 CsFAPI 扩展 `n-k` 中间件
+  - 删除 `step02` 中的 PVK 常数折射率 smoke test 主流程依赖
 - 已验证结论：
-  - 已成功从论文原图重建 FAPI 的 `n/κ` 曲线
-  - 重绘结果与原图叠加后整体贴合，无明显跑偏
+  - 已成功从 [LIT-0001] Fig. 3 的 `ITO/CsFAPI` 数字化 `n` 曲线拟合 Cauchy 参数并外推到 `1100 nm`
+  - `step02` 已成功消费 `CsFAPI_nk_extended.csv` 并保持厚玻璃非相干修正与 LM 反演闭环
 - 仍待验证：
-  - 若后续需要高精度建模，仍应优先寻找作者原始数值表或补充材料，而不是长期依赖图像数字化值
+  - `1000-1100 nm` 外推段的物理可信度仍需后续用原始数据或独立测量交叉验证
+  - 当前 `k=0` 假设在近红外是否足够严格，还需结合后续实验或文献继续审查
 
 ## 10. Recommended Next Actions
 
 建议后续优先处理以下事项：
 
 1. 建立 `data/raw/`，并把 `test_data/` 中实际原始测量 CSV 迁移到规范目录
-2. 创建 `results/logs/` 和结构化反演结果输出文件
-3. 将 `step01`/`step02` 中可复用逻辑下沉到 `src/core/`
-4. 建立 `docs/RESOURCE_INDEX.md`，说明 ITO、银镜基准、论文资料的来源和格式
+2. 创建结构化反演结果输出文件，记录 `d_pvk`、`chi-square` 与外推参数 `A/B`
+3. 将 `step01`/`step01b`/`step02` 中可复用逻辑下沉到 `src/core/`
+4. 建立 `docs/RESOURCE_INDEX.md`，说明 ITO、银镜基准、论文资料与数字化资源的来源和格式
 5. 建立 `README.md`，补齐项目运行入口、依赖安装和 Phase 概览
 
 ## 11. Update Rule
