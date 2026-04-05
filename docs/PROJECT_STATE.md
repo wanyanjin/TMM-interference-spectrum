@@ -4,16 +4,18 @@
 
 ## 1. Current Snapshot
 
-- 更新时间：2026-04-05
+- 更新时间：2026-04-06
 - 当前判断 Phase：`Phase 02`
 - 阶段定义：`绝对反射率标定 -> 文献数字化 -> CsFAPI 近红外外推 -> TMM 基准前向/反演闭环`
 - 当前可用能力：
   - 已有 `step01_absolute_calibration.py`，可将样品与银镜原始计数转换为绝对反射率
   - 已有 `step01b_cauchy_extrapolation.py`，可基于 [LIT-0001] 的 `ITO/CsFAPI` 数字化折射率曲线生成 `750-1100 nm` 的 CsFAPI 扩展 `n-k` 中间件
   - 已有 `step02_tmm_inversion.py`，可读取目标反射率、ITO 色散和 CsFAPI 扩展 `n-k` 中间件，执行包含 50/50 BEMA 粗糙度修正的双参数 `d_bulk + d_rough` 反演
+  - 已有 `diagnostics_shape_mismatch.py`，可在独立沙盒中对 ITO 近红外吸收、厚度不均匀性和 PVK 色散斜率做形状畸变诊断
   - 已有 `step02_digitize_fapi_optical_constants.py`，可从 `LIT-0001` 的 Fig. 2 原图数字化提取 FAPI 的 `n/κ` 曲线并输出 QA 图
   - 已有 `step02_digitize_csfapi_optical_constants.py`，可从 `LIT-0001` 的 Fig. 3 原图数字化提取 CsFAPI 的 `n/κ` 曲线并输出 QA 图
   - 已产出标准中间文件 `data/processed/target_reflectance.csv` 与 `data/processed/CsFAPI_nk_extended.csv`
+  - 已完成 Phase 02 形状畸变诊断，当前证据指向：ITO 近红外吸收失真是长波端托平与整体形状失配的主导因素
 - 当前未完成内容：
   - 尚未建立 `src/core/` 公共物理模块
   - 尚未把历史目录完全迁移到 `AGENTS.md` 规定的新结构
@@ -31,6 +33,7 @@ TMM-interference-spectrum/
 │   └── PROJECT_STATE.md
 ├── src/
 │   └── scripts/
+│       ├── diagnostics_shape_mismatch.py
 │       ├── step01_absolute_calibration.py
 │       ├── step01b_cauchy_extrapolation.py
 │       ├── step02_digitize_csfapi_optical_constants.py
@@ -52,6 +55,7 @@ TMM-interference-spectrum/
 │   ├── figures/
 │   │   ├── absolute_reflectance_interference.png
 │   │   ├── cauchy_extrapolation_check.png
+│   │   ├── diagnostic_shape_analysis.png
 │   │   ├── phase02_fig2_fapi_optical_constants_digitized.png
 │   │   ├── phase02_fig2_fapi_optical_constants_overlay.png
 │   │   ├── phase02_fig3_csfapi_optical_constants_digitized.png
@@ -59,6 +63,7 @@ TMM-interference-spectrum/
 │   │   ├── phase02_fig3b_csfapi_optical_constants_overlay.png
 │   │   └── tmm_inversion_result.png
 │   └── logs/
+│       ├── phase02_shape_diagnostic_report.md
 │       ├── phase02_fig2_fapi_digitization_notes.md
 │       └── phase02_fig3_csfapi_digitization_notes.md
 ├── test_data/
@@ -213,6 +218,25 @@ TMM-interference-spectrum/
 - `results/figures/phase02_fig3b_csfapi_optical_constants_overlay.png`
 - `results/logs/phase02_fig3_csfapi_digitization_notes.md`
 
+### 4.6 `diagnostics_shape_mismatch.py`
+
+- 文件位置：`src/scripts/diagnostics_shape_mismatch.py`
+- 主要职责：在不修改主流程的前提下，复用 `step02` 的数据读取和 BEMA 基线模型，对条纹形状畸变的物理来源做诊断
+
+输入：
+- `data/processed/target_reflectance.csv`
+- `data/processed/CsFAPI_nk_extended.csv`
+- `resources/ITO_20 Ohm_105 nm_e1e2.mat`
+
+核心诊断探针：
+- Probe A：对 ITO 的近红外 `k` 施加长波增强缩放，测试 Drude 吸收失真假说
+- Probe B：对 `d_bulk` 做高斯厚度平均，测试光斑内宏观厚度不均匀性
+- Probe C：放开 PVK 的 Cauchy `B` 参数缩放，测试近红外色散斜率是否过平
+
+输出：
+- `results/figures/diagnostic_shape_analysis.png`
+- `results/logs/phase02_shape_diagnostic_report.md`
+
 ## 5. Data Flow
 
 当前项目主数据流如下：
@@ -235,6 +259,13 @@ resources/ITO_20 Ohm_105 nm_e1e2.mat
     -> step02_tmm_inversion.py (CsFAPI 扩展 n-k -> BEMA 粗糙层修正 -> d_bulk + d_rough 双参数反演)
     -> results/figures/tmm_inversion_result.png
 
+data/processed/target_reflectance.csv
+data/processed/CsFAPI_nk_extended.csv
+resources/ITO_20 Ohm_105 nm_e1e2.mat
+    -> diagnostics_shape_mismatch.py
+    -> results/figures/diagnostic_shape_analysis.png
+    -> results/logs/phase02_shape_diagnostic_report.md
+
 reference/Khan.../images/b3c499f799...
     -> step02_digitize_fapi_optical_constants.py
     -> resources/digitized/phase02_fig2_fapi_optical_constants_digitized.csv
@@ -251,6 +282,7 @@ reference/Khan.../images/885e29d3...
 2. `step01b` 把 [LIT-0001] 数字化 CsFAPI 曲线转换成标准近红外 `n-k` 中间件
 3. `step02` 在消费标准 `n-k` 中间件后，进一步通过 50/50 BEMA 将 PVK-Air 表面粗糙度折算为有效介质层
 4. 当前脚本链已经具备“测量数据 -> 标准中间数据 + 文献外推中间数据 -> BEMA 修正 TMM 双参数反演图表”的最小闭环
+5. 诊断沙盒表明：主流程剩余的形状畸变更可能来自 ITO 近红外吸收建模不足，而不是单纯的粗糙度缺失
 
 ## 6. Key Physical / Numerical Assumptions
 
@@ -338,6 +370,17 @@ reference/Khan.../images/885e29d3...
   - 已纳入 `step02_tmm_inversion.py` 主流程
   - 后续仍需结合拟合结果持续验证振幅改进是否稳定
 
+### 7.7 条纹形状畸变的主导根因已被定位，但尚未修入主流程
+
+- 表现：
+  - 在 BEMA 粗糙层已修复振幅后，主流程仍存在长波端托平和条纹跨度失配
+- 影响：
+  - `diagnostics_shape_mismatch.py` 的 Probe A 显示，ITO 近红外吸收增强可将形状误差显著压低
+  - 这说明当前主流程的 ITO 吸收建模仍不足，是下一轮主流程升级的优先方向
+- 当前状态：
+  - 已完成独立诊断并形成报告
+  - 尚未把 ITO 吸收修正并入 `step02_tmm_inversion.py`
+
 ## 8. Architecture Risks
 
 ### 8.1 复用逻辑仍未模块化
@@ -386,27 +429,32 @@ reference/Khan.../images/885e29d3...
 - 因此双参数数值收敛不自动等价于唯一物理解
 - 当前升级可直接改善振幅匹配，但后续若用于定量结论，仍需通过更多先验或更多观测量约束参数空间
 
-### 8.7 结果文件命名尚未 Phase 化
+### 8.7 ITO 吸收修正已被诊断为关键缺项
+
+- 独立诊断表明，ITO 近红外吸收增强比厚度不均匀性和 PVK 色散斜率修正更能同时修复长波托平与整体形状
+- 这意味着当前 `step02` 虽然已解决振幅问题，但在 ITO 自由载流子吸收建模上仍存在结构性欠拟合
+- 下一轮若继续改主流程，优先级应高于把厚度高斯平均或 PVK Cauchy `B` 缩放直接固化
+
+### 8.8 结果文件命名尚未 Phase 化
 
 - 当前图像文件名尚未显式带上 `phaseXX`
 - 后续结果积累后，可能不利于多轮实验比较和回滚定位
 
 ## 9. Recent Update Summary
 
-- 更新时间：`2026-04-05`
+- 更新时间：`2026-04-06`
 - 当前 Phase：`Phase 02`
 - 本次新增/修改：
-  - 新增 `step01b_cauchy_extrapolation.py`
-  - 新增 `data/processed/CsFAPI_nk_extended.csv`
-  - 新增 `results/figures/cauchy_extrapolation_check.png`
-  - 重构 `step02_tmm_inversion.py`，改为执行包含 BEMA 粗糙层修正的双参数 `d_bulk + d_rough` 反演
-  - 删除 `step02` 中的平滑单层 `d_pvk` 主流程接口
+  - 新增 `diagnostics_shape_mismatch.py`
+  - 新增 `results/figures/diagnostic_shape_analysis.png`
+  - 新增 `results/logs/phase02_shape_diagnostic_report.md`
+  - 完成对 ITO 吸收、厚度不均匀性与 PVK 色散斜率的独立诊断比较
 - 已验证结论：
-  - 已成功从 [LIT-0001] Fig. 3 的 `ITO/CsFAPI` 数字化 `n` 曲线拟合 Cauchy 参数并外推到 `1100 nm`
-  - `step02` 已成功消费 `CsFAPI_nk_extended.csv` 并保持厚玻璃非相干修正与 LM 双参数反演闭环
+  - ITO 近红外吸收增强是当前形状畸变的主导修复机制
+  - 厚度不均匀性和 PVK Cauchy 斜率修正都能改善形状，但优先级低于 ITO 吸收修正
 - 仍待验证：
+  - 需要把 ITO 近红外吸收修正转成可解释的主流程参数化，而不是停留在诊断探针层
   - `1000-1100 nm` 外推段的物理可信度仍需后续用原始数据或独立测量交叉验证
-  - 当前 `k=0` 假设在近红外是否足够严格，还需结合后续实验或文献继续审查
   - `d_bulk` 与 `d_rough` 的相关性是否会影响最终物理解读，还需后续继续评估
 
 ## 10. Recommended Next Actions
