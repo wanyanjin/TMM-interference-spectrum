@@ -10,7 +10,7 @@
 - 当前可用能力：
   - 已有 `step01_absolute_calibration.py`，可将样品与银镜原始计数转换为绝对反射率
   - 已有 `step01b_cauchy_extrapolation.py`，可基于 [LIT-0001] 的 `ITO/CsFAPI` 数字化折射率曲线生成 `750-1100 nm` 的 CsFAPI 扩展 `n-k` 中间件
-  - 已有 `step02_tmm_inversion.py`，可读取目标反射率、ITO 色散和 CsFAPI 扩展 `n-k` 中间件，执行包含 50/50 BEMA 粗糙度与 ITO 标量吸收补偿的三参数 `d_bulk + d_rough + alpha_ito` 联合反演
+  - 已有 `step02_tmm_inversion.py`，可读取目标反射率、ITO 色散和 CsFAPI 扩展 `n-k` 中间件，执行包含 50/50 BEMA 粗糙度与 ITO 色散吸收补偿的三参数 `d_bulk + d_rough + ito_alpha` 联合反演
   - 已有 `diagnostics_shape_mismatch.py`，可在独立沙盒中对 ITO 近红外吸收、厚度不均匀性和 PVK 色散斜率做形状畸变诊断
   - 已有 `step02_digitize_fapi_optical_constants.py`，可从 `LIT-0001` 的 Fig. 2 原图数字化提取 FAPI 的 `n/κ` 曲线并输出 QA 图
   - 已有 `step02_digitize_csfapi_optical_constants.py`，可从 `LIT-0001` 的 Fig. 3 原图数字化提取 CsFAPI 的 `n/κ` 曲线并输出 QA 图
@@ -146,7 +146,7 @@ TMM-interference-spectrum/
 ### 4.3 `step02_tmm_inversion.py`
 
 - 文件位置：`src/scripts/step02_tmm_inversion.py`
-- 主要职责：读取 `step01` 输出的目标反射率、ITO 色散和 `step01b` 生成的 CsFAPI 扩展 `n-k` 中间件，执行包含 BEMA 表面粗糙度修正与 ITO 标量吸收补偿的三参数联合反演
+- 主要职责：读取 `step01` 输出的目标反射率、ITO 色散和 `step01b` 生成的 CsFAPI 扩展 `n-k` 中间件，执行包含 BEMA 表面粗糙度修正与 ITO 色散吸收补偿的三参数联合反演
 
 输入：
 - `data/processed/target_reflectance.csv`
@@ -170,10 +170,10 @@ TMM-interference-spectrum/
 - SAM 厚度固定：`2 nm`
 - PVK 块体厚度 `d_bulk` 搜索范围：`400-650 nm`
 - PVK 表面粗糙层厚度 `d_rough` 搜索范围：`0-100 nm`
-- ITO 吸收缩放系数 `alpha_ito` 搜索范围：`0.1-20.0`
+- ITO 色散吸收参数 `ito_alpha` 搜索范围：`0.0-30.0`
 - PVK 采用 `step01b` 生成的 CsFAPI 扩展 `n-k` 中间件，并通过线性插值映射到目标波长网格
 - 粗糙层采用 `50% PVK + 50% Air` 的 Bruggeman EMA 有效介质模型
-- ITO 在进入 TMM 之前，锁定实部 `n` 不变，仅对虚部 `k` 施加标量吸收缩放
+- ITO 在进入 TMM 之前，锁定实部 `n` 不变，仅对虚部 `k` 施加锚定在 `850-1100 nm` 的二次增长色散吸收缩放
 - 相干层堆栈为：`Glass -> ITO -> NiOx -> SAM -> PVK_Bulk -> PVK_Roughness -> Air`
 
 核心处理流程：
@@ -181,7 +181,7 @@ TMM-interference-spectrum/
 - 读取 `step01b` 生成的 CsFAPI 扩展 `n-k` 表
 - 解析 ITO 的 `e1/e2` 数据并转为 `n + ik`
 - 构建 ITO 复折射率插值器
-- 根据 `alpha_ito` 对 ITO 的消光系数 `k` 做标量吸收放大
+- 根据 `ito_alpha` 对 ITO 的消光系数 `k` 做长波增强的色散吸收放大
 - 构建 PVK 复折射率插值器
 - 根据块体 PVK 复介电常数计算 50/50 BEMA 粗糙层复折射率
 - 计算宏观反射率：
@@ -259,7 +259,7 @@ resources/digitized/phase02_fig3_csfapi_optical_constants_digitized.csv
 data/processed/target_reflectance.csv
 data/processed/CsFAPI_nk_extended.csv
 resources/ITO_20 Ohm_105 nm_e1e2.mat
-    -> step02_tmm_inversion.py (CsFAPI 扩展 n-k -> ITO 标量吸收补偿 -> BEMA 粗糙层修正 -> d_bulk + d_rough + alpha_ito 三参数反演)
+    -> step02_tmm_inversion.py (CsFAPI 扩展 n-k -> ITO 色散吸收补偿 -> BEMA 粗糙层修正 -> d_bulk + d_rough + ito_alpha 三参数反演)
     -> results/figures/tmm_inversion_result.png
 
 data/processed/target_reflectance.csv
@@ -283,9 +283,9 @@ reference/Khan.../images/885e29d3...
 
 1. `step01` 负责把原始计数校准成可用于物理建模的绝对反射率
 2. `step01b` 把 [LIT-0001] 数字化 CsFAPI 曲线转换成标准近红外 `n-k` 中间件
-3. `step02` 在消费标准 `n-k` 中间件后，先对 ITO 的消光系数 `k` 做标量吸收补偿，再通过 50/50 BEMA 将 PVK-Air 表面粗糙度折算为有效介质层
-4. 当前脚本链已经具备“测量数据 -> 标准中间数据 + 文献外推中间数据 -> ITO 标量吸收 + BEMA 修正 TMM 三参数反演图表”的最小闭环
-5. 诊断沙盒指出的 ITO 近红外吸收缺项，现已被并入主流程做解耦的标量吸收补偿
+3. `step02` 在消费标准 `n-k` 中间件后，先对 ITO 的消光系数 `k` 做锚定 `850-1100 nm` 的色散吸收补偿，再通过 50/50 BEMA 将 PVK-Air 表面粗糙度折算为有效介质层
+4. 当前脚本链已经具备“测量数据 -> 标准中间数据 + 文献外推中间数据 -> ITO 色散吸收 + BEMA 修正 TMM 三参数反演图表”的最小闭环
+5. 这轮色散吸收探针已显著压低长波端误差，说明底层吸收缺失确实是主导项
 
 ## 6. Key Physical / Numerical Assumptions
 
@@ -299,8 +299,8 @@ reference/Khan.../images/885e29d3...
 - `750-1100 nm` 内强制采用 `k = 0`
 - `1000-1100 nm` 属于超出原始椭偏测量窗口的模型外推区
 - 粗糙层采用 `50% PVK + 50% Air` 的 BEMA 有效介质
-- ITO 的额外吸收以锁定实部 `n` 的标量参数 `alpha_ito` 表示
-- 反演当前同时拟合 `d_bulk`、`d_rough` 与 `alpha_ito` 三个参数
+- ITO 的额外吸收以锁定实部 `n` 的色散参数 `ito_alpha` 表示，其对 `k` 的放大在 `850 nm` 处为 1，在 `1100 nm` 处为 `1 + ito_alpha`
+- 反演当前同时拟合 `d_bulk`、`d_rough` 与 `ito_alpha` 三个参数
 
 这些假设是理解结果与后续扩展的关键锚点；若后续有改动，必须同步更新本文件。
 
@@ -382,8 +382,8 @@ reference/Khan.../images/885e29d3...
   - `diagnostics_shape_mismatch.py` 的 Probe A 显示，ITO 近红外吸收增强可将形状误差显著压低
   - 这说明当前主流程的 ITO 吸收建模仍不足，是下一轮主流程升级的优先方向
 - 当前状态：
-  - 已通过 ITO 标量吸收补偿并入 `step02_tmm_inversion.py`
-  - 当前主流程可直接检验“长波端畸变是否完全由底层吸收缺失主导”
+  - 已通过 ITO 色散吸收补偿并入 `step02_tmm_inversion.py`
+  - 当前主流程已能把长波端托平明显拉回实测曲线附近
 
 ## 8. Architecture Risks
 
@@ -433,11 +433,11 @@ reference/Khan.../images/885e29d3...
 - 因此双参数数值收敛不自动等价于唯一物理解
 - 当前升级可直接改善振幅匹配，但后续若用于定量结论，仍需通过更多先验或更多观测量约束参数空间
 
-### 8.7 ITO 吸收修正已被诊断为关键缺项
+### 8.7 ITO 色散吸收修正已被诊断为关键缺项
 
 - 独立诊断表明，ITO 近红外吸收增强比厚度不均匀性和 PVK 色散斜率修正更能同时修复长波托平与整体形状
-- 这也是当前主流程优先引入 ITO 标量吸收补偿，而未先固化厚度高斯平均或 PVK Cauchy `B` 缩放的原因
-- 后续仍需关注 `alpha_ito` 是否与 `d_bulk` / `d_rough` 存在新的参数相关性
+- 本轮主流程进一步表明：把吸收放大限制在长波端，比全局标量吸收更符合数据
+- 后续仍需关注 `ito_alpha` 是否与 `d_bulk` / `d_rough` 存在新的参数相关性
 
 ### 8.8 结果文件命名尚未 Phase 化
 
@@ -449,22 +449,22 @@ reference/Khan.../images/885e29d3...
 - 更新时间：`2026-04-06`
 - 当前 Phase：`Phase 02`
 - 本次新增/修改：
-  - 在 `step02_tmm_inversion.py` 中以 `alpha_ito` 新增 ITO 标量吸收补偿
-  - 将主流程从 BEMA 双参数反演升级为 `d_bulk + d_rough + alpha_ito` 三参数联合反演
-  - 更新 `PROJECT_STATE.md` 以反映标量吸收补偿并入主流程
+  - 在 `step02_tmm_inversion.py` 中将 ITO 补偿升级为锚定 `850-1100 nm` 的色散吸收函数
+  - 将主流程调整为 `d_bulk + d_rough + ito_alpha` 三参数联合反演
+  - 更新 `PROJECT_STATE.md` 以反映色散吸收补偿并入主流程
 - 已验证结论：
   - ITO 近红外吸收增强是当前形状畸变的主导修复机制
-  - 主流程现已具备基于 `alpha_ito` 的底层基底吸收修正闭环
+  - 色散吸收版比全局标量吸收版更有效，能在不压塌 850 nm 主峰的前提下显著拉低长波端误差
 - 仍待验证：
   - `1000-1100 nm` 外推段的物理可信度仍需后续用原始数据或独立测量交叉验证
-  - `d_bulk`、`d_rough` 与 `alpha_ito` 的相关性是否会影响最终物理解读，还需后续继续评估
+  - `d_bulk`、`d_rough` 与 `ito_alpha` 的相关性是否会影响最终物理解读，还需后续继续评估
 
 ## 10. Recommended Next Actions
 
 建议后续优先处理以下事项：
 
 1. 建立 `data/raw/`，并把 `test_data/` 中实际原始测量 CSV 迁移到规范目录
-2. 创建结构化反演结果输出文件，记录 `d_bulk`、`d_rough`、`alpha_ito`、`chi-square` 与外推参数 `A/B`
+2. 创建结构化反演结果输出文件，记录 `d_bulk`、`d_rough`、`ito_alpha`、`chi-square` 与外推参数 `A/B`
 3. 将 `step01`/`step01b`/`step02` 中可复用逻辑下沉到 `src/core/`
 4. 建立 `docs/RESOURCE_INDEX.md`，说明 ITO、银镜基准、论文资料与数字化资源的来源和格式
 5. 建立 `README.md`，补齐项目运行入口、依赖安装和 Phase 概览
