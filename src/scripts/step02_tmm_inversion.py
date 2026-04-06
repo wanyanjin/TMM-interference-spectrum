@@ -10,7 +10,7 @@
 4. PVK 外推 n-k 中间件加载与插值
 5. BEMA 表面粗糙度修正
 6. 厚玻璃非相干修正 + 相干薄膜 TMM
-7. lmfit 四参数厚度反演
+7. lmfit 六参数厚度反演
 8. 结果绘图
 """
 
@@ -39,21 +39,26 @@ AIR_INDEX = 1.0
 ITO_THICKNESS_NM = 105.0
 NIOX_THICKNESS_NM = 20.0
 SAM_THICKNESS_NM = 2.0
-NIOX_NK = 2.1 + 0.0j
 SAM_NK = 1.8 + 0.0j
 
-INITIAL_PVK_BULK_THICKNESS_NM = 440.0
+INITIAL_PVK_BULK_THICKNESS_NM = 448.0
 MIN_PVK_BULK_THICKNESS_NM = 400.0
 MAX_PVK_BULK_THICKNESS_NM = 500.0
-INITIAL_PVK_ROUGHNESS_THICKNESS_NM = 60.0
+INITIAL_PVK_ROUGHNESS_THICKNESS_NM = 51.0
 MIN_PVK_ROUGHNESS_THICKNESS_NM = 0.0
 MAX_PVK_ROUGHNESS_THICKNESS_NM = 100.0
-INITIAL_ITO_ALPHA = 5.0
+INITIAL_ITO_ALPHA = 12.0
 MIN_ITO_ALPHA = 0.0
 MAX_ITO_ALPHA = 30.0
-INITIAL_THICKNESS_SIGMA_NM = 15.0
+INITIAL_THICKNESS_SIGMA_NM = 15.6
 MIN_THICKNESS_SIGMA_NM = 0.0
 MAX_THICKNESS_SIGMA_NM = 60.0
+INITIAL_PVK_B_SCALE = 1.0
+MIN_PVK_B_SCALE = 0.1
+MAX_PVK_B_SCALE = 3.0
+INITIAL_NIOX_K = 0.0
+MIN_NIOX_K = 0.0
+MAX_NIOX_K = 0.5
 
 
 def get_project_root() -> Path:
@@ -378,6 +383,8 @@ def calc_macro_reflectance(
     d_rough_nm: float,
     ito_alpha: float,
     sigma_thickness_nm: float,
+    pvk_b_scale: float,
+    niox_k: float,
     wavelength_nm: np.ndarray,
     get_ito_nk: Callable[[np.ndarray], np.ndarray],
     get_pvk_nk: Callable[[np.ndarray], np.ndarray],
@@ -401,8 +408,14 @@ def calc_macro_reflectance(
     wavelength = np.asarray(wavelength_nm, dtype=float)
     ito_base_nk = get_ito_nk(wavelength)
     ito_nk = apply_dispersive_absorption_correction(ito_base_nk, wavelength, ito_alpha)
-    pvk_bulk_nk = get_pvk_nk(wavelength)
-    pvk_rough_nk = calc_bema_rough_nk(pvk_bulk_nk)
+    pvk_base_nk = get_pvk_nk(wavelength)
+    n_base = np.real(pvk_base_nk)
+    k_base = np.imag(pvk_base_nk)
+    n_anchor = float(np.real(get_pvk_nk(np.array([1000.0], dtype=float)))[0])
+    n_new = n_anchor + pvk_b_scale * (n_base - n_anchor)
+    pvk_pert_nk = n_new + 1j * k_base
+    pvk_rough_nk = calc_bema_rough_nk(pvk_pert_nk)
+    niox_nk = 2.1 + 1j * niox_k
     r_front = ((GLASS_INDEX - AIR_INDEX) / (GLASS_INDEX + AIR_INDEX)) ** 2
 
     def calc_single_reflectance(single_d_bulk_nm: float) -> np.ndarray:
@@ -412,9 +425,9 @@ def calc_macro_reflectance(
             n_list = [
                 GLASS_INDEX + 0.0j,
                 ito_nk[index],
-                NIOX_NK,
+                niox_nk,
                 SAM_NK,
-                pvk_bulk_nk[index],
+                pvk_pert_nk[index],
                 pvk_rough_nk[index],
                 AIR_INDEX + 0.0j,
             ]
@@ -457,11 +470,15 @@ def residual(
     d_rough_nm = params["d_rough"].value
     ito_alpha = params["ito_alpha"].value
     sigma_thickness_nm = params["sigma_thickness"].value
+    pvk_b_scale = params["pvk_b_scale"].value
+    niox_k = params["niox_k"].value
     r_model = calc_macro_reflectance(
         d_bulk_nm,
         d_rough_nm,
         ito_alpha,
         sigma_thickness_nm,
+        pvk_b_scale,
+        niox_k,
         wavelength_nm,
         get_ito_nk,
         get_pvk_nk,
@@ -478,6 +495,8 @@ def plot_fit_result(
     d_total_nm: float,
     ito_alpha: float,
     sigma_thickness_nm: float,
+    pvk_b_scale: float,
+    niox_k: float,
     chisqr: float,
     output_path: Path,
 ) -> None:
@@ -507,6 +526,8 @@ def plot_fit_result(
         f"Total d_total = {d_total_nm:.1f} nm\n"
         f"ITO IR Alpha = {ito_alpha:.3f}\n"
         f"Thickness Sigma = {sigma_thickness_nm:.1f} nm\n"
+        f"PVK B-Scale = {pvk_b_scale:.3f}\n"
+        f"NiOx k = {niox_k:.4f}\n"
         f"Chi-Square = {chisqr:.3f}"
     )
     ax.text(
@@ -523,7 +544,7 @@ def plot_fit_result(
     ax.set_xlim(WAVELENGTH_MIN_NM, WAVELENGTH_MAX_NM)
     ax.set_xlabel("Wavelength (nm)")
     ax.set_ylabel("Absolute Reflectance (%)")
-    ax.set_title("TMM Inversion with BEMA + ITO Disp. Abs + Thickness Inhomogeneity")
+    ax.set_title("TMM Inversion (6-Params): Dispersion Perturbation + NiOx Abs")
     ax.grid(True, linestyle="--", alpha=0.35)
     ax.legend()
 
@@ -577,6 +598,18 @@ def main() -> None:
         min=MIN_THICKNESS_SIGMA_NM,
         max=MAX_THICKNESS_SIGMA_NM,
     )
+    params.add(
+        "pvk_b_scale",
+        value=INITIAL_PVK_B_SCALE,
+        min=MIN_PVK_B_SCALE,
+        max=MAX_PVK_B_SCALE,
+    )
+    params.add(
+        "niox_k",
+        value=INITIAL_NIOX_K,
+        min=MIN_NIOX_K,
+        max=MAX_NIOX_K,
+    )
 
     result = minimize(
         residual,
@@ -589,12 +622,16 @@ def main() -> None:
     d_rough_best_nm = float(result.params["d_rough"].value)
     ito_alpha_best = float(result.params["ito_alpha"].value)
     sigma_thickness_best_nm = float(result.params["sigma_thickness"].value)
+    pvk_b_scale_best = float(result.params["pvk_b_scale"].value)
+    niox_k_best = float(result.params["niox_k"].value)
     d_total_best_nm = d_bulk_best_nm + d_rough_best_nm
     r_best_fit = calc_macro_reflectance(
         d_bulk_best_nm,
         d_rough_best_nm,
         ito_alpha_best,
         sigma_thickness_best_nm,
+        pvk_b_scale_best,
+        niox_k_best,
         wavelength_nm,
         get_ito_nk,
         get_pvk_nk,
@@ -612,11 +649,13 @@ def main() -> None:
         d_total_nm=d_total_best_nm,
         ito_alpha=ito_alpha_best,
         sigma_thickness_nm=sigma_thickness_best_nm,
+        pvk_b_scale=pvk_b_scale_best,
+        niox_k=niox_k_best,
         chisqr=float(result.chisqr),
         output_path=output_path,
     )
 
-    print("TMM 四参数厚度反演完成。")
+    print("TMM 六参数厚度反演完成。")
     print(f"目标曲线输入: {target_csv}")
     print(f"反演结果图片: {output_path}")
     print(f"Fitted d_bulk = {d_bulk_best_nm:.3f} nm")
@@ -624,6 +663,8 @@ def main() -> None:
     print(f"Fitted d_total = {d_total_best_nm:.3f} nm")
     print(f"ITO IR Alpha = {ito_alpha_best:.6f}")
     print(f"Thickness Sigma = {sigma_thickness_best_nm:.6f} nm")
+    print(f"PVK B-Scale = {pvk_b_scale_best:.6f}")
+    print(f"NiOx k = {niox_k_best:.6f}")
     print(f"Chi-Square = {float(result.chisqr):.6f}")
     print(f"拟合状态: success={result.success}, nfev={result.nfev}")
 

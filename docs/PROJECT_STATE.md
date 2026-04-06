@@ -5,12 +5,12 @@
 ## 1. Current Snapshot
 
 - 更新时间：2026-04-06
-- 当前判断 Phase：`Phase 02`
-- 阶段定义：`绝对反射率标定 -> 文献数字化 -> CsFAPI 近红外外推 -> TMM 基准前向/反演闭环`
+- 当前判断 Phase：`Phase 03`
+- 阶段定义：`在 Phase 02 基线之上，引入色散扰动与寄生吸收微调，继续压缩形状残差`
 - 当前可用能力：
   - 已有 `step01_absolute_calibration.py`，可将样品与银镜原始计数转换为绝对反射率
   - 已有 `step01b_cauchy_extrapolation.py`，可基于 [LIT-0001] 的 `ITO/CsFAPI` 数字化折射率曲线生成 `750-1100 nm` 的 CsFAPI 扩展 `n-k` 中间件
-  - 已有 `step02_tmm_inversion.py`，可读取目标反射率、ITO 色散和 CsFAPI 扩展 `n-k` 中间件，执行包含 50/50 BEMA 粗糙度、ITO 色散吸收补偿与宏观厚度不均匀性高斯平均的四参数 `d_bulk + d_rough + ito_alpha + sigma_thickness` 联合反演
+  - 已有 `step02_tmm_inversion.py`，可读取目标反射率、ITO 色散和 CsFAPI 扩展 `n-k` 中间件，执行包含 50/50 BEMA 粗糙度、ITO 色散吸收补偿、宏观厚度不均匀性高斯平均、PVK 色散斜率扰动与 NiOx 寄生吸收的六参数 `d_bulk + d_rough + ito_alpha + sigma_thickness + pvk_b_scale + niox_k` 联合反演
   - 已有 `diagnostics_shape_mismatch.py`，可在独立沙盒中对 ITO 近红外吸收、厚度不均匀性和 PVK 色散斜率做形状畸变诊断
   - 已有 `step02_digitize_fapi_optical_constants.py`，可从 `LIT-0001` 的 Fig. 2 原图数字化提取 FAPI 的 `n/κ` 曲线并输出 QA 图
   - 已有 `step02_digitize_csfapi_optical_constants.py`，可从 `LIT-0001` 的 Fig. 3 原图数字化提取 CsFAPI 的 `n/κ` 曲线并输出 QA 图
@@ -146,7 +146,7 @@ TMM-interference-spectrum/
 ### 4.3 `step02_tmm_inversion.py`
 
 - 文件位置：`src/scripts/step02_tmm_inversion.py`
-- 主要职责：读取 `step01` 输出的目标反射率、ITO 色散和 `step01b` 生成的 CsFAPI 扩展 `n-k` 中间件，执行包含 BEMA 表面粗糙度修正、ITO 色散吸收补偿与宏观厚度不均匀性高斯平均的四参数联合反演
+- 主要职责：读取 `step01` 输出的目标反射率、ITO 色散和 `step01b` 生成的 CsFAPI 扩展 `n-k` 中间件，执行包含 BEMA 表面粗糙度修正、ITO 色散吸收补偿、宏观厚度不均匀性高斯平均、PVK 色散斜率扰动与 NiOx 寄生吸收的六参数联合反演
 
 输入：
 - `data/processed/target_reflectance.csv`
@@ -172,10 +172,14 @@ TMM-interference-spectrum/
 - PVK 表面粗糙层厚度 `d_rough` 搜索范围：`0-100 nm`
 - ITO 色散吸收参数 `ito_alpha` 搜索范围：`0.0-30.0`
 - 宏观厚度不均匀性参数 `sigma_thickness` 搜索范围：`0.0-60.0 nm`
+- PVK 色散斜率缩放参数 `pvk_b_scale` 搜索范围：`0.1-3.0`
+- NiOx 近红外寄生吸收参数 `niox_k` 搜索范围：`0.0-0.5`
 - PVK 采用 `step01b` 生成的 CsFAPI 扩展 `n-k` 中间件，并通过线性插值映射到目标波长网格
 - 粗糙层采用 `50% PVK + 50% Air` 的 Bruggeman EMA 有效介质模型
 - ITO 在进入 TMM 之前，锁定实部 `n` 不变，仅对虚部 `k` 施加锚定在 `850-1100 nm` 的二次增长色散吸收缩放
 - 当 `sigma_thickness >= 0.1 nm` 时，对 `d_bulk` 在 `[-3σ, +3σ]` 上做 9 点离散高斯加权平均，以模拟光斑尺度内的宏观厚度不均匀性
+- PVK 色散扰动以 `1000 nm` 为折射率锚点，仅对 `n(λ)-n(1000 nm)` 的变化量施加 `pvk_b_scale` 缩放
+- NiOx 层在主流程中由固定实部 `2.1` 和可拟合虚部 `niox_k` 构成
 - 相干层堆栈为：`Glass -> ITO -> NiOx -> SAM -> PVK_Bulk -> PVK_Roughness -> Air`
 
 核心处理流程：
@@ -185,13 +189,15 @@ TMM-interference-spectrum/
 - 构建 ITO 复折射率插值器
 - 根据 `ito_alpha` 对 ITO 的消光系数 `k` 做长波增强的色散吸收放大
 - 构建 PVK 复折射率插值器
-- 根据块体 PVK 复介电常数计算 50/50 BEMA 粗糙层复折射率
+- 根据 `pvk_b_scale` 扰动 PVK 的近红外色散斜率
+- 根据扰动后的块体 PVK 复介电常数计算 50/50 BEMA 粗糙层复折射率
+- 动态构建 `2.1 + i*niox_k` 的 NiOx 复折射率
 - 计算宏观反射率：
   - 玻璃前表面菲涅尔反射
   - 玻璃后方包含粗糙层的薄膜堆栈相干 TMM
   - 若 `sigma_thickness` 非零，则对多个 `d_bulk` 采样点做高斯加权平均
   - 再按非相干强度级联公式合成总反射率
-- 使用 `lmfit` 的 `leastsq` 做四参数联合反演
+- 使用 `lmfit` 的 `leastsq` 做六参数联合反演
 - 输出最佳拟合图
 
 输出：
@@ -262,7 +268,7 @@ resources/digitized/phase02_fig3_csfapi_optical_constants_digitized.csv
 data/processed/target_reflectance.csv
 data/processed/CsFAPI_nk_extended.csv
 resources/ITO_20 Ohm_105 nm_e1e2.mat
-    -> step02_tmm_inversion.py (CsFAPI 扩展 n-k -> ITO 色散吸收补偿 -> BEMA 粗糙层修正 -> 宏观厚度高斯平均 -> d_bulk + d_rough + ito_alpha + sigma_thickness 四参数反演)
+    -> step02_tmm_inversion.py (CsFAPI 扩展 n-k -> ITO 色散吸收补偿 -> PVK 色散斜率扰动 -> NiOx 寄生吸收 -> BEMA 粗糙层修正 -> 宏观厚度高斯平均 -> 六参数反演)
     -> results/figures/tmm_inversion_result.png
 
 data/processed/target_reflectance.csv
@@ -286,9 +292,9 @@ reference/Khan.../images/885e29d3...
 
 1. `step01` 负责把原始计数校准成可用于物理建模的绝对反射率
 2. `step01b` 把 [LIT-0001] 数字化 CsFAPI 曲线转换成标准近红外 `n-k` 中间件
-3. `step02` 在消费标准 `n-k` 中间件后，先对 ITO 的消光系数 `k` 做锚定 `850-1100 nm` 的色散吸收补偿，再通过 50/50 BEMA 将 PVK-Air 表面粗糙度折算为有效介质层，并对 `d_bulk` 做高斯厚度平均
-4. 当前脚本链已经具备“测量数据 -> 标准中间数据 + 文献外推中间数据 -> ITO 色散吸收 + BEMA 修正 + 厚度不均匀性平均 TMM 四参数反演图表”的最小闭环
-5. 这轮升级的目标是继续压低峰谷尖锐度，让模型条纹圆润度向实测靠近
+3. `step02` 在消费标准 `n-k` 中间件后，先对 ITO 的消光系数 `k` 做锚定 `850-1100 nm` 的色散吸收补偿，再对 PVK 斜率和 NiOx 吸收做微调，通过 50/50 BEMA 将 PVK-Air 表面粗糙度折算为有效介质层，并对 `d_bulk` 做高斯厚度平均
+4. 当前脚本链已经具备“测量数据 -> 标准中间数据 + 文献外推中间数据 -> ITO 色散吸收 + PVK 色散扰动 + NiOx 寄生吸收 + BEMA 修正 + 厚度不均匀性平均 TMM 六参数反演图表”的最小闭环
+5. 这轮升级的目标是继续压低 `850-950 nm` 短波端的斜率残差，同时分担 `ito_alpha` 原先独自承担的底层吸收补偿压力
 
 ## 6. Key Physical / Numerical Assumptions
 
@@ -303,7 +309,7 @@ reference/Khan.../images/885e29d3...
 - `1000-1100 nm` 属于超出原始椭偏测量窗口的模型外推区
 - 粗糙层采用 `50% PVK + 50% Air` 的 BEMA 有效介质
 - ITO 的额外吸收以锁定实部 `n` 的色散参数 `ito_alpha` 表示，其对 `k` 的放大在 `850 nm` 处为 1，在 `1100 nm` 处为 `1 + ito_alpha`
-- 反演当前同时拟合 `d_bulk`、`d_rough`、`ito_alpha` 与 `sigma_thickness` 四个参数
+- 反演当前同时拟合 `d_bulk`、`d_rough`、`ito_alpha`、`sigma_thickness`、`pvk_b_scale` 与 `niox_k` 六个参数
 
 这些假设是理解结果与后续扩展的关键锚点；若后续有改动，必须同步更新本文件。
 
@@ -336,13 +342,13 @@ reference/Khan.../images/885e29d3...
 ### 7.3 当前反演模型虽已扩展，但结构解释仍非唯一
 
 - 表现：
-  - 当前已反演 `d_bulk`、`d_rough`、`ito_alpha` 与 `sigma_thickness`
+  - 当前已反演 `d_bulk`、`d_rough`、`ito_alpha`、`sigma_thickness`、`pvk_b_scale` 与 `niox_k`
   - ITO/NiOx/SAM 厚度与多数材料参数仍固定
 - 影响：
-  - 四参数收敛仍不等于结构解释唯一
+  - 六参数收敛仍不等于结构解释唯一
   - 对模型误差与参数耦合的吸收能力有限
 - 当前状态：
-  - 已比早期模型更能吸收表面粗糙度、底层吸收和峰谷展宽偏差
+  - 已比早期模型更能吸收表面粗糙度、底层吸收、峰谷展宽和短波斜率偏差
   - 不适合作为最终物理解译结论
 
 ### 7.4 图像数字化结果不是原始实验表
@@ -449,7 +455,13 @@ reference/Khan.../images/885e29d3...
 - 因此它可能与 `d_rough` 和 `ito_alpha` 共同吸收同一部分误差
 - 该机制能提升拟合灵活性，但也会进一步削弱“单组参数唯一对应单一物理结构”的可解释性
 
-### 8.9 结果文件命名尚未 Phase 化
+### 8.9 PVK 斜率扰动与 NiOx 吸收会引入新的可辨识性风险
+
+- `pvk_b_scale` 会改变短波端相位推进速度与峰谷跨度
+- `niox_k` 会改变整体对比度并与 `ito_alpha` 共同承担寄生吸收
+- 因此这两个新自由度虽然能显著压低残差，但也会进一步削弱“拟合最优即物理唯一”的可信度
+
+### 8.10 结果文件命名尚未 Phase 化
 
 - 当前图像文件名尚未显式带上 `phaseXX`
 - 后续结果积累后，可能不利于多轮实验比较和回滚定位
@@ -457,17 +469,18 @@ reference/Khan.../images/885e29d3...
 ## 9. Recent Update Summary
 
 - 更新时间：`2026-04-06`
-- 当前 Phase：`Phase 02`
+- 当前 Phase：`Phase 03`
 - 本次新增/修改：
-  - 在 `step02_tmm_inversion.py` 中将主流程升级为包含宏观厚度不均匀性高斯平均的四参数反演
-  - 将主流程参数调整为 `d_bulk + d_rough + ito_alpha + sigma_thickness`
-  - 更新 `PROJECT_STATE.md` 以反映厚度不均匀性并入主流程
+  - 在 `step02_tmm_inversion.py` 中将主流程升级为包含 PVK 色散斜率扰动与 NiOx 寄生吸收的六参数反演
+  - 将主流程参数调整为 `d_bulk + d_rough + ito_alpha + sigma_thickness + pvk_b_scale + niox_k`
+  - 更新 `PROJECT_STATE.md` 以反映 Phase 03 的六参数主流程
 - 已验证结论：
   - ITO 近红外吸收增强是当前形状畸变的主导修复机制
   - 色散吸收版比全局标量吸收版更有效，能在不压塌 850 nm 主峰的前提下显著拉低长波端误差
+  - 加入 `pvk_b_scale` 与 `niox_k` 后，短波端 `850-950 nm` 的斜率失配进一步显著下降
 - 仍待验证：
   - `1000-1100 nm` 外推段的物理可信度仍需后续用原始数据或独立测量交叉验证
-  - `d_bulk`、`d_rough`、`ito_alpha` 与 `sigma_thickness` 的相关性是否会影响最终物理解读，还需后续继续评估
+  - `d_bulk`、`d_rough`、`ito_alpha`、`sigma_thickness`、`pvk_b_scale` 与 `niox_k` 的相关性是否会影响最终物理解读，还需后续继续评估
 
 ## 10. Recommended Next Actions
 
