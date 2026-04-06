@@ -10,7 +10,7 @@
 - 当前可用能力：
   - 已有 `step01_absolute_calibration.py`，可将样品与银镜原始计数转换为绝对反射率
   - 已有 `step01b_cauchy_extrapolation.py`，可基于 [LIT-0001] 的 `ITO/CsFAPI` 数字化折射率曲线生成 `750-1100 nm` 的 CsFAPI 扩展 `n-k` 中间件
-  - 已有 `step02_tmm_inversion.py`，可读取目标反射率、ITO 色散和 CsFAPI 扩展 `n-k` 中间件，执行包含 50/50 BEMA 粗糙度修正的双参数 `d_bulk + d_rough` 反演
+  - 已有 `step02_tmm_inversion.py`，可读取目标反射率、ITO 色散和 CsFAPI 扩展 `n-k` 中间件，执行包含 50/50 BEMA 粗糙度与 ITO Drude 吸收补偿的三参数 `d_bulk + d_rough + ito_Ep` 联合反演
   - 已有 `diagnostics_shape_mismatch.py`，可在独立沙盒中对 ITO 近红外吸收、厚度不均匀性和 PVK 色散斜率做形状畸变诊断
   - 已有 `step02_digitize_fapi_optical_constants.py`，可从 `LIT-0001` 的 Fig. 2 原图数字化提取 FAPI 的 `n/κ` 曲线并输出 QA 图
   - 已有 `step02_digitize_csfapi_optical_constants.py`，可从 `LIT-0001` 的 Fig. 3 原图数字化提取 CsFAPI 的 `n/κ` 曲线并输出 QA 图
@@ -146,7 +146,7 @@ TMM-interference-spectrum/
 ### 4.3 `step02_tmm_inversion.py`
 
 - 文件位置：`src/scripts/step02_tmm_inversion.py`
-- 主要职责：读取 `step01` 输出的目标反射率、ITO 色散和 `step01b` 生成的 CsFAPI 扩展 `n-k` 中间件，执行包含 BEMA 表面粗糙度修正的双参数厚度反演
+- 主要职责：读取 `step01` 输出的目标反射率、ITO 色散和 `step01b` 生成的 CsFAPI 扩展 `n-k` 中间件，执行包含 BEMA 表面粗糙度修正与 ITO Drude 原位补偿的三参数联合反演
 
 输入：
 - `data/processed/target_reflectance.csv`
@@ -169,9 +169,11 @@ TMM-interference-spectrum/
 - NiOx 厚度固定：`20 nm`
 - SAM 厚度固定：`2 nm`
 - PVK 块体厚度 `d_bulk` 搜索范围：`400-650 nm`
-- PVK 表面粗糙层厚度 `d_rough` 搜索范围：`0-80 nm`
+- PVK 表面粗糙层厚度 `d_rough` 搜索范围：`0-100 nm`
+- ITO 等离子体能量修正 `ito_Ep` 搜索范围：`0-2 eV`
 - PVK 采用 `step01b` 生成的 CsFAPI 扩展 `n-k` 中间件，并通过线性插值映射到目标波长网格
 - 粗糙层采用 `50% PVK + 50% Air` 的 Bruggeman EMA 有效介质模型
+- ITO 在进入 TMM 之前，先对基础 `n-k` 施加原位 Drude 吸收补偿
 - 相干层堆栈为：`Glass -> ITO -> NiOx -> SAM -> PVK_Bulk -> PVK_Roughness -> Air`
 
 核心处理流程：
@@ -179,13 +181,14 @@ TMM-interference-spectrum/
 - 读取 `step01b` 生成的 CsFAPI 扩展 `n-k` 表
 - 解析 ITO 的 `e1/e2` 数据并转为 `n + ik`
 - 构建 ITO 复折射率插值器
+- 根据 `ito_Ep` 对 ITO 基础复折射率施加 Drude 原位补偿
 - 构建 PVK 复折射率插值器
 - 根据块体 PVK 复介电常数计算 50/50 BEMA 粗糙层复折射率
 - 计算宏观反射率：
   - 玻璃前表面菲涅尔反射
   - 玻璃后方包含粗糙层的薄膜堆栈相干 TMM
   - 再按非相干强度级联公式合成总反射率
-- 使用 `lmfit` 的 `leastsq` 做双参数厚度反演
+- 使用 `lmfit` 的 `leastsq` 做三参数联合反演
 - 输出最佳拟合图
 
 输出：
@@ -256,7 +259,7 @@ resources/digitized/phase02_fig3_csfapi_optical_constants_digitized.csv
 data/processed/target_reflectance.csv
 data/processed/CsFAPI_nk_extended.csv
 resources/ITO_20 Ohm_105 nm_e1e2.mat
-    -> step02_tmm_inversion.py (CsFAPI 扩展 n-k -> BEMA 粗糙层修正 -> d_bulk + d_rough 双参数反演)
+    -> step02_tmm_inversion.py (CsFAPI 扩展 n-k -> ITO Drude 补偿 -> BEMA 粗糙层修正 -> d_bulk + d_rough + ito_Ep 三参数反演)
     -> results/figures/tmm_inversion_result.png
 
 data/processed/target_reflectance.csv
@@ -280,9 +283,9 @@ reference/Khan.../images/885e29d3...
 
 1. `step01` 负责把原始计数校准成可用于物理建模的绝对反射率
 2. `step01b` 把 [LIT-0001] 数字化 CsFAPI 曲线转换成标准近红外 `n-k` 中间件
-3. `step02` 在消费标准 `n-k` 中间件后，进一步通过 50/50 BEMA 将 PVK-Air 表面粗糙度折算为有效介质层
-4. 当前脚本链已经具备“测量数据 -> 标准中间数据 + 文献外推中间数据 -> BEMA 修正 TMM 双参数反演图表”的最小闭环
-5. 诊断沙盒表明：主流程剩余的形状畸变更可能来自 ITO 近红外吸收建模不足，而不是单纯的粗糙度缺失
+3. `step02` 在消费标准 `n-k` 中间件后，先对 ITO 施加 Drude 原位补偿，再通过 50/50 BEMA 将 PVK-Air 表面粗糙度折算为有效介质层
+4. 当前脚本链已经具备“测量数据 -> 标准中间数据 + 文献外推中间数据 -> ITO Drude + BEMA 修正 TMM 三参数反演图表”的最小闭环
+5. 诊断沙盒指出的 ITO 近红外吸收缺项，现已被并入主流程做原位吸收补偿
 
 ## 6. Key Physical / Numerical Assumptions
 
@@ -296,7 +299,8 @@ reference/Khan.../images/885e29d3...
 - `750-1100 nm` 内强制采用 `k = 0`
 - `1000-1100 nm` 属于超出原始椭偏测量窗口的模型外推区
 - 粗糙层采用 `50% PVK + 50% Air` 的 BEMA 有效介质
-- 反演当前同时拟合 `d_bulk` 与 `d_rough` 两个参数
+- ITO 的额外自由载流子吸收以原位 Drude 补偿参数 `ito_Ep` 表示
+- 反演当前同时拟合 `d_bulk`、`d_rough` 与 `ito_Ep` 三个参数
 
 这些假设是理解结果与后续扩展的关键锚点；若后续有改动，必须同步更新本文件。
 
@@ -378,8 +382,8 @@ reference/Khan.../images/885e29d3...
   - `diagnostics_shape_mismatch.py` 的 Probe A 显示，ITO 近红外吸收增强可将形状误差显著压低
   - 这说明当前主流程的 ITO 吸收建模仍不足，是下一轮主流程升级的优先方向
 - 当前状态：
-  - 已完成独立诊断并形成报告
-  - 尚未把 ITO 吸收修正并入 `step02_tmm_inversion.py`
+  - 已通过 ITO Drude 原位补偿并入 `step02_tmm_inversion.py`
+  - 底层基底吸收修正已在物理机制上形成闭环，但当前数据集是否会收敛到显著非零 `ito_Ep` 仍需结合拟合结果继续评估
 
 ## 8. Architecture Risks
 
@@ -432,8 +436,8 @@ reference/Khan.../images/885e29d3...
 ### 8.7 ITO 吸收修正已被诊断为关键缺项
 
 - 独立诊断表明，ITO 近红外吸收增强比厚度不均匀性和 PVK 色散斜率修正更能同时修复长波托平与整体形状
-- 这意味着当前 `step02` 虽然已解决振幅问题，但在 ITO 自由载流子吸收建模上仍存在结构性欠拟合
-- 下一轮若继续改主流程，优先级应高于把厚度高斯平均或 PVK Cauchy `B` 缩放直接固化
+- 这也是当前主流程优先引入 ITO Drude 原位补偿，而未先固化厚度高斯平均或 PVK Cauchy `B` 缩放的原因
+- 后续仍需关注 `ito_Ep` 是否与 `d_bulk` / `d_rough` 存在新的参数相关性
 
 ### 8.8 结果文件命名尚未 Phase 化
 
@@ -445,24 +449,22 @@ reference/Khan.../images/885e29d3...
 - 更新时间：`2026-04-06`
 - 当前 Phase：`Phase 02`
 - 本次新增/修改：
-  - 新增 `diagnostics_shape_mismatch.py`
-  - 新增 `results/figures/diagnostic_shape_analysis.png`
-  - 新增 `results/logs/phase02_shape_diagnostic_report.md`
-  - 完成对 ITO 吸收、厚度不均匀性与 PVK 色散斜率的独立诊断比较
+  - 在 `step02_tmm_inversion.py` 中新增 ITO Drude 原位补偿
+  - 将主流程从 BEMA 双参数反演升级为 `d_bulk + d_rough + ito_Ep` 三参数联合反演
+  - 更新 `PROJECT_STATE.md` 以反映 Drude 补偿并入主流程
 - 已验证结论：
   - ITO 近红外吸收增强是当前形状畸变的主导修复机制
-  - 厚度不均匀性和 PVK Cauchy 斜率修正都能改善形状，但优先级低于 ITO 吸收修正
+  - 主流程现已具备基于 `ito_Ep` 的底层基底吸收修正闭环
 - 仍待验证：
-  - 需要把 ITO 近红外吸收修正转成可解释的主流程参数化，而不是停留在诊断探针层
   - `1000-1100 nm` 外推段的物理可信度仍需后续用原始数据或独立测量交叉验证
-  - `d_bulk` 与 `d_rough` 的相关性是否会影响最终物理解读，还需后续继续评估
+  - `d_bulk`、`d_rough` 与 `ito_Ep` 的相关性是否会影响最终物理解读，还需后续继续评估
 
 ## 10. Recommended Next Actions
 
 建议后续优先处理以下事项：
 
 1. 建立 `data/raw/`，并把 `test_data/` 中实际原始测量 CSV 迁移到规范目录
-2. 创建结构化反演结果输出文件，记录 `d_bulk`、`d_rough`、`chi-square` 与外推参数 `A/B`
+2. 创建结构化反演结果输出文件，记录 `d_bulk`、`d_rough`、`ito_Ep`、`chi-square` 与外推参数 `A/B`
 3. 将 `step01`/`step01b`/`step02` 中可复用逻辑下沉到 `src/core/`
 4. 建立 `docs/RESOURCE_INDEX.md`，说明 ITO、银镜基准、论文资料与数字化资源的来源和格式
 5. 建立 `README.md`，补齐项目运行入口、依赖安装和 Phase 概览
