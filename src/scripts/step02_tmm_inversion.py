@@ -6,7 +6,7 @@
 模块划分：
 1. 目标曲线读取
 2. ITO 色散解析与插值
-3. ITO Drude 原位补偿
+3. ITO 标量吸收补偿
 4. PVK 外推 n-k 中间件加载与插值
 5. BEMA 表面粗糙度修正
 6. 厚玻璃非相干修正 + 相干薄膜 TMM
@@ -48,9 +48,9 @@ MAX_PVK_BULK_THICKNESS_NM = 650.0
 INITIAL_PVK_ROUGHNESS_THICKNESS_NM = 60.0
 MIN_PVK_ROUGHNESS_THICKNESS_NM = 0.0
 MAX_PVK_ROUGHNESS_THICKNESS_NM = 100.0
-INITIAL_ITO_EP_EV = 0.5
-MIN_ITO_EP_EV = 0.0
-MAX_ITO_EP_EV = 2.0
+INITIAL_ITO_ALPHA = 1.0
+MIN_ITO_ALPHA = 0.1
+MAX_ITO_ALPHA = 20.0
 
 
 def get_project_root() -> Path:
@@ -295,19 +295,10 @@ def build_ito_interpolator(wavelength_nm: np.ndarray, nk: np.ndarray) -> Callabl
     return get_ito_nk
 
 
-def apply_drude_correction(
-    base_nk: np.ndarray,
-    wavelength_nm: np.ndarray,
-    Ep: float,
-    Gamma: float = 0.1,
-) -> np.ndarray:
-    """对 ITO 基础复折射率施加原位 Drude 吸收补偿。"""
-    wavelength = np.asarray(wavelength_nm, dtype=np.float64)
-    energy_ev = 1240.0 / wavelength
-    epsilon_base = np.asarray(base_nk, dtype=np.complex128) ** 2
-    delta_epsilon = -(Ep**2) / (energy_ev**2 + 1j * Gamma * energy_ev)
-    epsilon_new = epsilon_base + delta_epsilon
-    return np.sqrt(epsilon_new)
+def apply_scalar_absorption_correction(base_nk: np.ndarray, alpha_ito: float) -> np.ndarray:
+    """锁定 ITO 实部 n，仅对虚部 k 施加标量放大。"""
+    base_nk_array = np.asarray(base_nk, dtype=np.complex128)
+    return np.real(base_nk_array) + 1j * (np.imag(base_nk_array) * alpha_ito)
 
 
 def load_pvk_dispersion(csv_path: Path) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
@@ -371,7 +362,7 @@ def calc_bema_rough_nk(bulk_nk: np.ndarray) -> np.ndarray:
 def calc_macro_reflectance(
     d_bulk_nm: float,
     d_rough_nm: float,
-    ito_Ep: float,
+    alpha_ito: float,
     wavelength_nm: np.ndarray,
     get_ito_nk: Callable[[np.ndarray], np.ndarray],
     get_pvk_nk: Callable[[np.ndarray], np.ndarray],
@@ -394,7 +385,7 @@ def calc_macro_reflectance(
     """
     wavelength = np.asarray(wavelength_nm, dtype=float)
     ito_base_nk = get_ito_nk(wavelength)
-    ito_nk = apply_drude_correction(ito_base_nk, wavelength, ito_Ep)
+    ito_nk = apply_scalar_absorption_correction(ito_base_nk, alpha_ito)
     pvk_bulk_nk = get_pvk_nk(wavelength)
     pvk_rough_nk = calc_bema_rough_nk(pvk_bulk_nk)
 
@@ -437,8 +428,8 @@ def residual(
     """lmfit 残差函数。"""
     d_bulk_nm = params["d_bulk"].value
     d_rough_nm = params["d_rough"].value
-    ito_Ep = params["ito_Ep"].value
-    r_model = calc_macro_reflectance(d_bulk_nm, d_rough_nm, ito_Ep, wavelength_nm, get_ito_nk, get_pvk_nk)
+    alpha_ito = params["alpha_ito"].value
+    r_model = calc_macro_reflectance(d_bulk_nm, d_rough_nm, alpha_ito, wavelength_nm, get_ito_nk, get_pvk_nk)
     return r_model - r_target
 
 
@@ -449,7 +440,7 @@ def plot_fit_result(
     d_bulk_nm: float,
     d_rough_nm: float,
     d_total_nm: float,
-    ito_Ep: float,
+    alpha_ito: float,
     chisqr: float,
     output_path: Path,
 ) -> None:
@@ -477,7 +468,7 @@ def plot_fit_result(
         f"Fitted d_bulk = {d_bulk_nm:.1f} nm\n"
         f"Fitted d_rough = {d_rough_nm:.1f} nm\n"
         f"Total d_total = {d_total_nm:.1f} nm\n"
-        f"ITO E_p = {ito_Ep:.3f} eV\n"
+        f"ITO alpha = {alpha_ito:.3f}\n"
         f"Chi-Square = {chisqr:.3f}"
     )
     ax.text(
@@ -494,7 +485,7 @@ def plot_fit_result(
     ax.set_xlim(WAVELENGTH_MIN_NM, WAVELENGTH_MAX_NM)
     ax.set_xlabel("Wavelength (nm)")
     ax.set_ylabel("Absolute Reflectance (%)")
-    ax.set_title("TMM Inversion with BEMA + ITO Drude Compensation (850-1100 nm)")
+    ax.set_title("TMM Inversion with BEMA + ITO Scalar Absorption (850-1100 nm)")
     ax.grid(True, linestyle="--", alpha=0.35)
     ax.legend()
 
@@ -537,10 +528,10 @@ def main() -> None:
         max=MAX_PVK_ROUGHNESS_THICKNESS_NM,
     )
     params.add(
-        "ito_Ep",
-        value=INITIAL_ITO_EP_EV,
-        min=MIN_ITO_EP_EV,
-        max=MAX_ITO_EP_EV,
+        "alpha_ito",
+        value=INITIAL_ITO_ALPHA,
+        min=MIN_ITO_ALPHA,
+        max=MAX_ITO_ALPHA,
     )
 
     result = minimize(
@@ -552,9 +543,9 @@ def main() -> None:
 
     d_bulk_best_nm = float(result.params["d_bulk"].value)
     d_rough_best_nm = float(result.params["d_rough"].value)
-    ito_Ep_best = float(result.params["ito_Ep"].value)
+    alpha_ito_best = float(result.params["alpha_ito"].value)
     d_total_best_nm = d_bulk_best_nm + d_rough_best_nm
-    r_best_fit = calc_macro_reflectance(d_bulk_best_nm, d_rough_best_nm, ito_Ep_best, wavelength_nm, get_ito_nk, get_pvk_nk)
+    r_best_fit = calc_macro_reflectance(d_bulk_best_nm, d_rough_best_nm, alpha_ito_best, wavelength_nm, get_ito_nk, get_pvk_nk)
 
     if np.any(~np.isfinite(r_best_fit)):
         raise ValueError("最佳拟合反射率中出现 NaN 或 Inf，说明模型数值计算失败。")
@@ -566,7 +557,7 @@ def main() -> None:
         d_bulk_nm=d_bulk_best_nm,
         d_rough_nm=d_rough_best_nm,
         d_total_nm=d_total_best_nm,
-        ito_Ep=ito_Ep_best,
+        alpha_ito=alpha_ito_best,
         chisqr=float(result.chisqr),
         output_path=output_path,
     )
@@ -577,7 +568,7 @@ def main() -> None:
     print(f"Fitted d_bulk = {d_bulk_best_nm:.3f} nm")
     print(f"Fitted d_rough = {d_rough_best_nm:.3f} nm")
     print(f"Fitted d_total = {d_total_best_nm:.3f} nm")
-    print(f"ITO E_p = {ito_Ep_best:.6f} eV")
+    print(f"ITO alpha = {alpha_ito_best:.6f}")
     print(f"Chi-Square = {float(result.chisqr):.6f}")
     print(f"拟合状态: success={result.success}, nfev={result.nfev}")
 
