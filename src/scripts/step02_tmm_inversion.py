@@ -10,7 +10,7 @@
 4. PVK 外推 n-k 中间件加载与插值
 5. BEMA 表面粗糙度修正
 6. 厚玻璃非相干修正 + 相干薄膜 TMM
-7. lmfit 三参数厚度反演
+7. lmfit 四参数厚度反演
 8. 结果绘图
 """
 
@@ -42,15 +42,18 @@ SAM_THICKNESS_NM = 2.0
 NIOX_NK = 2.1 + 0.0j
 SAM_NK = 1.8 + 0.0j
 
-INITIAL_PVK_BULK_THICKNESS_NM = 450.0
+INITIAL_PVK_BULK_THICKNESS_NM = 440.0
 MIN_PVK_BULK_THICKNESS_NM = 400.0
-MAX_PVK_BULK_THICKNESS_NM = 650.0
+MAX_PVK_BULK_THICKNESS_NM = 500.0
 INITIAL_PVK_ROUGHNESS_THICKNESS_NM = 60.0
 MIN_PVK_ROUGHNESS_THICKNESS_NM = 0.0
 MAX_PVK_ROUGHNESS_THICKNESS_NM = 100.0
 INITIAL_ITO_ALPHA = 5.0
 MIN_ITO_ALPHA = 0.0
 MAX_ITO_ALPHA = 30.0
+INITIAL_THICKNESS_SIGMA_NM = 15.0
+MIN_THICKNESS_SIGMA_NM = 0.0
+MAX_THICKNESS_SIGMA_NM = 60.0
 
 
 def get_project_root() -> Path:
@@ -374,6 +377,7 @@ def calc_macro_reflectance(
     d_bulk_nm: float,
     d_rough_nm: float,
     ito_alpha: float,
+    sigma_thickness_nm: float,
     wavelength_nm: np.ndarray,
     get_ito_nk: Callable[[np.ndarray], np.ndarray],
     get_pvk_nk: Callable[[np.ndarray], np.ndarray],
@@ -399,34 +403,46 @@ def calc_macro_reflectance(
     ito_nk = apply_dispersive_absorption_correction(ito_base_nk, wavelength, ito_alpha)
     pvk_bulk_nk = get_pvk_nk(wavelength)
     pvk_rough_nk = calc_bema_rough_nk(pvk_bulk_nk)
-
-    r_coh = np.empty_like(wavelength, dtype=float)
-
-    for index, wl_nm in enumerate(wavelength):
-        n_list = [
-            GLASS_INDEX + 0.0j,
-            ito_nk[index],
-            NIOX_NK,
-            SAM_NK,
-            pvk_bulk_nk[index],
-            pvk_rough_nk[index],
-            AIR_INDEX + 0.0j,
-        ]
-        d_list = [
-            np.inf,
-            ITO_THICKNESS_NM,
-            NIOX_THICKNESS_NM,
-            SAM_THICKNESS_NM,
-            d_bulk_nm,
-            d_rough_nm,
-            np.inf,
-        ]
-        tmm_result = coh_tmm("s", n_list, d_list, 0.0, wl_nm)
-        r_coh[index] = float(tmm_result["R"])
-
     r_front = ((GLASS_INDEX - AIR_INDEX) / (GLASS_INDEX + AIR_INDEX)) ** 2
-    r_total = r_front + (((1.0 - r_front) ** 2) * r_coh) / (1.0 - r_front * r_coh)
-    return r_total
+
+    def calc_single_reflectance(single_d_bulk_nm: float) -> np.ndarray:
+        r_coh = np.empty_like(wavelength, dtype=float)
+
+        for index, wl_nm in enumerate(wavelength):
+            n_list = [
+                GLASS_INDEX + 0.0j,
+                ito_nk[index],
+                NIOX_NK,
+                SAM_NK,
+                pvk_bulk_nk[index],
+                pvk_rough_nk[index],
+                AIR_INDEX + 0.0j,
+            ]
+            d_list = [
+                np.inf,
+                ITO_THICKNESS_NM,
+                NIOX_THICKNESS_NM,
+                SAM_THICKNESS_NM,
+                single_d_bulk_nm,
+                d_rough_nm,
+                np.inf,
+            ]
+            tmm_result = coh_tmm("s", n_list, d_list, 0.0, wl_nm)
+            r_coh[index] = float(tmm_result["R"])
+
+        return r_front + (((1.0 - r_front) ** 2) * r_coh) / (1.0 - r_front * r_coh)
+
+    if sigma_thickness_nm < 0.1:
+        return calc_single_reflectance(d_bulk_nm)
+
+    offsets_nm = np.linspace(-3.0 * sigma_thickness_nm, 3.0 * sigma_thickness_nm, 9, dtype=float)
+    weights = np.exp(-(offsets_nm**2) / (2.0 * sigma_thickness_nm**2))
+    weights /= np.sum(weights)
+
+    r_total_averaged = np.zeros_like(wavelength, dtype=float)
+    for offset_nm, weight in zip(offsets_nm, weights):
+        r_total_averaged += weight * calc_single_reflectance(d_bulk_nm + offset_nm)
+    return r_total_averaged
 
 
 def residual(
@@ -440,7 +456,16 @@ def residual(
     d_bulk_nm = params["d_bulk"].value
     d_rough_nm = params["d_rough"].value
     ito_alpha = params["ito_alpha"].value
-    r_model = calc_macro_reflectance(d_bulk_nm, d_rough_nm, ito_alpha, wavelength_nm, get_ito_nk, get_pvk_nk)
+    sigma_thickness_nm = params["sigma_thickness"].value
+    r_model = calc_macro_reflectance(
+        d_bulk_nm,
+        d_rough_nm,
+        ito_alpha,
+        sigma_thickness_nm,
+        wavelength_nm,
+        get_ito_nk,
+        get_pvk_nk,
+    )
     return r_model - r_target
 
 
@@ -452,6 +477,7 @@ def plot_fit_result(
     d_rough_nm: float,
     d_total_nm: float,
     ito_alpha: float,
+    sigma_thickness_nm: float,
     chisqr: float,
     output_path: Path,
 ) -> None:
@@ -480,6 +506,7 @@ def plot_fit_result(
         f"Fitted d_rough = {d_rough_nm:.1f} nm\n"
         f"Total d_total = {d_total_nm:.1f} nm\n"
         f"ITO IR Alpha = {ito_alpha:.3f}\n"
+        f"Thickness Sigma = {sigma_thickness_nm:.1f} nm\n"
         f"Chi-Square = {chisqr:.3f}"
     )
     ax.text(
@@ -496,7 +523,7 @@ def plot_fit_result(
     ax.set_xlim(WAVELENGTH_MIN_NM, WAVELENGTH_MAX_NM)
     ax.set_xlabel("Wavelength (nm)")
     ax.set_ylabel("Absolute Reflectance (%)")
-    ax.set_title("TMM Inversion with BEMA + ITO Dispersive Absorption (850-1100 nm)")
+    ax.set_title("TMM Inversion with BEMA + ITO Disp. Abs + Thickness Inhomogeneity")
     ax.grid(True, linestyle="--", alpha=0.35)
     ax.legend()
 
@@ -544,6 +571,12 @@ def main() -> None:
         min=MIN_ITO_ALPHA,
         max=MAX_ITO_ALPHA,
     )
+    params.add(
+        "sigma_thickness",
+        value=INITIAL_THICKNESS_SIGMA_NM,
+        min=MIN_THICKNESS_SIGMA_NM,
+        max=MAX_THICKNESS_SIGMA_NM,
+    )
 
     result = minimize(
         residual,
@@ -555,8 +588,17 @@ def main() -> None:
     d_bulk_best_nm = float(result.params["d_bulk"].value)
     d_rough_best_nm = float(result.params["d_rough"].value)
     ito_alpha_best = float(result.params["ito_alpha"].value)
+    sigma_thickness_best_nm = float(result.params["sigma_thickness"].value)
     d_total_best_nm = d_bulk_best_nm + d_rough_best_nm
-    r_best_fit = calc_macro_reflectance(d_bulk_best_nm, d_rough_best_nm, ito_alpha_best, wavelength_nm, get_ito_nk, get_pvk_nk)
+    r_best_fit = calc_macro_reflectance(
+        d_bulk_best_nm,
+        d_rough_best_nm,
+        ito_alpha_best,
+        sigma_thickness_best_nm,
+        wavelength_nm,
+        get_ito_nk,
+        get_pvk_nk,
+    )
 
     if np.any(~np.isfinite(r_best_fit)):
         raise ValueError("最佳拟合反射率中出现 NaN 或 Inf，说明模型数值计算失败。")
@@ -569,17 +611,19 @@ def main() -> None:
         d_rough_nm=d_rough_best_nm,
         d_total_nm=d_total_best_nm,
         ito_alpha=ito_alpha_best,
+        sigma_thickness_nm=sigma_thickness_best_nm,
         chisqr=float(result.chisqr),
         output_path=output_path,
     )
 
-    print("TMM 三参数厚度反演完成。")
+    print("TMM 四参数厚度反演完成。")
     print(f"目标曲线输入: {target_csv}")
     print(f"反演结果图片: {output_path}")
     print(f"Fitted d_bulk = {d_bulk_best_nm:.3f} nm")
     print(f"Fitted d_rough = {d_rough_best_nm:.3f} nm")
     print(f"Fitted d_total = {d_total_best_nm:.3f} nm")
     print(f"ITO IR Alpha = {ito_alpha_best:.6f}")
+    print(f"Thickness Sigma = {sigma_thickness_best_nm:.6f} nm")
     print(f"Chi-Square = {float(result.chisqr):.6f}")
     print(f"拟合状态: success={result.success}, nfev={result.nfev}")
 

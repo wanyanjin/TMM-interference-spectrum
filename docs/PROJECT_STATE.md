@@ -10,7 +10,7 @@
 - 当前可用能力：
   - 已有 `step01_absolute_calibration.py`，可将样品与银镜原始计数转换为绝对反射率
   - 已有 `step01b_cauchy_extrapolation.py`，可基于 [LIT-0001] 的 `ITO/CsFAPI` 数字化折射率曲线生成 `750-1100 nm` 的 CsFAPI 扩展 `n-k` 中间件
-  - 已有 `step02_tmm_inversion.py`，可读取目标反射率、ITO 色散和 CsFAPI 扩展 `n-k` 中间件，执行包含 50/50 BEMA 粗糙度与 ITO 色散吸收补偿的三参数 `d_bulk + d_rough + ito_alpha` 联合反演
+  - 已有 `step02_tmm_inversion.py`，可读取目标反射率、ITO 色散和 CsFAPI 扩展 `n-k` 中间件，执行包含 50/50 BEMA 粗糙度、ITO 色散吸收补偿与宏观厚度不均匀性高斯平均的四参数 `d_bulk + d_rough + ito_alpha + sigma_thickness` 联合反演
   - 已有 `diagnostics_shape_mismatch.py`，可在独立沙盒中对 ITO 近红外吸收、厚度不均匀性和 PVK 色散斜率做形状畸变诊断
   - 已有 `step02_digitize_fapi_optical_constants.py`，可从 `LIT-0001` 的 Fig. 2 原图数字化提取 FAPI 的 `n/κ` 曲线并输出 QA 图
   - 已有 `step02_digitize_csfapi_optical_constants.py`，可从 `LIT-0001` 的 Fig. 3 原图数字化提取 CsFAPI 的 `n/κ` 曲线并输出 QA 图
@@ -146,7 +146,7 @@ TMM-interference-spectrum/
 ### 4.3 `step02_tmm_inversion.py`
 
 - 文件位置：`src/scripts/step02_tmm_inversion.py`
-- 主要职责：读取 `step01` 输出的目标反射率、ITO 色散和 `step01b` 生成的 CsFAPI 扩展 `n-k` 中间件，执行包含 BEMA 表面粗糙度修正与 ITO 色散吸收补偿的三参数联合反演
+- 主要职责：读取 `step01` 输出的目标反射率、ITO 色散和 `step01b` 生成的 CsFAPI 扩展 `n-k` 中间件，执行包含 BEMA 表面粗糙度修正、ITO 色散吸收补偿与宏观厚度不均匀性高斯平均的四参数联合反演
 
 输入：
 - `data/processed/target_reflectance.csv`
@@ -168,12 +168,14 @@ TMM-interference-spectrum/
 - ITO 厚度固定：`105 nm`
 - NiOx 厚度固定：`20 nm`
 - SAM 厚度固定：`2 nm`
-- PVK 块体厚度 `d_bulk` 搜索范围：`400-650 nm`
+- PVK 块体厚度 `d_bulk` 搜索范围：`400-500 nm`
 - PVK 表面粗糙层厚度 `d_rough` 搜索范围：`0-100 nm`
 - ITO 色散吸收参数 `ito_alpha` 搜索范围：`0.0-30.0`
+- 宏观厚度不均匀性参数 `sigma_thickness` 搜索范围：`0.0-60.0 nm`
 - PVK 采用 `step01b` 生成的 CsFAPI 扩展 `n-k` 中间件，并通过线性插值映射到目标波长网格
 - 粗糙层采用 `50% PVK + 50% Air` 的 Bruggeman EMA 有效介质模型
 - ITO 在进入 TMM 之前，锁定实部 `n` 不变，仅对虚部 `k` 施加锚定在 `850-1100 nm` 的二次增长色散吸收缩放
+- 当 `sigma_thickness >= 0.1 nm` 时，对 `d_bulk` 在 `[-3σ, +3σ]` 上做 9 点离散高斯加权平均，以模拟光斑尺度内的宏观厚度不均匀性
 - 相干层堆栈为：`Glass -> ITO -> NiOx -> SAM -> PVK_Bulk -> PVK_Roughness -> Air`
 
 核心处理流程：
@@ -187,8 +189,9 @@ TMM-interference-spectrum/
 - 计算宏观反射率：
   - 玻璃前表面菲涅尔反射
   - 玻璃后方包含粗糙层的薄膜堆栈相干 TMM
+  - 若 `sigma_thickness` 非零，则对多个 `d_bulk` 采样点做高斯加权平均
   - 再按非相干强度级联公式合成总反射率
-- 使用 `lmfit` 的 `leastsq` 做三参数联合反演
+- 使用 `lmfit` 的 `leastsq` 做四参数联合反演
 - 输出最佳拟合图
 
 输出：
@@ -259,7 +262,7 @@ resources/digitized/phase02_fig3_csfapi_optical_constants_digitized.csv
 data/processed/target_reflectance.csv
 data/processed/CsFAPI_nk_extended.csv
 resources/ITO_20 Ohm_105 nm_e1e2.mat
-    -> step02_tmm_inversion.py (CsFAPI 扩展 n-k -> ITO 色散吸收补偿 -> BEMA 粗糙层修正 -> d_bulk + d_rough + ito_alpha 三参数反演)
+    -> step02_tmm_inversion.py (CsFAPI 扩展 n-k -> ITO 色散吸收补偿 -> BEMA 粗糙层修正 -> 宏观厚度高斯平均 -> d_bulk + d_rough + ito_alpha + sigma_thickness 四参数反演)
     -> results/figures/tmm_inversion_result.png
 
 data/processed/target_reflectance.csv
@@ -283,9 +286,9 @@ reference/Khan.../images/885e29d3...
 
 1. `step01` 负责把原始计数校准成可用于物理建模的绝对反射率
 2. `step01b` 把 [LIT-0001] 数字化 CsFAPI 曲线转换成标准近红外 `n-k` 中间件
-3. `step02` 在消费标准 `n-k` 中间件后，先对 ITO 的消光系数 `k` 做锚定 `850-1100 nm` 的色散吸收补偿，再通过 50/50 BEMA 将 PVK-Air 表面粗糙度折算为有效介质层
-4. 当前脚本链已经具备“测量数据 -> 标准中间数据 + 文献外推中间数据 -> ITO 色散吸收 + BEMA 修正 TMM 三参数反演图表”的最小闭环
-5. 这轮色散吸收探针已显著压低长波端误差，说明底层吸收缺失确实是主导项
+3. `step02` 在消费标准 `n-k` 中间件后，先对 ITO 的消光系数 `k` 做锚定 `850-1100 nm` 的色散吸收补偿，再通过 50/50 BEMA 将 PVK-Air 表面粗糙度折算为有效介质层，并对 `d_bulk` 做高斯厚度平均
+4. 当前脚本链已经具备“测量数据 -> 标准中间数据 + 文献外推中间数据 -> ITO 色散吸收 + BEMA 修正 + 厚度不均匀性平均 TMM 四参数反演图表”的最小闭环
+5. 这轮升级的目标是继续压低峰谷尖锐度，让模型条纹圆润度向实测靠近
 
 ## 6. Key Physical / Numerical Assumptions
 
@@ -300,7 +303,7 @@ reference/Khan.../images/885e29d3...
 - `1000-1100 nm` 属于超出原始椭偏测量窗口的模型外推区
 - 粗糙层采用 `50% PVK + 50% Air` 的 BEMA 有效介质
 - ITO 的额外吸收以锁定实部 `n` 的色散参数 `ito_alpha` 表示，其对 `k` 的放大在 `850 nm` 处为 1，在 `1100 nm` 处为 `1 + ito_alpha`
-- 反演当前同时拟合 `d_bulk`、`d_rough` 与 `ito_alpha` 三个参数
+- 反演当前同时拟合 `d_bulk`、`d_rough`、`ito_alpha` 与 `sigma_thickness` 四个参数
 
 这些假设是理解结果与后续扩展的关键锚点；若后续有改动，必须同步更新本文件。
 
@@ -330,16 +333,16 @@ reference/Khan.../images/885e29d3...
 - 当前状态：
   - 功能可用，但结果留痕不够完整
 
-### 7.3 当前反演模型参数自由度较低
+### 7.3 当前反演模型虽已扩展，但结构解释仍非唯一
 
 - 表现：
-  - 当前仅反演 `d_bulk` 与 `d_rough`
-  - ITO/NiOx/SAM 厚度与材料参数均固定
+  - 当前已反演 `d_bulk`、`d_rough`、`ito_alpha` 与 `sigma_thickness`
+  - ITO/NiOx/SAM 厚度与多数材料参数仍固定
 - 影响：
-  - 双参数收敛仍不等于结构解释唯一
+  - 四参数收敛仍不等于结构解释唯一
   - 对模型误差与参数耦合的吸收能力有限
 - 当前状态：
-  - 已比单参数模型更能吸收表面粗糙度导致的振幅偏差
+  - 已比早期模型更能吸收表面粗糙度、底层吸收和峰谷展宽偏差
   - 不适合作为最终物理解译结论
 
 ### 7.4 图像数字化结果不是原始实验表
@@ -384,6 +387,7 @@ reference/Khan.../images/885e29d3...
 - 当前状态：
   - 已通过 ITO 色散吸收补偿并入 `step02_tmm_inversion.py`
   - 当前主流程已能把长波端托平明显拉回实测曲线附近
+  - 本轮继续加入 `sigma_thickness`，用于吸收光斑尺度内的峰谷钝化与条纹展宽
 
 ## 8. Architecture Risks
 
@@ -439,7 +443,13 @@ reference/Khan.../images/885e29d3...
 - 本轮主流程进一步表明：把吸收放大限制在长波端，比全局标量吸收更符合数据
 - 后续仍需关注 `ito_alpha` 是否与 `d_bulk` / `d_rough` 存在新的参数相关性
 
-### 8.8 结果文件命名尚未 Phase 化
+### 8.8 宏观厚度不均匀性会进一步放大参数相关性
+
+- `sigma_thickness` 会直接影响峰谷圆润度、条纹对比度和局部形状
+- 因此它可能与 `d_rough` 和 `ito_alpha` 共同吸收同一部分误差
+- 该机制能提升拟合灵活性，但也会进一步削弱“单组参数唯一对应单一物理结构”的可解释性
+
+### 8.9 结果文件命名尚未 Phase 化
 
 - 当前图像文件名尚未显式带上 `phaseXX`
 - 后续结果积累后，可能不利于多轮实验比较和回滚定位
@@ -449,15 +459,15 @@ reference/Khan.../images/885e29d3...
 - 更新时间：`2026-04-06`
 - 当前 Phase：`Phase 02`
 - 本次新增/修改：
-  - 在 `step02_tmm_inversion.py` 中将 ITO 补偿升级为锚定 `850-1100 nm` 的色散吸收函数
-  - 将主流程调整为 `d_bulk + d_rough + ito_alpha` 三参数联合反演
-  - 更新 `PROJECT_STATE.md` 以反映色散吸收补偿并入主流程
+  - 在 `step02_tmm_inversion.py` 中将主流程升级为包含宏观厚度不均匀性高斯平均的四参数反演
+  - 将主流程参数调整为 `d_bulk + d_rough + ito_alpha + sigma_thickness`
+  - 更新 `PROJECT_STATE.md` 以反映厚度不均匀性并入主流程
 - 已验证结论：
   - ITO 近红外吸收增强是当前形状畸变的主导修复机制
   - 色散吸收版比全局标量吸收版更有效，能在不压塌 850 nm 主峰的前提下显著拉低长波端误差
 - 仍待验证：
   - `1000-1100 nm` 外推段的物理可信度仍需后续用原始数据或独立测量交叉验证
-  - `d_bulk`、`d_rough` 与 `ito_alpha` 的相关性是否会影响最终物理解读，还需后续继续评估
+  - `d_bulk`、`d_rough`、`ito_alpha` 与 `sigma_thickness` 的相关性是否会影响最终物理解读，还需后续继续评估
 
 ## 10. Recommended Next Actions
 
