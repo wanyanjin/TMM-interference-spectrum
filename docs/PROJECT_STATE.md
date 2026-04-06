@@ -11,6 +11,7 @@
   - 已有 `step01_absolute_calibration.py`，可将样品与银镜原始计数转换为绝对反射率
   - 已有 `step01b_cauchy_extrapolation.py`，可基于 [LIT-0001] 的 `ITO/CsFAPI` 数字化折射率曲线生成 `750-1100 nm` 的 CsFAPI 扩展 `n-k` 中间件
   - 已有 `step02_tmm_inversion.py`，可读取目标反射率、ITO 色散和 CsFAPI 扩展 `n-k` 中间件，执行包含 50/50 BEMA 粗糙度、ITO 色散吸收补偿、宏观厚度不均匀性高斯平均、PVK 色散斜率扰动与 NiOx 寄生吸收的六参数 `d_bulk + d_rough + ito_alpha + sigma_thickness + pvk_b_scale + niox_k` 联合反演
+  - 已有 `step03_batch_fit_samples.py`，可对 OneDrive 原始样品目录中的多位置 CSV 做统一绝对反射率校准、六参数批量拟合、单样品图导出和汇总表生成
   - 已有 `diagnostics_shape_mismatch.py`，可在独立沙盒中对 ITO 近红外吸收、厚度不均匀性和 PVK 色散斜率做形状畸变诊断
   - 已有 `step02_digitize_fapi_optical_constants.py`，可从 `LIT-0001` 的 Fig. 2 原图数字化提取 FAPI 的 `n/κ` 曲线并输出 QA 图
   - 已有 `step02_digitize_csfapi_optical_constants.py`，可从 `LIT-0001` 的 Fig. 3 原图数字化提取 CsFAPI 的 `n/κ` 曲线并输出 QA 图
@@ -38,10 +39,12 @@ TMM-interference-spectrum/
 │       ├── step01b_cauchy_extrapolation.py
 │       ├── step02_digitize_csfapi_optical_constants.py
 │       ├── step02_digitize_fapi_optical_constants.py
-│       └── step02_tmm_inversion.py
+│       ├── step02_tmm_inversion.py
+│       └── step03_batch_fit_samples.py
 ├── data/
 │   └── processed/
 │       ├── CsFAPI_nk_extended.csv
+│       ├── phase03_batch_fit/
 │       └── target_reflectance.csv
 ├── resources/
 │   ├── digitized/
@@ -56,6 +59,7 @@ TMM-interference-spectrum/
 │   │   ├── absolute_reflectance_interference.png
 │   │   ├── cauchy_extrapolation_check.png
 │   │   ├── diagnostic_shape_analysis.png
+│   │   ├── phase03_batch_fit/
 │   │   ├── phase02_fig2_fapi_optical_constants_digitized.png
 │   │   ├── phase02_fig2_fapi_optical_constants_overlay.png
 │   │   ├── phase02_fig3_csfapi_optical_constants_digitized.png
@@ -63,6 +67,7 @@ TMM-interference-spectrum/
 │   │   ├── phase02_fig3b_csfapi_optical_constants_overlay.png
 │   │   └── tmm_inversion_result.png
 │   └── logs/
+│       ├── phase03_batch_fit/
 │       ├── phase02_shape_diagnostic_report.md
 │       ├── phase02_fig2_fapi_digitization_notes.md
 │       └── phase02_fig3_csfapi_digitization_notes.md
@@ -218,7 +223,26 @@ TMM-interference-spectrum/
 - `results/figures/phase02_fig2_fapi_optical_constants_overlay.png`
 - `results/logs/phase02_fig2_fapi_digitization_notes.md`
 
-### 4.5 `step02_digitize_csfapi_optical_constants.py`
+### 4.5 `step03_batch_fit_samples.py`
+
+- 文件位置：`src/scripts/step03_batch_fit_samples.py`
+- 主要职责：对 OneDrive 原始样品目录中的多位置 CSV 逐文件执行绝对反射率校准、六参数拟合、单样品图导出和汇总表生成
+
+输入：
+- `/Users/luxin/Library/CloudStorage/OneDrive-共享的库-onedrive/Data/PL/2026/0403/cor/data-0403/*.csv`
+- `test_data/Ag-mirro.csv`
+- `resources/GCC-1022系列xlsx.xlsx`
+- `resources/ITO_20 Ohm_105 nm_e1e2.mat`
+- `data/processed/CsFAPI_nk_extended.csv`
+
+输出：
+- `results/figures/phase03_batch_fit/*.png`
+- `data/processed/phase03_batch_fit/*.csv`
+- `results/logs/phase03_batch_fit/phase03_batch_fit_summary.csv`
+- `results/logs/phase03_batch_fit/phase03_batch_fit_pivot.csv`
+- `/Users/luxin/Library/CloudStorage/OneDrive-共享的库-onedrive/Data/PL/2026/0403/cor/data-0403/batch-fit-results/...`
+
+### 4.6 `step02_digitize_csfapi_optical_constants.py`
 
 - 文件位置：`src/scripts/step02_digitize_csfapi_optical_constants.py`
 - 主要职责：从 `LIT-0001` 的 Fig. 3 原图中提取 CsFAPI 的折射率 `n` 与消光系数 `κ` 两个子图数据，并输出单一 CSV 与 QA 图
@@ -270,6 +294,17 @@ data/processed/CsFAPI_nk_extended.csv
 resources/ITO_20 Ohm_105 nm_e1e2.mat
     -> step02_tmm_inversion.py (CsFAPI 扩展 n-k -> ITO 色散吸收补偿 -> PVK 色散斜率扰动 -> NiOx 寄生吸收 -> BEMA 粗糙层修正 -> 宏观厚度高斯平均 -> 六参数反演)
     -> results/figures/tmm_inversion_result.png
+
+/Users/luxin/Library/CloudStorage/OneDrive-共享的库-onedrive/Data/PL/2026/0403/cor/data-0403/*.csv
+test_data/Ag-mirro.csv
+resources/GCC-1022系列xlsx.xlsx
+resources/ITO_20 Ohm_105 nm_e1e2.mat
+data/processed/CsFAPI_nk_extended.csv
+    -> step03_batch_fit_samples.py (绝对反射率校准 -> 六参数逐文件拟合 -> 单样品图 / 曲线 CSV / 汇总表)
+    -> results/figures/phase03_batch_fit/*.png
+    -> data/processed/phase03_batch_fit/*.csv
+    -> results/logs/phase03_batch_fit/*.csv
+    -> OneDrive batch-fit-results/*
 
 data/processed/target_reflectance.csv
 data/processed/CsFAPI_nk_extended.csv
@@ -473,6 +508,7 @@ reference/Khan.../images/885e29d3...
 - 本次新增/修改：
   - 在 `step02_tmm_inversion.py` 中将主流程升级为包含 PVK 色散斜率扰动与 NiOx 寄生吸收的六参数反演
   - 将主流程参数调整为 `d_bulk + d_rough + ito_alpha + sigma_thickness + pvk_b_scale + niox_k`
+  - 新增 `step03_batch_fit_samples.py`，在不修改 `step02` 主脚本的前提下完成多位置样品批量拟合与双落盘导出
   - 更新 `PROJECT_STATE.md` 以反映 Phase 03 的六参数主流程
 - 已验证结论：
   - ITO 近红外吸收增强是当前形状畸变的主导修复机制
