@@ -715,3 +715,32 @@ reference/Khan.../images/885e29d3...
 - 数据流准确
 - 风险和问题列表准确
 - 不堆砌无关历史对话内容
+
+## Phase 04c Update (2026-04-07)
+
+- Current Phase: `Phase 04c`
+- Core strategy shift: stop pursuing high-dimensional inverse fitting on `bad-20-2` absolute reflectance; use forward differential fingerprint mapping with zero-preserving normalization for morphology-only phase alignment.
+- Inputs: `test_data/good-21.csv`, `test_data/bad-20-2.csv`, calibrated by step01-compatible chain.
+- Baseline extraction: run 6-parameter fit on `good-21` as intact-device physical baseline (`chi-square = 0.002564`).
+- Forward dictionary: lock all six baseline parameters, inject fixed `d_air = 40.0 nm` at three interfaces:
+  - `L1 Glass/ITO`
+  - `L2 ITO/NiOx`
+  - `L3 SAM/PVK`
+- Differential definitions:
+  - `Delta_R_exp = bad_20_2_smooth - good_21_smooth`
+  - `Delta_R_theory_L = R_theory_L - R_theory_good_6p`
+- Normalization: zero-preserving normalization by `max_abs` within 850-1100 nm for both experimental and theoretical delta curves.
+- Key alignment result (normalized morphology RMSE, lower is better):
+  - `L1 Glass/ITO`: `1.156029`
+  - `L2 ITO/NiOx`: `0.611901`
+  - `L3 SAM/PVK`: `0.254985` (best)
+- Phase alignment conclusion: experimental normalized differential fingerprint is best aligned with `L3 (SAM/PVK)`.
+
+### Phase 04c Artifacts
+
+- Script: `src/scripts/step04c_fingerprint_mapping.py`
+- Figure: `results/figures/phase04c_fingerprint_mapping.png`
+- Log: `results/logs/phase04c_fingerprint_mapping.md`
+- Processed calibration outputs:
+  - `data/processed/phase04c/good-21_calibrated.csv`
+  - `data/processed/phase04c/bad-20-2_calibrated.csv`
