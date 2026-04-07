@@ -1,0 +1,1299 @@
+{
+    "pdf_info": [
+        {
+            "para_blocks": [
+                {
+                    "bbox": [
+                        67,
+                        72,
+                        541,
+                        109
+                    ],
+                    "type": "title",
+                    "angle": 0,
+                    "index": 2,
+                    "lines": [
+                        {
+                            "bbox": [
+                                69,
+                                71,
+                                542,
+                                91
+                            ],
+                            "spans": [
+                                {
+                                    "bbox": [
+                                        69,
+                                        71,
+                                        542,
+                                        91
+                                    ],
+                                    "type": "text",
+                                    "content": "Optical constants manipulation of formamidinium lead iodide perovskites:",
+                                    "score": 1.0
+                                }
+                            ]
+                        },
+                        {
+                            "bbox": [
+                                69,
+                                89,
+                                309,
+                                110
+                            ],
+                            "spans": [
+                                {
+                                    "bbox": [
+                                        69,
+                                        89,
+                                        309,
+                                        110
+                                    ],
+                                    "type": "text",
+                                    "content": "Ellipsometric and spectroscopic twigging",
+                                    "score": 1.0
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "bbox": [
+                        67,
+                        117,
+                        541,
+                        153
+                    ],
+                    "type": "text",
+                    "angle": 0,
+                    "index": 3,
+                    "lines": [
+                        {
+                            "bbox": [
+                                69,
+                                115,
+                                541,
+                                133
+                            ],
+                            "spans": [
+                                {
+                                    "bbox": [
+                                        69,
+                                        115,
+                                        541,
+                                        133
+                                    ],
+                                    "type": "text",
+                                    "content": "Mohd Taukeer Khan,a Muhammed P. U. Haris,b Baraa Alhouri,a Samrana Kazim,b,c,d Shahzada",
+                                    "score": 1.0
+                                }
+                            ]
+                        },
+                        {
+                            "bbox": [
+                                67,
+                                137,
+                                123,
+                                152
+                            ],
+                            "spans": [
+                                {
+                                    "bbox": [
+                                        67,
+                                        137,
+                                        123,
+                                        152
+                                    ],
+                                    "type": "text",
+                                    "content": "Ahmad b,d",
+                                    "score": 1.0
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "bbox": [
+                        67,
+                        169,
+                        541,
+                        227
+                    ],
+                    "type": "list",
+                    "angle": 0,
+                    "index": 6,
+                    "blocks": [
+                        {
+                            "bbox": [
+                                67,
+                                169,
+                                541,
+                                197
+                            ],
+                            "type": "text",
+                            "angle": 0,
+                            "index": 4,
+                            "lines": [
+                                {
+                                    "bbox": [
+                                        68,
+                                        168,
+                                        541,
+                                        184
+                                    ],
+                                    "spans": [
+                                        {
+                                            "bbox": [
+                                                68,
+                                                168,
+                                                541,
+                                                184
+                                            ],
+                                            "type": "text",
+                                            "content": "aDepartment of Physics, Faculty of Science, Islamic University of Madinah, Prince Naifbin",
+                                            "score": 1.0
+                                        }
+                                    ]
+                                },
+                                {
+                                    "bbox": [
+                                        70,
+                                        184,
+                                        380,
+                                        198
+                                    ],
+                                    "spans": [
+                                        {
+                                            "bbox": [
+                                                70,
+                                                184,
+                                                380,
+                                                198
+                                            ],
+                                            "type": "text",
+                                            "content": "Abdulaziz, Al Jamiah, Madinah 42351, Kingdom of Saudi Arabia",
+                                            "score": 1.0
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "bbox": [
+                                67,
+                                198,
+                                539,
+                                227
+                            ],
+                            "type": "text",
+                            "angle": 0,
+                            "index": 5,
+                            "lines": [
+                                {
+                                    "bbox": [
+                                        68,
+                                        197,
+                                        542,
+                                        214
+                                    ],
+                                    "spans": [
+                                        {
+                                            "bbox": [
+                                                68,
+                                                197,
+                                                542,
+                                                214
+                                            ],
+                                            "type": "text",
+                                            "content": "bBCMaterials, Basque Center for Materials, Applications, and Nanostructures, UPV/EHU Science",
+                                            "score": 1.0
+                                        }
+                                    ]
+                                },
+                                {
+                                    "bbox": [
+                                        69,
+                                        213,
+                                        195,
+                                        228
+                                    ],
+                                    "spans": [
+                                        {
+                                            "bbox": [
+                                                69,
+                                                213,
+                                                195,
+                                                228
+                                            ],
+                                            "type": "text",
+                                            "content": "Park, 48940, Leioa, Spain",
+                                            "score": 1.0
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ],
+                    "sub_type": "text"
+                },
+                {
+                    "bbox": [
+                        69,
+                        228,
+                        275,
+                        240
+                    ],
+                    "type": "text",
+                    "angle": 0,
+                    "index": 7,
+                    "lines": [
+                        {
+                            "bbox": [
+                                70,
+                                228,
+                                275,
+                                242
+                            ],
+                            "spans": [
+                                {
+                                    "bbox": [
+                                        70,
+                                        228,
+                                        275,
+                                        242
+                                    ],
+                                    "type": "text",
+                                    "content": "Email: shahzada.ahmad@bcmaterials.net",
+                                    "score": 1.0
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "bbox": [
+                        67,
+                        242,
+                        541,
+                        286
+                    ],
+                    "type": "list",
+                    "angle": 0,
+                    "index": 10,
+                    "blocks": [
+                        {
+                            "bbox": [
+                                67,
+                                242,
+                                541,
+                                270
+                            ],
+                            "type": "text",
+                            "angle": 0,
+                            "index": 8,
+                            "lines": [
+                                {
+                                    "bbox": [
+                                        68,
+                                        241,
+                                        541,
+                                        257
+                                    ],
+                                    "spans": [
+                                        {
+                                            "bbox": [
+                                                68,
+                                                241,
+                                                541,
+                                                257
+                                            ],
+                                            "type": "text",
+                                            "content": "cMaterials Physics Center, CSIC-UPV/EHU, Paseo Manuel de Lardizabal 5, 20018, Donostia - San",
+                                            "score": 1.0
+                                        }
+                                    ]
+                                },
+                                {
+                                    "bbox": [
+                                        69,
+                                        257,
+                                        153,
+                                        272
+                                    ],
+                                    "spans": [
+                                        {
+                                            "bbox": [
+                                                69,
+                                                257,
+                                                153,
+                                                272
+                                            ],
+                                            "type": "text",
+                                            "content": "Sebastian, Spain",
+                                            "score": 1.0
+                                        }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            "bbox": [
+                                68,
+                                271,
+                                400,
+                                286
+                            ],
+                            "type": "text",
+                            "angle": 0,
+                            "index": 9,
+                            "lines": [
+                                {
+                                    "bbox": [
+                                        70,
+                                        270,
+                                        400,
+                                        288
+                                    ],
+                                    "spans": [
+                                        {
+                                            "bbox": [
+                                                70,
+                                                270,
+                                                400,
+                                                288
+                                            ],
+                                            "type": "text",
+                                            "content": "dIKERBASQUE, Basque Foundation for Science, Bilbao, 48009, Spain",
+                                            "score": 1.0
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ],
+                    "sub_type": "text"
+                },
+                {
+                    "bbox": [
+                        67,
+                        313,
+                        335,
+                        329
+                    ],
+                    "type": "title",
+                    "angle": 0,
+                    "index": 11,
+                    "lines": [
+                        {
+                            "bbox": [
+                                69,
+                                312,
+                                335,
+                                331
+                            ],
+                            "spans": [
+                                {
+                                    "bbox": [
+                                        69,
+                                        312,
+                                        335,
+                                        331
+                                    ],
+                                    "type": "text",
+                                    "content": "S1. Fitting of Spectroscopic Ellipsometer data",
+                                    "score": 1.0
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "image",
+                    "bbox": [
+                        120,
+                        342,
+                        302,
+                        487
+                    ],
+                    "blocks": [
+                        {
+                            "bbox": [
+                                120,
+                                342,
+                                302,
+                                487
+                            ],
+                            "lines": [
+                                {
+                                    "bbox": [
+                                        120,
+                                        342,
+                                        302,
+                                        487
+                                    ],
+                                    "spans": [
+                                        {
+                                            "bbox": [
+                                                120,
+                                                342,
+                                                302,
+                                                487
+                                            ],
+                                            "type": "image",
+                                            "image_path": "f3e8d45fb4b5ee8f59acc29c1d12ecf170a5f07d181be09873f41f101600f02a.jpg"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "index": 12,
+                            "angle": 0,
+                            "type": "image_body"
+                        }
+                    ],
+                    "index": 12
+                },
+                {
+                    "type": "image",
+                    "bbox": [
+                        306,
+                        342,
+                        490,
+                        488
+                    ],
+                    "blocks": [
+                        {
+                            "bbox": [
+                                306,
+                                342,
+                                490,
+                                488
+                            ],
+                            "lines": [
+                                {
+                                    "bbox": [
+                                        306,
+                                        342,
+                                        490,
+                                        488
+                                    ],
+                                    "spans": [
+                                        {
+                                            "bbox": [
+                                                306,
+                                                342,
+                                                490,
+                                                488
+                                            ],
+                                            "type": "image",
+                                            "image_path": "498ef227f3152232f5cf0a0c01135c6ab26bbcc440539b62f039c577a8a84b60.jpg"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "index": 13,
+                            "angle": 0,
+                            "type": "image_body"
+                        }
+                    ],
+                    "index": 13
+                },
+                {
+                    "type": "image",
+                    "bbox": [
+                        119,
+                        487,
+                        306,
+                        625
+                    ],
+                    "blocks": [
+                        {
+                            "bbox": [
+                                119,
+                                487,
+                                306,
+                                625
+                            ],
+                            "lines": [
+                                {
+                                    "bbox": [
+                                        119,
+                                        487,
+                                        306,
+                                        625
+                                    ],
+                                    "spans": [
+                                        {
+                                            "bbox": [
+                                                119,
+                                                487,
+                                                306,
+                                                625
+                                            ],
+                                            "type": "image",
+                                            "image_path": "ca8f2c213cba4ce00394975fd3d182e3c8c251dcdd0bfa185eeb10540ee70f7c.jpg"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "index": 14,
+                            "angle": 0,
+                            "type": "image_body"
+                        }
+                    ],
+                    "index": 14
+                },
+                {
+                    "type": "image",
+                    "bbox": [
+                        310,
+                        489,
+                        492,
+                        628
+                    ],
+                    "blocks": [
+                        {
+                            "bbox": [
+                                310,
+                                489,
+                                492,
+                                628
+                            ],
+                            "lines": [
+                                {
+                                    "bbox": [
+                                        310,
+                                        489,
+                                        492,
+                                        628
+                                    ],
+                                    "spans": [
+                                        {
+                                            "bbox": [
+                                                310,
+                                                489,
+                                                492,
+                                                628
+                                            ],
+                                            "type": "image",
+                                            "image_path": "47735ce407fe4553855273a93e1c8776e826283eff8a2bba993fd52e110563a5.jpg"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "index": 15,
+                            "angle": 0,
+                            "type": "image_body"
+                        },
+                        {
+                            "bbox": [
+                                67,
+                                638,
+                                533,
+                                666
+                            ],
+                            "lines": [
+                                {
+                                    "bbox": [
+                                        69,
+                                        637,
+                                        531,
+                                        651
+                                    ],
+                                    "spans": [
+                                        {
+                                            "bbox": [
+                                                69,
+                                                637,
+                                                255,
+                                                651
+                                            ],
+                                            "type": "text",
+                                            "content": "Figure S1. The measured amplitude ratio",
+                                            "score": 1.0
+                                        },
+                                        {
+                                            "bbox": [
+                                                255,
+                                                639,
+                                                271,
+                                                651
+                                            ],
+                                            "type": "inline_equation",
+                                            "content": "( \\Psi )",
+                                            "score": 0.54
+                                        },
+                                        {
+                                            "bbox": [
+                                                271,
+                                                637,
+                                                369,
+                                                651
+                                            ],
+                                            "type": "text",
+                                            "content": "and phase difference",
+                                            "score": 1.0
+                                        },
+                                        {
+                                            "bbox": [
+                                                369,
+                                                639,
+                                                383,
+                                                651
+                                            ],
+                                            "type": "inline_equation",
+                                            "content": "( \\Delta )",
+                                            "score": 0.56
+                                        },
+                                        {
+                                            "bbox": [
+                                                383,
+                                                637,
+                                                531,
+                                                651
+                                            ],
+                                            "type": "text",
+                                            "content": "of the FAPI and CsFAPI thin films",
+                                            "score": 1.0
+                                        }
+                                    ]
+                                },
+                                {
+                                    "bbox": [
+                                        68,
+                                        651,
+                                        149,
+                                        666
+                                    ],
+                                    "spans": [
+                                        {
+                                            "bbox": [
+                                                68,
+                                                651,
+                                                149,
+                                                666
+                                            ],
+                                            "type": "text",
+                                            "content": "on glass and ITO.",
+                                            "score": 1.0
+                                        }
+                                    ]
+                                }
+                            ],
+                            "index": 16,
+                            "angle": 0,
+                            "type": "image_caption"
+                        }
+                    ],
+                    "index": 15
+                }
+            ],
+            "discarded_blocks": [
+                {
+                    "bbox": [
+                        7,
+                        0,
+                        298,
+                        11
+                    ],
+                    "type": "header",
+                    "angle": 0,
+                    "index": 0,
+                    "lines": [
+                        {
+                            "bbox": [
+                                7,
+                                0,
+                                296,
+                                16
+                            ],
+                            "spans": [
+                                {
+                                    "bbox": [
+                                        7,
+                                        0,
+                                        296,
+                                        16
+                                    ],
+                                    "type": "text",
+                                    "content": "Supplementary Information (SI) for Energy Advances.",
+                                    "score": 1.0
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "bbox": [
+                        7,
+                        11,
+                        298,
+                        24
+                    ],
+                    "type": "header",
+                    "angle": 0,
+                    "index": 1,
+                    "lines": [
+                        {
+                            "bbox": [
+                                9,
+                                8,
+                                299,
+                                26
+                            ],
+                            "spans": [
+                                {
+                                    "bbox": [
+                                        9,
+                                        8,
+                                        85,
+                                        26
+                                    ],
+                                    "type": "text",
+                                    "content": "This journal is",
+                                    "score": 1.0
+                                },
+                                {
+                                    "bbox": [
+                                        85,
+                                        11,
+                                        97,
+                                        22
+                                    ],
+                                    "type": "inline_equation",
+                                    "content": "\\circledcirc",
+                                    "score": 0.75
+                                },
+                                {
+                                    "bbox": [
+                                        97,
+                                        8,
+                                        299,
+                                        26
+                                    ],
+                                    "type": "text",
+                                    "content": "The Royal Society of Chemistry 2024",
+                                    "score": 1.0
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ],
+            "page_size": [
+                612,
+                792
+            ],
+            "page_idx": 0
+        },
+        {
+            "para_blocks": [
+                {
+                    "type": "table",
+                    "bbox": [
+                        70,
+                        92,
+                        369,
+                        297
+                    ],
+                    "blocks": [
+                        {
+                            "bbox": [
+                                69,
+                                72,
+                                453,
+                                85
+                            ],
+                            "lines": [
+                                {
+                                    "bbox": [
+                                        69,
+                                        71,
+                                        453,
+                                        87
+                                    ],
+                                    "spans": [
+                                        {
+                                            "bbox": [
+                                                69,
+                                                71,
+                                                453,
+                                                87
+                                            ],
+                                            "type": "text",
+                                            "content": "Table S1. Tauc-Lorentz fit parameters for FAPI and CsFAPI thin films on glass and ITO.",
+                                            "score": 1.0
+                                        }
+                                    ]
+                                }
+                            ],
+                            "index": 0,
+                            "angle": 0,
+                            "type": "table_caption"
+                        },
+                        {
+                            "bbox": [
+                                70,
+                                92,
+                                369,
+                                297
+                            ],
+                            "lines": [
+                                {
+                                    "bbox": [
+                                        70,
+                                        92,
+                                        369,
+                                        297
+                                    ],
+                                    "spans": [
+                                        {
+                                            "bbox": [
+                                                70,
+                                                92,
+                                                369,
+                                                297
+                                            ],
+                                            "type": "table",
+                                            "html": "<table><tr><td>Sample</td><td>Glass/FAPI</td><td>ITO/FAPI</td><td>Glass/CsFAPI</td><td>ITO/ CsFAPI</td></tr><tr><td>r (nm)</td><td>15</td><td>23</td><td>21</td><td>15</td></tr><tr><td>Void (%)</td><td>20</td><td>23</td><td>12</td><td>9</td></tr><tr><td>ε∞</td><td>1.25</td><td>1.24</td><td>1.10</td><td>1.01</td></tr><tr><td>A1</td><td>3.43</td><td>30.55</td><td>24.53</td><td>6.16</td></tr><tr><td>E1</td><td>1.55</td><td>1.45</td><td>1.57</td><td>1.58</td></tr><tr><td>C1</td><td>0.19</td><td>0.44</td><td>0.13</td><td>0.13</td></tr><tr><td>A2</td><td>44.45</td><td>52.101</td><td>7.60</td><td>6.52</td></tr><tr><td>E2</td><td>2.18</td><td>2.18</td><td>2.46</td><td>2.45</td></tr><tr><td>C2</td><td>4.35</td><td>3.70</td><td>0.49</td><td>0.54</td></tr><tr><td>A3</td><td>0.83</td><td>1.00</td><td>6.50</td><td>8.26</td></tr><tr><td>E3</td><td>2.70</td><td>2.45</td><td>3.31</td><td>3.18</td></tr><tr><td>C3</td><td>0.41</td><td>0.49</td><td>3.89</td><td>0.61</td></tr><tr><td>χ2</td><td>0.18</td><td>0.03</td><td>0.10</td><td>0.03</td></tr></table>",
+                                            "image_path": "0099a5303ac734799002af66eb9ffa07beb612ba8f958c5a87b47be0fc7a3f63.jpg"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "index": 1,
+                            "angle": 0,
+                            "type": "table_body"
+                        }
+                    ],
+                    "index": 1
+                },
+                {
+                    "type": "image",
+                    "bbox": [
+                        99,
+                        323,
+                        307,
+                        488
+                    ],
+                    "blocks": [
+                        {
+                            "bbox": [
+                                99,
+                                323,
+                                307,
+                                488
+                            ],
+                            "lines": [
+                                {
+                                    "bbox": [
+                                        99,
+                                        323,
+                                        307,
+                                        488
+                                    ],
+                                    "spans": [
+                                        {
+                                            "bbox": [
+                                                99,
+                                                323,
+                                                307,
+                                                488
+                                            ],
+                                            "type": "image",
+                                            "image_path": "184149de12a67c88632120ac8f9bc1184095ae445bb7659293a7a0154b09d102.jpg"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "index": 2,
+                            "angle": 0,
+                            "type": "image_body"
+                        }
+                    ],
+                    "index": 2
+                },
+                {
+                    "type": "image",
+                    "bbox": [
+                        301,
+                        323,
+                        509,
+                        490
+                    ],
+                    "blocks": [
+                        {
+                            "bbox": [
+                                301,
+                                323,
+                                509,
+                                490
+                            ],
+                            "lines": [
+                                {
+                                    "bbox": [
+                                        301,
+                                        323,
+                                        509,
+                                        490
+                                    ],
+                                    "spans": [
+                                        {
+                                            "bbox": [
+                                                301,
+                                                323,
+                                                509,
+                                                490
+                                            ],
+                                            "type": "image",
+                                            "image_path": "bf6adbe54007cc94bdb10c7ca816d8c3da61124307a6321be1e8a4b29c774071.jpg"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "index": 3,
+                            "angle": 0,
+                            "type": "image_body"
+                        },
+                        {
+                            "bbox": [
+                                69,
+                                502,
+                                405,
+                                514
+                            ],
+                            "lines": [
+                                {
+                                    "bbox": [
+                                        70,
+                                        501,
+                                        406,
+                                        516
+                                    ],
+                                    "spans": [
+                                        {
+                                            "bbox": [
+                                                70,
+                                                501,
+                                                248,
+                                                516
+                                            ],
+                                            "type": "text",
+                                            "content": "Figure S2. The absorption spectra of (a)",
+                                            "score": 1.0
+                                        },
+                                        {
+                                            "bbox": [
+                                                249,
+                                                502,
+                                                280,
+                                                514
+                                            ],
+                                            "type": "inline_equation",
+                                            "content": "\\mathsf { F A P b l } _ { 3 }",
+                                            "score": 0.7
+                                        },
+                                        {
+                                            "bbox": [
+                                                280,
+                                                501,
+                                                317,
+                                                516
+                                            ],
+                                            "type": "text",
+                                            "content": ", and (b)",
+                                            "score": 1.0
+                                        },
+                                        {
+                                            "bbox": [
+                                                317,
+                                                502,
+                                                358,
+                                                514
+                                            ],
+                                            "type": "inline_equation",
+                                            "content": "\\mathsf { C s F A P b l } _ { 3 }",
+                                            "score": 0.56
+                                        },
+                                        {
+                                            "bbox": [
+                                                358,
+                                                501,
+                                                406,
+                                                516
+                                            ],
+                                            "type": "text",
+                                            "content": "thin films.",
+                                            "score": 1.0
+                                        }
+                                    ]
+                                }
+                            ],
+                            "index": 4,
+                            "angle": 0,
+                            "type": "image_caption"
+                        }
+                    ],
+                    "index": 3
+                },
+                {
+                    "type": "table",
+                    "bbox": [
+                        112,
+                        574,
+                        271,
+                        652
+                    ],
+                    "blocks": [
+                        {
+                            "bbox": [
+                                69,
+                                546,
+                                395,
+                                559
+                            ],
+                            "lines": [
+                                {
+                                    "bbox": [
+                                        69,
+                                        545,
+                                        397,
+                                        562
+                                    ],
+                                    "spans": [
+                                        {
+                                            "bbox": [
+                                                69,
+                                                545,
+                                                397,
+                                                562
+                                            ],
+                                            "type": "text",
+                                            "content": "Table S2: Energy bandgap of FAPI and CsFAPI thin films on glass and ITO.",
+                                            "score": 1.0
+                                        }
+                                    ]
+                                }
+                            ],
+                            "index": 5,
+                            "angle": 0,
+                            "type": "table_caption"
+                        },
+                        {
+                            "bbox": [
+                                112,
+                                574,
+                                271,
+                                652
+                            ],
+                            "lines": [
+                                {
+                                    "bbox": [
+                                        112,
+                                        574,
+                                        271,
+                                        652
+                                    ],
+                                    "spans": [
+                                        {
+                                            "bbox": [
+                                                112,
+                                                574,
+                                                271,
+                                                652
+                                            ],
+                                            "type": "table",
+                                            "html": "<table><tr><td>Sample</td><td>Eg</td></tr><tr><td>Glass/ FAPI</td><td>1.49 Ev</td></tr><tr><td>Glass/ITO/FAPI</td><td>1.50 eV</td></tr><tr><td>Glass/CsFAPI</td><td>1.59 eV</td></tr><tr><td>Glass/ITO/CsFAPI</td><td>1.58 eV</td></tr></table>",
+                                            "image_path": "cc92b1f97dbaf305c483cda4bdc8623335426e911415585ded19c9cd29a59d06.jpg"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "index": 6,
+                            "angle": 0,
+                            "type": "table_body"
+                        }
+                    ],
+                    "index": 6
+                }
+            ],
+            "discarded_blocks": [],
+            "page_size": [
+                612,
+                792
+            ],
+            "page_idx": 1
+        },
+        {
+            "para_blocks": [
+                {
+                    "type": "image",
+                    "bbox": [
+                        151,
+                        69,
+                        458,
+                        325
+                    ],
+                    "blocks": [
+                        {
+                            "bbox": [
+                                151,
+                                69,
+                                458,
+                                325
+                            ],
+                            "lines": [
+                                {
+                                    "bbox": [
+                                        151,
+                                        69,
+                                        458,
+                                        325
+                                    ],
+                                    "spans": [
+                                        {
+                                            "bbox": [
+                                                151,
+                                                69,
+                                                458,
+                                                325
+                                            ],
+                                            "type": "image",
+                                            "image_path": "e9fc72e310bace04cc0bb87791d00edee3018e4a0e948950d2e0a3853f977228.jpg"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "index": 0,
+                            "angle": 0,
+                            "type": "image_body"
+                        },
+                        {
+                            "bbox": [
+                                70,
+                                335,
+                                497,
+                                350
+                            ],
+                            "lines": [
+                                {
+                                    "bbox": [
+                                        70,
+                                        336,
+                                        496,
+                                        350
+                                    ],
+                                    "spans": [
+                                        {
+                                            "bbox": [
+                                                70,
+                                                336,
+                                                496,
+                                                350
+                                            ],
+                                            "type": "text",
+                                            "content": "Figure S3. J-V characteristics under illumination of a typical CsFAPI-based perovskites solar cell.",
+                                            "score": 1.0
+                                        }
+                                    ]
+                                }
+                            ],
+                            "index": 1,
+                            "angle": 0,
+                            "type": "image_caption"
+                        }
+                    ],
+                    "index": 0
+                },
+                {
+                    "type": "image",
+                    "bbox": [
+                        162,
+                        378,
+                        447,
+                        594
+                    ],
+                    "blocks": [
+                        {
+                            "bbox": [
+                                162,
+                                378,
+                                447,
+                                594
+                            ],
+                            "lines": [
+                                {
+                                    "bbox": [
+                                        162,
+                                        378,
+                                        447,
+                                        594
+                                    ],
+                                    "spans": [
+                                        {
+                                            "bbox": [
+                                                162,
+                                                378,
+                                                447,
+                                                594
+                                            ],
+                                            "type": "image",
+                                            "image_path": "9cc7cee1a368a4e1df0029b0c8e8cf69ea7c5418d953f979c5cd2918c9cdc41d.jpg"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "index": 2,
+                            "angle": 0,
+                            "type": "image_body"
+                        },
+                        {
+                            "bbox": [
+                                70,
+                                604,
+                                417,
+                                618
+                            ],
+                            "lines": [
+                                {
+                                    "bbox": [
+                                        69,
+                                        604,
+                                        417,
+                                        620
+                                    ],
+                                    "spans": [
+                                        {
+                                            "bbox": [
+                                                69,
+                                                604,
+                                                417,
+                                                620
+                                            ],
+                                            "type": "text",
+                                            "content": "Figure S4. EQE characteristics of a typical CsFAPI-based perovskites solar cell.",
+                                            "score": 1.0
+                                        }
+                                    ]
+                                }
+                            ],
+                            "index": 3,
+                            "angle": 0,
+                            "type": "image_caption"
+                        }
+                    ],
+                    "index": 2
+                }
+            ],
+            "discarded_blocks": [],
+            "page_size": [
+                612,
+                792
+            ],
+            "page_idx": 2
+        }
+    ],
+    "_backend": "hybrid",
+    "_ocr_enable": false,
+    "_vlm_ocr_enable": false,
+    "_version_name": "2.7.6"
+}

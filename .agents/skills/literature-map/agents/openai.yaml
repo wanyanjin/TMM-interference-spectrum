@@ -1,0 +1,7 @@
+interface:
+  display_name: "Literature Map"
+  short_description: "Scan papers and update literature map"
+  default_prompt: "Use $literature-map to scan project papers and update docs/LITERATURE_MAP.md."
+
+policy:
+  allow_implicit_invocation: true

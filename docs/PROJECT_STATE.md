@@ -5,18 +5,24 @@
 ## 1. Current Snapshot
 
 - 更新时间：2026-04-06
-- 当前判断 Phase：`Phase 03`
-- 阶段定义：`在 Phase 02 基线之上，引入色散扰动与寄生吸收微调，继续压缩形状残差`
+- 当前判断 Phase：`Phase 04`
+- 阶段定义：`基于 Phase 03 六参数基线，前向预测 SAM/PVK 界面空气隙在 850-1500 nm 的反射率可检测性`
 - 当前可用能力：
   - 已有 `step01_absolute_calibration.py`，可将样品与银镜原始计数转换为绝对反射率
   - 已有 `step01b_cauchy_extrapolation.py`，可基于 [LIT-0001] 的 `ITO/CsFAPI` 数字化折射率曲线生成 `750-1100 nm` 的 CsFAPI 扩展 `n-k` 中间件
   - 已有 `step02_tmm_inversion.py`，可读取目标反射率、ITO 色散和 CsFAPI 扩展 `n-k` 中间件，执行包含 50/50 BEMA 粗糙度、ITO 色散吸收补偿、宏观厚度不均匀性高斯平均、PVK 色散斜率扰动与 NiOx 寄生吸收的六参数 `d_bulk + d_rough + ito_alpha + sigma_thickness + pvk_b_scale + niox_k` 联合反演
   - 已有 `step03_batch_fit_samples.py`，可对 OneDrive 原始样品目录中的多位置 CSV 做统一绝对反射率校准、六参数批量拟合、单样品图导出和汇总表生成
+  - 已有 `step03_forward_simulation.py`，可固化 Phase 03 六参数最优基线，在 `850-1500 nm` 波段前向预测 `SAM/PVK` 界面空气隙对绝对反射率 `R` 与差分反射率 `ΔR` 的影响
+  - 已有 `step04a_air_gap_diagnostic.py`，可基于 `test_data/good-21.csv` 与 `test_data/bad-23.csv` 完成绝对反射率标定、6 参数/7 参数对比拟合、差分指纹比对与空气隙收敛诊断
+  - 已有 `step04b_air_gap_localization.py`，可基于 `test_data/good-21.csv` 与 `test_data/bad-20-2.csv` 完成空气隙空间定位对比与材料参数弛豫诊断
   - 已有 `diagnostics_shape_mismatch.py`，可在独立沙盒中对 ITO 近红外吸收、厚度不均匀性和 PVK 色散斜率做形状畸变诊断
   - 已有 `step02_digitize_fapi_optical_constants.py`，可从 `LIT-0001` 的 Fig. 2 原图数字化提取 FAPI 的 `n/κ` 曲线并输出 QA 图
   - 已有 `step02_digitize_csfapi_optical_constants.py`，可从 `LIT-0001` 的 Fig. 3 原图数字化提取 CsFAPI 的 `n/κ` 曲线并输出 QA 图
   - 已产出标准中间文件 `data/processed/target_reflectance.csv` 与 `data/processed/CsFAPI_nk_extended.csv`
   - 已完成 Phase 02 形状畸变诊断，当前证据指向：ITO 近红外吸收失真是长波端托平与整体形状失配的主导因素
+  - 已完成 Phase 04 空气隙前向预测，当前基线下 `d_air = 2 nm` 与 `5 nm` 的 `max(|ΔR|)` 分别约为 `0.538%` 与 `1.347%`，均高于 `0.2%` 典型噪声线
+  - 已完成 Phase 04a 空气隙诊断沙盒：在 `bad-23` 上加入 `d_air` 后，`chi-square` 由 `0.03197` 降至 `0.01619`，`d_air` 收敛到约 `39.9 nm`，但仍未低于 `0.01`
+  - 已完成 Phase 04b 空气隙空间定位：对 `bad-20-2` 的 L1/L2/L3 三个 7 参数模型中，L3 (`SAM/PVK`) 的 `chi-square` 最低，但材料参数锁死时仍未优于 6 参数基线；释放材料参数后 `chi-square` 可进一步降至 `0.01932`
 - 当前未完成内容：
   - 尚未建立 `src/core/` 公共物理模块
   - 尚未把历史目录完全迁移到 `AGENTS.md` 规定的新结构
@@ -40,10 +46,15 @@ TMM-interference-spectrum/
 │       ├── step02_digitize_csfapi_optical_constants.py
 │       ├── step02_digitize_fapi_optical_constants.py
 │       ├── step02_tmm_inversion.py
-│       └── step03_batch_fit_samples.py
+│       ├── step03_batch_fit_samples.py
+│       ├── step03_forward_simulation.py
+│       ├── step04a_air_gap_diagnostic.py
+│       └── step04b_air_gap_localization.py
 ├── data/
 │   └── processed/
 │       ├── CsFAPI_nk_extended.csv
+│       ├── phase04a/
+│       ├── phase04b/
 │       ├── phase03_batch_fit/
 │       └── target_reflectance.csv
 ├── resources/
@@ -65,9 +76,14 @@ TMM-interference-spectrum/
 │   │   ├── phase02_fig3_csfapi_optical_constants_digitized.png
 │   │   ├── phase02_fig3a_csfapi_optical_constants_overlay.png
 │   │   ├── phase02_fig3b_csfapi_optical_constants_overlay.png
+│   │   ├── phase04_air_gap_prediction.png
+│   │   ├── phase04a_air_gap_diagnostic.png
+│   │   ├── phase04b_localization.png
 │   │   └── tmm_inversion_result.png
 │   └── logs/
 │       ├── phase03_batch_fit/
+│       ├── phase04a_air_gap_diagnostic.md
+│       ├── phase04b_localization.md
 │       ├── phase02_shape_diagnostic_report.md
 │       ├── phase02_fig2_fapi_digitization_notes.md
 │       └── phase02_fig3_csfapi_digitization_notes.md
@@ -254,7 +270,98 @@ TMM-interference-spectrum/
 - `results/figures/phase02_fig3b_csfapi_optical_constants_overlay.png`
 - `results/logs/phase02_fig3_csfapi_digitization_notes.md`
 
-### 4.6 `diagnostics_shape_mismatch.py`
+### 4.7 `step03_forward_simulation.py`
+
+- 文件位置：`src/scripts/step03_forward_simulation.py`
+- 主要职责：固化 Phase 03 六参数最优基线，在 `850-1500 nm` 波段前向扫描 `SAM/PVK` 界面空气隙引入后的绝对反射率 `R` 与差分反射率 `ΔR`
+
+输入：
+- `data/processed/CsFAPI_nk_extended.csv`
+- `resources/ITO_20 Ohm_105 nm_e1e2.mat`
+
+固化参数：
+- `d_bulk_base = 700.0 nm`
+- `d_rough = 31.337 nm`
+- `ito_alpha = 13.313`
+- `sigma_thickness = 22.761 nm`
+- `pvk_b_scale = 1.626`
+- `niox_k = 0.455`
+
+核心处理流程：
+- 复用 `step02_tmm_inversion.py` 的 ITO 数据读取、介电常数转 `n+k`、ITO 长波吸收补偿、BEMA 粗糙层与厚玻璃非相干合成逻辑
+- 对 `data/processed/CsFAPI_nk_extended.csv` 先做 `<=1100 nm` 的表格插值
+- 对 `1100-1500 nm` 的 PVK 尾部折射率，在 `1050-1100 nm` 真实表格上拟合 `n(lambda)=A+B/lambda_um^2` 的 Cauchy 模型，并强制 `k = 0`
+- 保持 `sigma_thickness` 的 `9` 点高斯厚度平均
+- 将相干层堆栈升级为：
+  - `Glass -> ITO -> NiOx -> SAM -> Air_Gap -> PVK_Bulk -> PVK_Roughness -> Air`
+- 扫描 `d_air = [0, 2, 5, 10, 50, 100] nm`
+- 以 `d_air = 0` 为基线计算 `ΔR = R_dair - R_0`
+
+输出：
+- `results/figures/phase04_air_gap_prediction.png`
+- 终端摘要：
+  - `PVK >1100 nm` 外推是否成功
+  - `Cauchy A/B` 参数
+  - `d_air = 2 nm` 与 `5 nm` 的 `max(|ΔR|)`
+  - 是否高于 `0.2%` 噪声阈值
+
+### 4.8 `step04a_air_gap_diagnostic.py`
+
+- 文件位置：`src/scripts/step04a_air_gap_diagnostic.py`
+- 主要职责：对 `test_data/good-21.csv` 与 `test_data/bad-23.csv` 做代表性绝对反射率标定、6 参数/7 参数拟合对比与空气隙差分指纹诊断
+
+输入：
+- `test_data/good-21.csv`
+- `test_data/bad-23.csv`
+- `test_data/Ag-mirro.csv`
+- `resources/GCC-1022系列xlsx.xlsx`
+- `data/processed/CsFAPI_nk_extended.csv`
+- `resources/ITO_20 Ohm_105 nm_e1e2.mat`
+
+核心处理流程：
+- 先复用 `step01_absolute_calibration.py` 将 `good-21` 与 `bad-23` 原始计数转换为 `850-1100 nm` 的 `Measured Smooth`
+- 对 `good-21` 运行完整六参数拟合，提取 `ito_alpha`、`pvk_b_scale`、`niox_k` 作为 bad 样品 7 参数诊断中的锁定材料参数
+- 对 `bad-23` 先运行六参数基线拟合，再运行仅放开 `d_bulk`、`d_rough`、`sigma_thickness`、`d_air` 的七参数局部优化
+- 空气隙位置显式固定为 `SAM -> Air_Gap -> PVK`
+- 输出 `ΔR_exp = R_bad - R_good` 与 `ΔR_theory = R_bad_7p_fit - R_good_6p_fit` 的差分指纹对比
+- 检查 `d_air` 是否卡在下界/初值，以及 `chi-square` 是否改善到 `0.01` 以下
+
+输出：
+- `data/processed/phase04a/good-21_calibrated.csv`
+- `data/processed/phase04a/bad-23_calibrated.csv`
+- `results/figures/phase04a_air_gap_diagnostic.png`
+- `results/logs/phase04a_air_gap_diagnostic.md`
+
+### 4.9 `step04b_air_gap_localization.py`
+
+- 文件位置：`src/scripts/step04b_air_gap_localization.py`
+- 主要职责：对 `test_data/bad-20-2.csv` 执行空气隙空间定位反证测试，并在最佳位置上释放材料参数做进一步弛豫
+
+输入：
+- `test_data/good-21.csv`
+- `test_data/bad-20-2.csv`
+- `test_data/Ag-mirro.csv`
+- `resources/GCC-1022系列xlsx.xlsx`
+- `data/processed/CsFAPI_nk_extended.csv`
+- `resources/ITO_20 Ohm_105 nm_e1e2.mat`
+
+核心处理流程：
+- 先复用 04a 的标定链生成 `good-21` 与 `bad-20-2` 的 `Measured Smooth`
+- 对 `good-21` 运行六参数拟合，提取 `base_ito_alpha`、`base_pvk_b_scale` 与 `base_niox_k`
+- 对 `bad-20-2` 的 7 参数模型分别测试三种空气隙位置：
+  - `L1: Glass -> Air_Gap -> ITO`
+  - `L2: ITO -> Air_Gap -> NiOx`
+  - `L3: SAM -> Air_Gap -> PVK`
+- 在材料参数锁定到 `good-21` 的前提下比较 L1/L2/L3 的 `chi-square` 与 `d_air`
+- 选取最佳位置后，再释放 `ito_alpha`、`pvk_b_scale` 与 `niox_k`，并把三者边界限制在 `good-21` 基准值的 `±15%`
+
+输出：
+- `data/processed/phase04b/good-21_calibrated.csv`
+- `data/processed/phase04b/bad-20-2_calibrated.csv`
+- `results/figures/phase04b_localization.png`
+- `results/logs/phase04b_localization.md`
+
+### 4.10 `diagnostics_shape_mismatch.py`
 
 - 文件位置：`src/scripts/diagnostics_shape_mismatch.py`
 - 主要职责：在不修改主流程的前提下，复用 `step02` 的数据读取和 BEMA 基线模型，对条纹形状畸变的物理来源做诊断
@@ -306,6 +413,33 @@ data/processed/CsFAPI_nk_extended.csv
     -> results/logs/phase03_batch_fit/*.csv
     -> OneDrive batch-fit-results/*
 
+data/processed/CsFAPI_nk_extended.csv
+resources/ITO_20 Ohm_105 nm_e1e2.mat
+    -> step03_forward_simulation.py (Phase 03 六参数基线固化 -> 1050-1100 nm Cauchy 尾段拟合 -> 1100-1500 nm PVK 尾部外推 -> Air_Gap 扫描 -> ΔR 阈值判别)
+    -> results/figures/phase04_air_gap_prediction.png
+
+test_data/good-21.csv
+test_data/bad-23.csv
+test_data/Ag-mirro.csv
+resources/GCC-1022系列xlsx.xlsx
+data/processed/CsFAPI_nk_extended.csv
+resources/ITO_20 Ohm_105 nm_e1e2.mat
+    -> step04a_air_gap_diagnostic.py (代表谱绝对标定 -> good 六参数参考拟合 -> bad 六参数基线拟合 -> SAM/PVK 空气隙七参数诊断拟合 -> ΔR 指纹比对)
+    -> data/processed/phase04a/*_calibrated.csv
+    -> results/figures/phase04a_air_gap_diagnostic.png
+    -> results/logs/phase04a_air_gap_diagnostic.md
+
+test_data/good-21.csv
+test_data/bad-20-2.csv
+test_data/Ag-mirro.csv
+resources/GCC-1022系列xlsx.xlsx
+data/processed/CsFAPI_nk_extended.csv
+resources/ITO_20 Ohm_105 nm_e1e2.mat
+    -> step04b_air_gap_localization.py (代表谱绝对标定 -> good 六参数基准提取 -> L1/L2/L3 空气隙空间定位 -> 最优位置材料参数弛豫)
+    -> data/processed/phase04b/*_calibrated.csv
+    -> results/figures/phase04b_localization.png
+    -> results/logs/phase04b_localization.md
+
 data/processed/target_reflectance.csv
 data/processed/CsFAPI_nk_extended.csv
 resources/ITO_20 Ohm_105 nm_e1e2.mat
@@ -328,23 +462,32 @@ reference/Khan.../images/885e29d3...
 1. `step01` 负责把原始计数校准成可用于物理建模的绝对反射率
 2. `step01b` 把 [LIT-0001] 数字化 CsFAPI 曲线转换成标准近红外 `n-k` 中间件
 3. `step02` 在消费标准 `n-k` 中间件后，先对 ITO 的消光系数 `k` 做锚定 `850-1100 nm` 的色散吸收补偿，再对 PVK 斜率和 NiOx 吸收做微调，通过 50/50 BEMA 将 PVK-Air 表面粗糙度折算为有效介质层，并对 `d_bulk` 做高斯厚度平均
-4. 当前脚本链已经具备“测量数据 -> 标准中间数据 + 文献外推中间数据 -> ITO 色散吸收 + PVK 色散扰动 + NiOx 寄生吸收 + BEMA 修正 + 厚度不均匀性平均 TMM 六参数反演图表”的最小闭环
-5. 这轮升级的目标是继续压低 `850-950 nm` 短波端的斜率残差，同时分担 `ito_alpha` 原先独自承担的底层吸收补偿压力
+4. `step03_forward_simulation.py` 继承上述基线，并通过 `Air_Gap` 缺陷层把反演引擎扩展为“前向预测雷达”，直接输出隐性剥离在 `850-1500 nm` 的 `R / ΔR` 可检测性图
+5. `step04a_air_gap_diagnostic.py` 进一步把代表性原始谱拉回到单样品诊断闭环，用 `good-21` 作为参考样本、在 `bad-23` 上显式检验 `SAM/PVK` 空气隙假设
+6. `step04b_air_gap_localization.py` 则进一步把假设从“是否有空气隙”推进到“空气隙最可能位于哪个界面，以及材料参数是否也必须发生漂移”
+7. 当前脚本链已经具备“测量数据 -> 标准中间数据 + 文献外推中间数据 -> 六参数反演基线 -> 空气隙前向预测 -> 单样品空气隙诊断 -> 空间定位与材料弛豫”的 Phase 04 闭环
 
 ## 6. Key Physical / Numerical Assumptions
 
 当前实现中最重要的物理和数值假设如下：
 
-- 仅处理 `850-1100 nm` 波段
+- `step02` 反演窗口为 `850-1100 nm`，`step03_forward_simulation.py` 的前向预测窗口扩展到 `850-1500 nm`
+- `step04a_air_gap_diagnostic.py` 在 `850-1100 nm` 的实验采样网格上比较 `good-21` 与 `bad-23`，不重采样到均匀 1 nm 网格
 - 玻璃厚板不作为相干层直接进入 TMM 相位矩阵
 - ITO 数据若波长量级大于 `2000`，则按 Angstrom 自动转为 nm
 - 厂家银镜基准若数值范围大于 `1.5`，则按百分比转为 `0-1` 小数
 - PVK 的近红外色散来源为 [LIT-0001] Fig. 3 的 `ITO/CsFAPI` 数字化 `n` 曲线，并通过 Cauchy 模型外推到 `1100 nm`
 - `750-1100 nm` 内强制采用 `k = 0`
 - `1000-1100 nm` 属于超出原始椭偏测量窗口的模型外推区
+- Phase 04 中 `1100-1500 nm` 的 PVK 折射率不再直接沿用表格，而是基于 `1050-1100 nm` 的真实点二次拟合 Cauchy 尾段后继续外推，且仍强制 `k = 0`
 - 粗糙层采用 `50% PVK + 50% Air` 的 BEMA 有效介质
 - ITO 的额外吸收以锁定实部 `n` 的色散参数 `ito_alpha` 表示，其对 `k` 的放大在 `850 nm` 处为 1，在 `1100 nm` 处为 `1 + ito_alpha`
+- Phase 04 中该 ITO 长波吸收补偿在 `1100 nm` 后保持饱和，不继续向 `1500 nm` 增长
 - 反演当前同时拟合 `d_bulk`、`d_rough`、`ito_alpha`、`sigma_thickness`、`pvk_b_scale` 与 `niox_k` 六个参数
+- Phase 04a 的空气隙假设位置显式固定为 `SAM / PVK` 界面，即层序 `Glass -> ITO -> NiOx -> SAM -> Air_Gap -> PVK_Bulk -> PVK_Roughness -> Air`
+- Phase 04a 的 7 参数诊断中，`ito_alpha`、`pvk_b_scale` 与 `niox_k` 锁定为 `good-21` 六参数最佳拟合值，只放开 `d_bulk`、`d_rough`、`sigma_thickness` 与 `d_air`
+- Phase 04b 的空间定位阶段分别测试 `Glass/ITO`、`ITO/NiOx` 与 `SAM/PVK` 三个候选空气隙界面
+- Phase 04b 的材料弛豫阶段允许 `ito_alpha`、`pvk_b_scale` 与 `niox_k` 在 `good-21` 基准值的 `±15%` 范围内漂移
 
 这些假设是理解结果与后续扩展的关键锚点；若后续有改动，必须同步更新本文件。
 
@@ -471,6 +614,7 @@ reference/Khan.../images/885e29d3...
   - `1000-1100 nm` 属于超出原文测量窗口的外推区
   - 当前将 `k` 在近红外全部强制为 `0`
   - 数字化误差会直接传递到 Cauchy 参数 `A, B`
+  - Phase 04 又基于 `1050-1100 nm` 尾段继续把 `n` 外推到 `1500 nm`，因此 `1100-1500 nm` 的预测结果更适合用作 LOD 趋势判断，而不是直接当作已验证材料常数
 
 ### 8.6 BEMA 双参数反演存在参数相关性风险
 
@@ -501,22 +645,49 @@ reference/Khan.../images/885e29d3...
 - 当前图像文件名尚未显式带上 `phaseXX`
 - 后续结果积累后，可能不利于多轮实验比较和回滚定位
 
+### 8.11 空气隙假设只解释了 bad-23 的部分失配
+
+- `step04a_air_gap_diagnostic.py` 在 `bad-23` 上得到 `d_air ≈ 39.9 nm`，且 `chi-square` 从 `0.03197` 降到 `0.01619`
+- 这说明 `SAM/PVK` 界面空气隙并非完全无效，而是能解释一部分谱形失配
+- 但由于 `chi-square` 仍高于 `0.01`，当前证据不足以支持“空气隙是唯一主导退化机制”的结论
+- 后续应优先检查：
+  - ITO 退化或近红外吸收漂移
+  - PVK 色散相对 good 样品发生整体偏移
+  - 其他界面或层厚参数同时退化
+
+### 8.12 bad-20-2 的空间定位支持 L3，但材料漂移同样关键
+
+- 在 `bad-20-2` 上，三种 7 参数空间定位模型的 `chi-square` 结果分别约为：
+  - `L1 Glass/ITO = 0.07086`
+  - `L2 ITO/NiOx = 0.06740`
+  - `L3 SAM/PVK = 0.02862`
+- 这说明若只比较空间位置，`SAM/PVK` 仍是最有希望的空气隙位置，且 `d_air ≈ 40.5 nm`
+- 但 `bad-20-2` 的 6 参数基线本身约为 `0.02830`，略优于锁定材料参数时的 `L3 7p`
+- 只有在最佳位置上进一步允许材料参数弛豫后，`chi-square` 才降到约 `0.01932`
+- 其中：
+  - `ITO Alpha` 只漂移约 `-0.96%`
+  - `PVK B-Scale` 漂移约 `-4.26%`
+  - `NiOx k` 触及 `-15%` 下边界
+- 这说明 `bad-20-2` 的异常不能仅靠“空气隙位置正确”解释，还伴随着明显的材料吸收/色散漂移需求
+
 ## 9. Recent Update Summary
 
 - 更新时间：`2026-04-06`
-- 当前 Phase：`Phase 03`
+- 当前 Phase：`Phase 04`
 - 本次新增/修改：
-  - 在 `step02_tmm_inversion.py` 中将主流程升级为包含 PVK 色散斜率扰动与 NiOx 寄生吸收的六参数反演
-  - 将主流程参数调整为 `d_bulk + d_rough + ito_alpha + sigma_thickness + pvk_b_scale + niox_k`
-  - 新增 `step03_batch_fit_samples.py`，在不修改 `step02` 主脚本的前提下完成多位置样品批量拟合与双落盘导出
-  - 更新 `PROJECT_STATE.md` 以反映 Phase 03 的六参数主流程
+  - 新增 `step04b_air_gap_localization.py`，基于 `test_data/good-21.csv` 与 `test_data/bad-20-2.csv` 完成三种界面位置的空气隙空间定位
+  - 新增 `data/processed/phase04b/good-21_calibrated.csv` 与 `data/processed/phase04b/bad-20-2_calibrated.csv`
+  - 输出 `results/figures/phase04b_localization.png` 与 `results/logs/phase04b_localization.md`
+  - 更新 `PROJECT_STATE.md`，记录 `bad-20-2` 的空间定位结论与材料参数弛豫需求
 - 已验证结论：
-  - ITO 近红外吸收增强是当前形状畸变的主导修复机制
-  - 色散吸收版比全局标量吸收版更有效，能在不压塌 850 nm 主峰的前提下显著拉低长波端误差
-  - 加入 `pvk_b_scale` 与 `niox_k` 后，短波端 `850-950 nm` 的斜率失配进一步显著下降
+  - `good-21` 的代表谱 6 参数拟合仍可稳定收敛，可作为 `bad-20-2` 的材料参数基准
+  - 对 `bad-20-2` 的三种空间定位模型中，`L3 (SAM/PVK)` 的 `chi-square` 最低，明显优于 `L1` 与 `L2`
+  - 在 `L3` 位置上，空气隙厚度收敛到约 `40-42 nm`
+  - 但锁定材料参数时，`L3 7p` 仍未优于 `bad-20-2` 的 6 参数基线；进一步释放材料参数后，`chi-square` 才降至约 `0.019323`
 - 仍待验证：
-  - `1000-1100 nm` 外推段的物理可信度仍需后续用原始数据或独立测量交叉验证
-  - `d_bulk`、`d_rough`、`ito_alpha`、`sigma_thickness`、`pvk_b_scale` 与 `niox_k` 的相关性是否会影响最终物理解读，还需后续继续评估
+  - 即使在最佳位置并做材料弛豫后，`chi-square` 仍未低于 `0.01`
+  - `NiOx k` 在 10 参数弛豫中触及 `-15%` 下边界，说明当前约束下仍存在未被完全吸收的退化机制
+  - 后续仍需继续检查 ITO 退化、NiOx 吸收变化、PVK 色散偏移或其他界面共同退化
 
 ## 10. Recommended Next Actions
 

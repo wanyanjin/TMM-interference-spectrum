@@ -1,0 +1,4573 @@
+[
+    [
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "PAPER "
+                    }
+                ]
+            },
+            "bbox": [
+                80,
+                119,
+                166,
+                139
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "View Article Online "
+                    }
+                ]
+            },
+            "bbox": [
+                754,
+                116,
+                899,
+                130
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "View Journal | View Issue "
+                    }
+                ]
+            },
+            "bbox": [
+                756,
+                133,
+                884,
+                143
+            ]
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/ad02e4baed7dfd4021385206e329ac009d0493c2a28ed24280f3dab8df4ce40e.jpg"
+                },
+                "image_caption": [],
+                "image_footnote": []
+            },
+            "bbox": [
+                73,
+                177,
+                100,
+                195
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "Check for updates "
+                    }
+                ]
+            },
+            "bbox": [
+                105,
+                179,
+                228,
+                192
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "Cite this: Energy Adv., 2024, 3, 2512 "
+                    }
+                ]
+            },
+            "bbox": [
+                65,
+                211,
+                226,
+                237
+            ]
+        },
+        {
+            "type": "title",
+            "content": {
+                "title_content": [
+                    {
+                        "type": "text",
+                        "content": "Optical constants manipulation of formamidinium lead iodide perovskites: ellipsometric and spectroscopic twigging† "
+                    }
+                ],
+                "level": 1
+            },
+            "bbox": [
+                284,
+                170,
+                919,
+                240
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "Mohd Taukeer Khan, a Muhammed P. U. Haris, b Baraa Alhouri,a Samrana Kazimbcd and Shahzada Ahmad *bd "
+                    }
+                ]
+            },
+            "bbox": [
+                282,
+                252,
+                806,
+                282
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "Unraveling the knowledge of the complex refractive index and photophysical properties of the perovskite layer is paramount to uncovering the physical process that occurs in a perovskite solar cell under illumination. Herein, we probed the optical and photophysical properties of "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\mathsf { F A P b } | _ { 3 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "(FAPI) and "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\mathsf { C s } _ { 0 . 1 } \\mathsf { F A } _ { 0 . 9 } \\mathsf { P b } | _ { 3 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "(CsFAPI) thin films deposited from pre-synthesized powder, by the spectroscopic ellipsometer and time-resolved fluorescence spectra. We determined the complex refractive index of perovskite films by fitting the measured spectroscopic ellipsometer data with the three-oscillator Tauc–Lorentz (T–L) model. We deduced that the CsFAPI thin film had a slightly lower absorption coefficient than the FAPI, but a higher refractive index and dielectric constant than the FAPI. The peak photoluminescence (PL) emission of FAPI and CsFAPI thin film on glass substrates was observed around 803 nm and 799 nm, respectively, while on ITO substrates, both FAPI and CsFAPI thin film was quenched and red-shifted to 816 nm. The methylammonium free pure CsFAPIbased perovskite solar cell fabricated in "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "p { - } i { - } n"
+                    },
+                    {
+                        "type": "text",
+                        "content": "configuration, measured a competitive efficiency of "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "1 6 . 1 4 \\%"
+                    },
+                    {
+                        "type": "text",
+                        "content": ", characterized by a "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\scriptstyle { \\mathcal { J } } _ { \\mathsf { S C } }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "of "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "2 3 . 9 9 5 ~ \\mathsf { m A c m } ^ { - 2 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": ", "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "V _ { \\mathrm { O C } }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "of 912 mV, and FF of "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "73 . 7 4 \\%"
+                    },
+                    {
+                        "type": "text",
+                        "content": ". "
+                    }
+                ]
+            },
+            "bbox": [
+                282,
+                301,
+                929,
+                483
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "Received 28th May 2024, Accepted 26th August 2024 "
+                    }
+                ]
+            },
+            "bbox": [
+                65,
+                410,
+                226,
+                433
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "DOI: 10.1039/d4ya00339j "
+                    }
+                ]
+            },
+            "bbox": [
+                65,
+                442,
+                213,
+                455
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "rsc.li/energy-advances "
+                    }
+                ]
+            },
+            "bbox": [
+                65,
+                469,
+                198,
+                483
+            ]
+        },
+        {
+            "type": "title",
+            "content": {
+                "title_content": [
+                    {
+                        "type": "text",
+                        "content": "1. Introduction "
+                    }
+                ],
+                "level": 1
+            },
+            "bbox": [
+                65,
+                521,
+                235,
+                539
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "Perovskite solar cells (PSCs) are categorized by their high power conversion efficiency (PCE) on par with the c-Si solar cells1 but suffer in terms of a short life span. Methylammonium lead triiodide "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\left( { \\bf M A P b I } _ { 3 } \\right)"
+                    },
+                    {
+                        "type": "text",
+                        "content": "is the most investigated perovskite active layer, however, it undergoes a transition from the tetragonal to the cubic phase around "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "5 5 ~ ^ { \\circ } \\mathrm { C }"
+                    },
+                    {
+                        "type": "text",
+                        "content": ". which impacts its electronic band structure and subsequently deteriorates the device performance.2–8 This issue centered the research focus on the formamidinium lead iodide "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\left( \\mathrm { F A P b I } _ { 3 } \\right."
+                    },
+                    {
+                        "type": "text",
+                        "content": ", FAPI) with an optimum bandgap close to the Shockley–Queisser limit. FAPI has delivered outstanding device performance with a PCE of over "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "2 6 \\%"
+                    },
+                    {
+                        "type": "text",
+                        "content": "with the additives.9–13 Nevertheless, FAPI undergoes an adverse phase transition from a photoactive black-colored "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\nsim"
+                    },
+                    {
+                        "type": "text",
+                        "content": "-phase "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "( E _ { \\mathrm { g } } ~ \\sim ~ 1 . 4 7 ~ \\mathrm { e V } )"
+                    },
+                    {
+                        "type": "text",
+                        "content": "to a photo-inactive yellow-colored d-phase "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "( E _ { \\mathrm { g } } \\sim 2 . 4 3 ~ \\mathrm { e V } )"
+                    },
+                    {
+                        "type": "text",
+                        "content": "at room temperature14 Various techniques have "
+                    }
+                ]
+            },
+            "bbox": [
+                63,
+                551,
+                490,
+                783
+            ]
+        },
+        {
+            "type": "list",
+            "content": {
+                "list_type": "text_list",
+                "list_items": [
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "a Department of Physics, Faculty of Science, Islamic University of Madinah, Prince Naifbin Abdulaziz, Al Jamiah, Madinah 42351, Kingdom of Saudi Arabia "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "b BCMaterials, Basque Center for Materials, Applications, and Nanostructures, UPV/ EHU Science Park, 48940, Leioa, Spain. E-mail: shahzada.ahmad@bcmaterials.net "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "c Materials Physics Center, CSIC-UPV/EHU, Paseo Manuel de Lardizabal 5, 20018, Donostia-San Sebastian, Spain "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "d IKERBASQUE, Basque Foundation for Science, Bilbao, 48009, Spain "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "† Electronic supplementary information (ESI) available. See DOI: https://doi.org/ 10.1039/d4ya00339j "
+                            }
+                        ]
+                    }
+                ]
+            },
+            "bbox": [
+                65,
+                803,
+                490,
+                919
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "been identified to mitigate the phase transition in FAPI, including A- and X-site doping, Lewis acid and base additivisation, and 2D/3D perovskite configurations. Akin to the prior reports in "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\mathbf { M A P b } \\mathbf { I } _ { 3 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "perovskites, mixed A-site cation configuration impacts the band structure and thus device performance. Moreover, most research works are being carried out at laboratory levels. The lab-to-lab reproducibility issue owing to the differences in the atmospheric condition, precursor quality, and weighing errors, is identified as one of the challenges to upscaling the high-performance PSCs to the module level. In this context, recently emerged pre-synthesized powder shows high potential towards these existing concerns. The yellow-colored "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\mathrm { F A P b I } _ { 3 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "and "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\mathrm { C s _ { 0 . 1 } F A _ { 0 . 9 } P b I _ { 3 } }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "(CsFAPI) powders in the d-phase exhibited high tolerance towards the weighing errors by reducing the number of weighing processes. Additionally, the use of low-purity precursors reduced the fabrication cost without affecting the final device performance.15–17 Moreover, the pre-synthesized powder route to develop microcrystals suppresses the anomalous "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "J { - } V"
+                    },
+                    {
+                        "type": "text",
+                        "content": "hysteresis observed in PSCs by mitigating the defect states17–19 and also discards the issue of Pb impurities present in the Pb precursors and anomalies in the weighing of the precursors to control the exact stoichiometry. "
+                    }
+                ]
+            },
+            "bbox": [
+                502,
+                519,
+                929,
+                857
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "The performance of a PSC depends upon the quality of the perovskites layer (e.g., roughness, grain size, interface, etc.) and its optical properties that include refractive index "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "( n )"
+                    },
+                    {
+                        "type": "text",
+                        "content": ", extinction coefficient "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\left( \\kappa \\right)"
+                    },
+                    {
+                        "type": "text",
+                        "content": ", real and imaginary dielectric constants "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\left( \\varepsilon _ { \\mathrm { r } } , \\varepsilon _ { \\mathrm { i } } \\right)"
+                    },
+                    {
+                        "type": "text",
+                        "content": ". "
+                    }
+                ]
+            },
+            "bbox": [
+                502,
+                858,
+                929,
+                919
+            ]
+        },
+        {
+            "type": "page_aside_text",
+            "content": {
+                "page_aside_text_content": [
+                    {
+                        "type": "text",
+                        "content": "Open Access Article. Published on 26 August 2024. Downloaded on 4/4/2026 4:01:13 PM.  \n(CC) BY-NC This article is licensed under a Creative Commons Attribution-NonCommercial 3.0 Unported License. "
+                    }
+                ]
+            },
+            "bbox": [
+                3,
+                114,
+                45,
+                627
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "Energy Advances "
+                    }
+                ]
+            },
+            "bbox": [
+                67,
+                43,
+                240,
+                89
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "ROYAL SOCIETY OF CHEMISTRY "
+                    }
+                ]
+            },
+            "bbox": [
+                685,
+                26,
+                929,
+                80
+            ]
+        },
+        {
+            "type": "page_number",
+            "content": {
+                "page_number_content": [
+                    {
+                        "type": "text",
+                        "content": "2512 "
+                    }
+                ]
+            },
+            "bbox": [
+                68,
+                956,
+                100,
+                967
+            ]
+        },
+        {
+            "type": "page_footer",
+            "content": {
+                "page_footer_content": [
+                    {
+                        "type": "text",
+                        "content": "Energy Adv., 2024, 3, 2512–2519 "
+                    }
+                ]
+            },
+            "bbox": [
+                119,
+                956,
+                319,
+                969
+            ]
+        },
+        {
+            "type": "page_footer",
+            "content": {
+                "page_footer_content": [
+                    {
+                        "type": "equation_inline",
+                        "content": "\\circledcirc"
+                    },
+                    {
+                        "type": "text",
+                        "content": "2024 The Author(s). Published by the Royal Society of Chemistry "
+                    }
+                ]
+            },
+            "bbox": [
+                509,
+                956,
+                927,
+                969
+            ]
+        }
+    ],
+    [
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "Therefore, to design efficient and stable PSCs, precise knowledge of these parameters is essential. The refractive index and dielectric constants are generally evaluated from absorptive, reflective, and transmittance spectroscopy.20–26 As the perovskitebased photonic devices including solar cells, laser, photodetector, light-emitting diodes, or tandem solar cells are fabricated by stacks of multilayers to manage the absorption/emission of light and charge carrier injection and extraction. Spectroscopic ellipsometry is a non-destructive, non-invasive technique that can measure the optical and structural properties of thin films with high sensitivity "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "( \\sim 0 . 1 \\mathring \\mathrm { A } )"
+                    },
+                    {
+                        "type": "text",
+                        "content": "and accuracy. Spectroscopic ellipsometry techniques can characterize the bulk, surfaces, interfaces, and multilayer stacks of thin films, as well as their thickness, electronic band structure, crystallinity, composition, interfacial diffusion, absorption coefficient, etc.27–31 Though other spectroscopic methods, such as absorptive, reflective, and transmittance spectroscopy, can also provide similar information on the optical properties, thickness, and roughness of thin films, however, they are less sensitive and comprehensive than spectroscopic ellipsometry. Moreover, typically the perovskite thin films are deposited by solution processing which can create pinholes on the film surface.32–34 These pinholes reduce the quality of perovskite thin films by decreasing the polarization of light or scattering the light in different directions and can decrease the refractive index of perovskite. From the SE, we can uncover the void present in the perovskite layers.35 Furthermore, the microstructure, crystal quality, chemical composition, or electrical conductivity also influence the optical properties of thin films and thus device performance therefore knowledge of the complex refractive index and dielectric function is essential to develop new materials36,37 "
+                    }
+                ]
+            },
+            "bbox": [
+                63,
+                60,
+                492,
+                519
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "Reports dealing with the spectroscopic ellipsometer measurements of "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\mathbf { M A P b I } _ { 3 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": ", 38–40 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\mathrm { C H _ { 3 } N H _ { 3 } P b B r _ { 3 } }"
+                    },
+                    {
+                        "type": "text",
+                        "content": ", 41 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\mathrm { F A P b I } _ { 3 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": ", 42–44 CsPbBr3, 45 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\mathbf { F A } _ { x } \\mathbf { M } \\mathbf { A } _ { 1 - x } \\mathbf { P } \\mathbf { b } \\mathbf { I } _ { 3 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "single crystals,46 however, to our knowledge there are no detailed reports available on the optical and dielectric properties of "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\mathrm { F A P b I } _ { 3 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "and "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\mathbf { C } s _ { 0 . 1 } \\mathbf { F A } _ { 0 . 9 } \\mathbf { P b } \\mathbf { I } _ { 3 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "thin films fabricated by powder methodology. Here we investigated the optical, photophysical, and electrical properties of "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\mathrm { F A P b I } _ { 3 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "and "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\mathbf { C } s _ { 0 . 1 } \\mathbf { F A _ { 0 . 9 } P b I _ { 3 } }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "thin films fabricated via pre-synthesized powder by recording the spectroscopic ellipsometer, time-resolved fluorescence spectra, and Hall-effect measurements. Moreover, we investigated the impact of substrates (glass and ITO) on these properties as well as their solar cells merits. "
+                    }
+                ]
+            },
+            "bbox": [
+                63,
+                519,
+                492,
+                704
+            ]
+        },
+        {
+            "type": "title",
+            "content": {
+                "title_content": [
+                    {
+                        "type": "text",
+                        "content": "2. Results and discussions "
+                    }
+                ],
+                "level": 1
+            },
+            "bbox": [
+                65,
+                743,
+                357,
+                762
+            ]
+        },
+        {
+            "type": "title",
+            "content": {
+                "title_content": [
+                    {
+                        "type": "text",
+                        "content": "Spectroscopic ellipsometer "
+                    }
+                ],
+                "level": 1
+            },
+            "bbox": [
+                65,
+                768,
+                253,
+                783
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "The spectroscopic ellipsometer evaluates the optical constant by determining the alteration in the polarization state of the light as it reflects through the film surface. It assesses the fluctuation in the amplitude ratio "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "( \\Psi )"
+                    },
+                    {
+                        "type": "text",
+                        "content": "and phase difference (D) of the reflected light, as specified in the relationship:35,47,48 "
+                    }
+                ]
+            },
+            "bbox": [
+                63,
+                786,
+                490,
+                865
+            ]
+        },
+        {
+            "type": "equation_interline",
+            "content": {
+                "math_content": "\\rho = \\tan (\\Psi) \\mathrm {e} ^ {i \\Delta} = \\frac {r _ {\\mathrm {p}}}{r _ {\\mathrm {s}}}",
+                "math_type": "latex",
+                "image_source": {
+                    "path": "images/ef09eaa6ef9eb5fe3d46d048bf22dcc9671a9bb86faa150913d1ae216ef92dea.jpg"
+                }
+            },
+            "bbox": [
+                213,
+                890,
+                347,
+                917
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "where, rp "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "r _ { \\mathrm { p } } = \\frac { E _ { r _ { \\mathrm { p } } } } { E _ { i _ { \\mathrm { p } } } }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "Erp and rs "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "r _ { \\mathrm { s } } = { \\frac { E _ { r _ { \\mathrm { s } } } } { E _ { i _ { \\mathrm { s } } } } }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "Ers refer to the parallel and perpendi-Ei cular Fresnel reflection coefficients, respectively. The acquired spectral analysis of FAPI and CsFAPI thin films for different configurations is presented in Fig. S1 (ESI†). The peaks and valleys observed in "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\psi"
+                    },
+                    {
+                        "type": "text",
+                        "content": "and D ascribe to the interference and describe the n and "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\kappa ."
+                    },
+                    {
+                        "type": "text",
+                        "content": ", respectively. The thickness and optical parameters of perovskite layers were extracted by fitting the measured ellipsometer data with a three-oscillator Tauc–Lorentz (T–L) model.48–50 The T–L dispersion model, developed by Jellison and Modine, marks a significant advancement in characterizing the frequencydependent complex permittivity of amorphous semiconductors. Recently, this model has been extended to model the dielectric function of transparent conductive oxides51,52 and perovskite materials.35,42,53 By integrating the principles of Tauc and Lorentz, it addresses the limitations of the Forouhi–Bloomer model, particularly for perovskite films, providing an enhanced fit for the complex refractive index and improving the understanding of optical properties. The three-oscillator model, which incorporates multiple oscillators to account for distinct electronic transitions, significantly enhances fitting accuracy, crucial for perovskite thin films. This model offers a precise fit for both the complex refractive index and the dielectric function, essential for delineating the unique optical properties of perovskite films. The refined fitting capabilities of the three-oscillator T–L model are indispensable for elucidating and optimizing perovskite films in driving the development of high-efficiency optoelectronic devices. In the T–L model, the imaginary part of the dielectric function, ei, is derived from the product of the bandgap of amorphous materials and the Lorentz model.48 The Tauc gap, "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "E _ { \\mathrm { g } } ,"
+                    },
+                    {
+                        "type": "text",
+                        "content": "is given by:54 "
+                    }
+                ]
+            },
+            "bbox": [
+                502,
+                60,
+                929,
+                522
+            ]
+        },
+        {
+            "type": "equation_interline",
+            "content": {
+                "math_content": "\\varepsilon_ {\\mathrm {i}} = A _ {\\mathrm {T a u c}} \\frac {\\left(E - E _ {\\mathrm {g}}\\right) ^ {2}}{E ^ {2}}",
+                "math_type": "latex",
+                "image_source": {
+                    "path": "images/7c0bd22da16ab51bdbce09de52803284551551bc0111d6c80abf7eb6d83dbe93.jpg"
+                }
+            },
+            "bbox": [
+                648,
+                528,
+                786,
+                560
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "The expression for "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\varepsilon _ { \\mathrm { i } }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "in the Tauc–Lorentz model is ei: "
+                    }
+                ]
+            },
+            "bbox": [
+                522,
+                576,
+                889,
+                591
+            ]
+        },
+        {
+            "type": "equation_interline",
+            "content": {
+                "math_content": "\\varepsilon_ {\\mathrm {i}} = \\left\\{ \\begin{array}{c c} \\frac {A \\cdot E _ {0} \\cdot C \\cdot \\left(E - E _ {\\mathrm {g}}\\right) ^ {2}}{E \\left[ \\left(E ^ {2} - E _ {0} ^ {2}\\right) ^ {2} + C ^ {2} \\cdot E ^ {2} \\right]}, & E > E _ {\\mathrm {g}} \\\\ 0 & E \\leq E _ {\\mathrm {g}} \\end{array} \\right.",
+                "math_type": "latex",
+                "image_source": {
+                    "path": "images/f757aef98ad96173a052bf39e1852ca323afca296a40b08f6196dd90f2b66f90.jpg"
+                }
+            },
+            "bbox": [
+                578,
+                595,
+                853,
+                652
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "The real part of the dielectric function, "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\varepsilon _ { \\mathrm { { r } ; } }"
+                    },
+                    {
+                        "type": "text",
+                        "content": ", in the T–L model is given by: "
+                    }
+                ]
+            },
+            "bbox": [
+                502,
+                668,
+                929,
+                700
+            ]
+        },
+        {
+            "type": "equation_interline",
+            "content": {
+                "math_content": "\\begin{array}{l} \\varepsilon_ {\\mathrm {r}} = \\varepsilon_ {\\mathrm {r}} (\\infty) + \\frac {A \\cdot C}{2 \\cdot \\pi \\cdot \\xi^ {4}} \\frac {a _ {\\ln}}{\\alpha \\cdot E _ {0}} \\cdot \\ln \\left[ \\frac {E _ {0} ^ {2} + E _ {\\mathrm {g}} ^ {2} + \\alpha \\cdot E _ {\\mathrm {g}}}{E _ {0} ^ {2} + E _ {\\mathrm {g}} ^ {2} - \\alpha \\cdot E _ {\\mathrm {g}}} \\right] \\\\ - \\frac {A \\cdot a _ {\\text {a t a n}}}{\\pi \\cdot \\xi^ {4} \\cdot E _ {0}} \\left[ \\pi - a \\cdot \\tan \\left(\\frac {2 \\cdot E _ {\\mathrm {g}} + \\alpha}{C}\\right) + a \\cdot \\tan \\left(\\frac {\\alpha - 2 \\cdot E _ {\\mathrm {g}}}{C}\\right) \\right] \\\\ + \\frac {2 \\cdot A \\cdot E _ {0}}{\\pi \\cdot \\zeta^ {4} \\cdot \\alpha} \\left\\{E _ {\\mathrm {g}} \\cdot \\left(E ^ {2} - \\gamma^ {2}\\right) \\cdot \\left[ \\pi + 2 \\cdot a \\cdot \\tan \\left(\\frac {\\gamma^ {2} - E _ {\\mathrm {g}} ^ {2}}{\\alpha \\cdot C}\\right) \\right] \\right\\} \\\\ - \\frac {A \\cdot E _ {0} \\cdot C \\cdot \\left(E ^ {2} + E _ {\\mathrm {g}} ^ {2}\\right)}{\\pi \\cdot \\xi^ {4} \\cdot E} \\cdot \\ln \\left(\\frac {| E - E _ {\\mathrm {g}} |}{E + E _ {\\mathrm {g}}}\\right) \\\\ + \\frac {2 \\cdot A \\cdot E _ {0} \\cdot C \\cdot E _ {\\mathrm {g}}}{\\pi \\cdot \\xi^ {4}} \\cdot \\ln \\left(\\frac {\\left| E - E _ {\\mathrm {g}} \\right| \\cdot \\left(E + E _ {\\mathrm {g}}\\right)}{\\sqrt {\\left(E _ {0} ^ {2} - E _ {\\mathrm {g}} ^ {2}\\right) ^ {2} + E _ {\\mathrm {g}} ^ {2} \\cdot C ^ {2}}}\\right) \\\\ \\end{array}",
+                "math_type": "latex",
+                "image_source": {
+                    "path": "images/383ba9abbb7ec5fb6697fbfa4a412a0bd0afec3fe044aafbeeee4fd6c31bff05.jpg"
+                }
+            },
+            "bbox": [
+                505,
+                704,
+                927,
+                917
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "View Article Online "
+                    }
+                ]
+            },
+            "bbox": [
+                831,
+                11,
+                927,
+                21
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "Paper "
+                    }
+                ]
+            },
+            "bbox": [
+                67,
+                30,
+                115,
+                44
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "Energy Advances "
+                    }
+                ]
+            },
+            "bbox": [
+                794,
+                30,
+                927,
+                44
+            ]
+        },
+        {
+            "type": "page_aside_text",
+            "content": {
+                "page_aside_text_content": [
+                    {
+                        "type": "text",
+                        "content": "Open Access Article. Published on 26 August 2024. Downloaded on 4/4/2026 4:01:13 PM.  \n "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "(\\mathbb{C}\\mathbb{C})"
+                    },
+                    {
+                        "type": "text",
+                        "content": " BY-NC This article is licensed under a Creative Commons Attribution-NonCommercial 3.0 Unported License. "
+                    }
+                ]
+            },
+            "bbox": [
+                3,
+                114,
+                45,
+                629
+            ]
+        },
+        {
+            "type": "page_footer",
+            "content": {
+                "page_footer_content": [
+                    {
+                        "type": "equation_inline",
+                        "content": "\\circledcirc"
+                    },
+                    {
+                        "type": "text",
+                        "content": "2024 The Author(s). Published by the Royal Society of Chemistry "
+                    }
+                ]
+            },
+            "bbox": [
+                65,
+                955,
+                487,
+                969
+            ]
+        },
+        {
+            "type": "page_footer",
+            "content": {
+                "page_footer_content": [
+                    {
+                        "type": "text",
+                        "content": "Energy Adv., 2024, 3, 2512–2519 "
+                    }
+                ]
+            },
+            "bbox": [
+                675,
+                956,
+                875,
+                970
+            ]
+        },
+        {
+            "type": "page_number",
+            "content": {
+                "page_number_content": [
+                    {
+                        "type": "text",
+                        "content": "2513 "
+                    }
+                ]
+            },
+            "bbox": [
+                895,
+                956,
+                927,
+                967
+            ]
+        }
+    ],
+    [
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "where: "
+                    }
+                ]
+            },
+            "bbox": [
+                65,
+                61,
+                115,
+                74
+            ]
+        },
+        {
+            "type": "equation_interline",
+            "content": {
+                "math_content": "a _ {\\ln} = \\left(E _ {\\mathrm {g}} ^ {2} - E _ {0} ^ {2}\\right) \\cdot E ^ {2} + E _ {\\mathrm {g}} ^ {2} \\cdot C ^ {2} - E _ {0} ^ {2} \\cdot \\left(E _ {0} ^ {2} + 3 \\cdot E _ {\\mathrm {g}} ^ {2}\\right)",
+                "math_type": "latex",
+                "image_source": {
+                    "path": "images/d45f0fe5457ef9b422b37032f1a64c4201bf601274598c8ac270d192226d405d.jpg"
+                }
+            },
+            "bbox": [
+                102,
+                92,
+                460,
+                112
+            ]
+        },
+        {
+            "type": "equation_interline",
+            "content": {
+                "math_content": "a _ {a \\tan} = \\left(E ^ {2} - E _ {0} ^ {2}\\right) \\cdot \\left(E _ {0} ^ {2} + E _ {\\mathrm {g}} ^ {2}\\right) + E _ {\\mathrm {g}} ^ {2} \\cdot C ^ {2}",
+                "math_type": "latex",
+                "image_source": {
+                    "path": "images/d81e9aa934391374467cca4c77935137123bf5500ef3a779cda751c09c6d8f13.jpg"
+                }
+            },
+            "bbox": [
+                95,
+                116,
+                373,
+                137
+            ]
+        },
+        {
+            "type": "equation_interline",
+            "content": {
+                "math_content": "\\xi^ {4} = \\left(E ^ {2} - E _ {0} ^ {2}\\right) \\cdot \\left(E _ {0} ^ {2} + E _ {\\mathrm {g}} ^ {2}\\right) + \\frac {\\alpha^ {2} \\cdot C ^ {2}}{4}",
+                "math_type": "latex",
+                "image_source": {
+                    "path": "images/376d607615f348bb7d09a4638b44b8df20b41294c7f7ed838eb5ddde8eeaf13a.jpg"
+                }
+            },
+            "bbox": [
+                112,
+                143,
+                366,
+                174
+            ]
+        },
+        {
+            "type": "equation_interline",
+            "content": {
+                "math_content": "\\alpha = \\sqrt {4 \\cdot E _ {0} ^ {2} - C ^ {2}}",
+                "math_type": "latex",
+                "image_source": {
+                    "path": "images/3ef3e42342220c959abfd197f36ec9867d366ca2a4512f1a04299d57dec8c6e8.jpg"
+                }
+            },
+            "bbox": [
+                119,
+                182,
+                242,
+                200
+            ]
+        },
+        {
+            "type": "equation_interline",
+            "content": {
+                "math_content": "\\gamma = \\sqrt {4 \\cdot E _ {0} ^ {2} - \\frac {C ^ {2}}{2}}",
+                "math_type": "latex",
+                "image_source": {
+                    "path": "images/1b532f8335b0503132ef0e7cb635b87881c915fda2458793abea2f1067342bf6.jpg"
+                }
+            },
+            "bbox": [
+                119,
+                210,
+                243,
+                247
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "here, "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\varepsilon _ { \\mathrm { r } } ( \\infty )"
+                    },
+                    {
+                        "type": "text",
+                        "content": "is a parameter associated with high frequency, A and "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "C"
+                    },
+                    {
+                        "type": "text",
+                        "content": "are the amplitude and broadening parameters of "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\varepsilon _ { \\mathrm { i } }"
+                    },
+                    {
+                        "type": "text",
+                        "content": ", respectively, "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "E _ { \\mathrm { g } }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "is the energy bandgap and "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "E _ { 0 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "is the peak transition energy.42,45 "
+                    }
+                ]
+            },
+            "bbox": [
+                65,
+                268,
+                490,
+                329
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "The solution-processed perovskite thin film may contain pinholes at the surface and they were taken into consideration through modeling the perovskite layer by effective medium approximation (EMA) with two layers: (i) perovskites bulk layer of thickness "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "L"
+                    },
+                    {
+                        "type": "text",
+                        "content": "and (ii) perovskite surface layer with void and oxygen having thickness r as shown in Fig. 1a and b.55–58 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "r"
+                    },
+                    {
+                        "type": "text",
+                        "content": "Additionally, we have used initial energies of 1.55 eV, 2.18 eV, and "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "2 . 7 0 ~ \\mathrm { e V }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "for fitting. "
+                    }
+                ]
+            },
+            "bbox": [
+                63,
+                329,
+                490,
+                451
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "It can be deduced from Fig. S1 (ESI†) that the T–L model is in agreement with the measured "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\psi"
+                    },
+                    {
+                        "type": "text",
+                        "content": "and D for all films with fitting "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\chi ^ { 2 } < 0 . 1 8"
+                    },
+                    {
+                        "type": "text",
+                        "content": ", subsequent fit parameters are tabulated in Table S1 "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\left( \\mathrm { E S I \\dag } \\right)"
+                    },
+                    {
+                        "type": "text",
+                        "content": ". Film thickness of FAPI samples: glass/FAPI and ITO/FAPI were obtained to be: "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "L \\sim 3 7 4 ~ \\mathrm { n m }"
+                    },
+                    {
+                        "type": "text",
+                        "content": ", and "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "3 6 0 ~ \\mathrm { { n m } }"
+                    },
+                    {
+                        "type": "text",
+                        "content": ", with corresponding roughness of "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "r \\sim 1 5 ~ \\mathrm { n m }"
+                    },
+                    {
+                        "type": "text",
+                        "content": ", and "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "2 3 \\mathrm { ~ n m }"
+                    },
+                    {
+                        "type": "text",
+                        "content": ", in that order. Alternatively, the film thickness of Glass/CsFAPI and ITO/CsFAPI were calculated to be "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "L \\sim 3 8 2 ~ \\mathrm { n m }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "and "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "3 6 4 ~ \\mathrm { { n m } }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "with a slightly higher roughness of "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "r \\sim 2 1 ~ \\mathrm { { n m } }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "and "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "1 5 ~ \\mathrm { n m }"
+                    },
+                    {
+                        "type": "text",
+                        "content": ". It can be deduced from Table S1 (ESI†) that all the transitions such as "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "E _ { 1 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": ", "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "E _ { 2 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": ", and "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "E _ { 3 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "were shifted to lower energies for the perovskites films fabricated on ITO as compared to the perovskites on glass. The high-frequency dielectric constant "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\varepsilon _ { \\infty }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "found to be lower for the CsFAPI films as compared to the FAPI thin films owing to the reduced crystallinity. "
+                    }
+                ]
+            },
+            "bbox": [
+                63,
+                451,
+                492,
+                682
+            ]
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/d1e958c75e74d6238fb302d3b76c3b1ad291d23f2bb78c2c3e71b4041de74929.jpg"
+                },
+                "image_caption": [
+                    {
+                        "type": "text",
+                        "content": "(a) "
+                    }
+                ],
+                "image_footnote": []
+            },
+            "bbox": [
+                147,
+                727,
+                418,
+                793
+            ]
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/856db18c22bd0694b82618b1d3c3e9ed046451cd36f1aa130c25d09a3a30cd26.jpg"
+                },
+                "image_caption": [
+                    {
+                        "type": "text",
+                        "content": "Fig. 1 The optical model employed to fit the spectroscopic ellipsometer data of perovskites films fabricated on (a) glass, and (b) ITO substrates. "
+                    }
+                ],
+                "image_footnote": []
+            },
+            "bbox": [
+                166,
+                807,
+                418,
+                887
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "Fig. 2 depicts the parameters obtained through the fitting of spectroscopic ellipsometer data for FAPI thin films, while Fig. 3 represents the same for the CsFAPI thin films. The refractive index of FAPI thin film deposited on a glass substrate exhibited a peak around "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "5 2 0 ~ \\mathrm { { n m } }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "with a refractive index "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "( n ) \\sim 2 . 3 3"
+                    },
+                    {
+                        "type": "text",
+                        "content": ", and a hump ranging from "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "7 0 0 ~ \\mathrm { { n m } }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "to "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "9 5 0 \\ \\mathrm { n m }"
+                    },
+                    {
+                        "type": "text",
+                        "content": ", which is lower than the previously reported value of 2.4–2.6.42 The peak at low energy corresponds to the transition through the energy bandgap, while the peak at high energy corresponds to an indirect transition. However, the value of "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "n"
+                    },
+                    {
+                        "type": "text",
+                        "content": "was found to decrease slightly for the perovskite films deposited on ITO with "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "n \\sim 2 . 2 2"
+                    },
+                    {
+                        "type": "text",
+                        "content": ". The drop in n on the perovskite thin films deposited on ITO substrates is associated with the decrease in the polarizability of perovskite films due to charge transfer, an increase in surface roughness, and a drop in crystallinity of the perovskite films.59,60 "
+                    }
+                ]
+            },
+            "bbox": [
+                502,
+                60,
+                929,
+                290
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "The refractive index spectra of CsFAPI thin film deposited on glass substrates exhibit two peaks at "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "5 3 0 \\ \\mathrm { n m }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "and "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "8 0 0 \\ \\mathrm { n m }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "with corresponding refractive index "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "n \\sim 2 . 8 1"
+                    },
+                    {
+                        "type": "text",
+                        "content": "and 2.59, respectively, higher than FAPI films. This value of n for FAPI is in a similar range reported by Xie et al.61 while slightly higher than reported by Ndione et al. of 2.5.42 The low-energy peak ascribes to the transition through the energy bandgap whereas the high-energy transition corresponds to the indirect transition through the bandgap. One possible reason for a higher refractive index of CsFAPI than FAPI is that CsFAPI has a larger molecular polarizability than FAPI. CsFAPI has a larger cation "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "( \\cos ^ { + } )"
+                    },
+                    {
+                        "type": "text",
+                        "content": "than FAPI "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\left( \\mathrm { F A } ^ { + } \\right)"
+                    },
+                    {
+                        "type": "text",
+                        "content": ", suggesting that CsFAPI has higher electron density and a larger molecular size. This could result in a higher polarizability and a higher refractive index for CsFAPI as compared to FAPI. Moreover, CsFAPI has a higher energy bandgap than FAPI, implying less absorption of light in CsFAPI and a higher n value. The value of "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "n"
+                    },
+                    {
+                        "type": "text",
+                        "content": "was found to be similar for the samples, glass/CsFAPI and ITO/CsFAPI. "
+                    }
+                ]
+            },
+            "bbox": [
+                502,
+                290,
+                929,
+                566
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "Fig. 2b depicts the extinction coefficient k of FAPI thin films. The peak was observed at "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "4 8 1 ~ \\mathrm { { n m } }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "with a value of "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\kappa \\sim 1 . 0 5"
+                    },
+                    {
+                        "type": "text",
+                        "content": "for "
+                    }
+                ]
+            },
+            "bbox": [
+                502,
+                567,
+                929,
+                596
+            ]
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/b3c499f799c0be47f32bf58a0c588af9c30db72b33cb6d3577d4c4317a76a48d.jpg"
+                },
+                "image_caption": [],
+                "image_footnote": []
+            },
+            "bbox": [
+                521,
+                631,
+                912,
+                753
+            ]
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/dec079f9af9906880b03d594343c30729ae8e568e8b45c3e6739eeb26788fc53.jpg"
+                },
+                "image_caption": [],
+                "image_footnote": []
+            },
+            "bbox": [
+                527,
+                753,
+                719,
+                872
+            ]
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/64f2bfa8cde434b08891f2c208f1b49a9657a182fdb908cb55f5d929ced73481.jpg"
+                },
+                "image_caption": [
+                    {
+                        "type": "text",
+                        "content": "Fig. 2 Optical constants: (a) refractive index (b) extinction coefficient, (c) dielectric constant, and (d) dielectric loss of FAPI thin films fabricated in different substrates. "
+                    }
+                ],
+                "image_footnote": []
+            },
+            "bbox": [
+                715,
+                754,
+                905,
+                875
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "View Article Online "
+                    }
+                ]
+            },
+            "bbox": [
+                831,
+                11,
+                929,
+                21
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "Energy Advances "
+                    }
+                ]
+            },
+            "bbox": [
+                67,
+                30,
+                203,
+                44
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "Paper "
+                    }
+                ]
+            },
+            "bbox": [
+                880,
+                30,
+                929,
+                44
+            ]
+        },
+        {
+            "type": "page_aside_text",
+            "content": {
+                "page_aside_text_content": [
+                    {
+                        "type": "text",
+                        "content": "Open Access Article. Published on 26 August 2024. Downloaded on 4/4/2026 4:01:13 PM.  \n[CC BY-NC] This article is licensed under a Creative Commons Attribution-NonCommercial 3.0 Unported License. "
+                    }
+                ]
+            },
+            "bbox": [
+                3,
+                114,
+                45,
+                629
+            ]
+        },
+        {
+            "type": "page_number",
+            "content": {
+                "page_number_content": [
+                    {
+                        "type": "text",
+                        "content": "2514 "
+                    }
+                ]
+            },
+            "bbox": [
+                68,
+                956,
+                102,
+                967
+            ]
+        },
+        {
+            "type": "page_footer",
+            "content": {
+                "page_footer_content": [
+                    {
+                        "type": "text",
+                        "content": "Energy Adv., 2024, 3, 2512–2519 "
+                    }
+                ]
+            },
+            "bbox": [
+                122,
+                956,
+                321,
+                969
+            ]
+        },
+        {
+            "type": "page_footer",
+            "content": {
+                "page_footer_content": [
+                    {
+                        "type": "equation_inline",
+                        "content": "\\circledcirc"
+                    },
+                    {
+                        "type": "text",
+                        "content": "2024 The Author(s). Published by the Royal Society of Chemistry "
+                    }
+                ]
+            },
+            "bbox": [
+                509,
+                956,
+                929,
+                970
+            ]
+        }
+    ],
+    [
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/4ad6d50871967bd68ad9d2d4b0a12bb3fe5adf116e9eec0d34d4752f2f7dac43.jpg"
+                },
+                "image_caption": [],
+                "image_footnote": []
+            },
+            "bbox": [
+                80,
+                62,
+                278,
+                186
+            ]
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/885e29d3301c8a26446578a1fe59d2783c89f227369fe031c7e24c763be6dc1c.jpg"
+                },
+                "image_caption": [],
+                "image_footnote": []
+            },
+            "bbox": [
+                278,
+                61,
+                475,
+                184
+            ]
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/029b0d205e3da637664da2a522bba8cbcd934f9664a57bb15c70cf2f598573b5.jpg"
+                },
+                "image_caption": [],
+                "image_footnote": []
+            },
+            "bbox": [
+                92,
+                186,
+                284,
+                308
+            ]
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/64afd999799ee0b20fcddfd23113e6b59d8d0aadf09347079dd63d6689f54ab4.jpg"
+                },
+                "image_caption": [
+                    {
+                        "type": "text",
+                        "content": "Fig. 3 Optical constants: (a) refractive index (b) extinction coefficient, (c) dielectric constant, and (d) dielectric loss of CsFAPI perovskites thin films fabricated on different substrates. "
+                    }
+                ],
+                "image_footnote": []
+            },
+            "bbox": [
+                282,
+                186,
+                477,
+                306
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "Glass/FAPI. The spectra also exhibit a wide shoulder ranging from "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "6 6 0 \\ \\mathrm { n m }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "to "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "7 8 0 ~ \\mathrm { n m }"
+                    },
+                    {
+                        "type": "text",
+                        "content": ", while ITO/FAPI delivered a similar "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\kappa"
+                    },
+                    {
+                        "type": "text",
+                        "content": "value. The extinction coefficient of CsFAPI films was found to be "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\kappa \\sim 0 . 8 3"
+                    },
+                    {
+                        "type": "text",
+                        "content": ", which is lower than FAPI. Further, the absorption coefficient "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\mathscr { X }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "was evaluated using the equation: "
+                    }
+                ]
+            },
+            "bbox": [
+                65,
+                378,
+                490,
+                455
+            ]
+        },
+        {
+            "type": "equation_interline",
+            "content": {
+                "math_content": "\\alpha = \\frac {4 \\pi \\kappa}{\\lambda}",
+                "math_type": "latex",
+                "image_source": {
+                    "path": "images/87eed385863b292b766fe4e98145a7b8cc1e361c99c5eebabb8362f82792ef79.jpg"
+                }
+            },
+            "bbox": [
+                248,
+                460,
+                307,
+                487
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "Fig. 4a and b illustrate the variation in the absorption coefficient of FAPI and CsFAPI films, respectively. The "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\mathscr { X }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "was found to be "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\sim 3 \\times 1 0 ^ { 5 } \\mathrm { c m } ^ { - 1 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "for Glass/FAPI and "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "2 . 2 \\times 1 0 ^ { 5 } \\mathrm { c m } ^ { - 1 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "for Glass/CsFAPI. The value of absorption coefficient in the present study is higher than the previously reported "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\left( 2 . 2 \\times 1 0 ^ { 5 } \\thinspace \\mathrm { c m } ^ { - 1 } \\right)"
+                    },
+                    {
+                        "type": "text",
+                        "content": "for FAPI thin films fabricated via conventional method62 and exhibits a similar value reported by Kato et al.43 A slight increase in a was noted for ITO/CsFAPI. The lower value of the absorption coefficient of CsFAPI thin films is attributed to the higher bandgap (Table S2 and Fig. S2, "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\mathrm { E S I \\dag }"
+                    },
+                    {
+                        "type": "text",
+                        "content": ") in comparison to FAPI, therefore, higher photon energy is required for the absorption in CsFAPI, subsequently lowering the absorption coefficient. "
+                    }
+                ]
+            },
+            "bbox": [
+                63,
+                504,
+                490,
+                686
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "The permittivity constant is associated with the energy band arrangement and is defined through the equation: "
+                    }
+                ]
+            },
+            "bbox": [
+                65,
+                688,
+                489,
+                718
+            ]
+        },
+        {
+            "type": "equation_interline",
+            "content": {
+                "math_content": "\\varepsilon = \\varepsilon_ {\\mathrm {r}} - i \\varepsilon_ {\\mathrm {i}}",
+                "math_type": "latex",
+                "image_source": {
+                    "path": "images/47f4346738d69a4bccedf234445954378ee271a629e7a56211ff5c339cf42cd7.jpg"
+                }
+            },
+            "bbox": [
+                240,
+                727,
+                315,
+                741
+            ]
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/d8551d3b1c02f8741213ce98da7ec2e5d68f040cfac6b315da1c74bba2b34b9f.jpg"
+                },
+                "image_caption": [],
+                "image_footnote": []
+            },
+            "bbox": [
+                80,
+                768,
+                284,
+                885
+            ]
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/fa2876e9531f2d4e5490b862627fd3d5cfb20daa7e0b0b2c4cab4863744febdf.jpg"
+                },
+                "image_caption": [
+                    {
+                        "type": "text",
+                        "content": "Fig. 4 The absorption coefficient of (a) FAPI and (b) CsFAPI perovskite thin films. "
+                    }
+                ],
+                "image_footnote": []
+            },
+            "bbox": [
+                278,
+                775,
+                477,
+                885
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "The real part of permittivity is given through the equation: "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\varepsilon _ { \\mathrm { { r } } } = n ^ { 2 } - \\kappa ^ { 2 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "and it is associated with the degree of polarization and it increases with polarization. The imaginary part of the permittivity constant is defined through the relation: "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\varepsilon _ { \\mathrm { i } } = 2 n \\kappa"
+                    },
+                    {
+                        "type": "text",
+                        "content": "and it provides information on the energy losses inside the material. The dielectric constant "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\varepsilon _ { \\mathrm { r } }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "of the two materials are illustrated in Fig. 2c and 3c. The dielectric constant of the Glass/FAPI sample exhibits a peak at "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "8 2 6 \\ \\mathrm { n m }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "with "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\varepsilon _ { \\mathrm { r } } ~ \\sim ~ 5 . 5 1"
+                    },
+                    {
+                        "type": "text",
+                        "content": ", corresponds to absorption by free charge carriers, and a secondary transition centered around "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "5 2 8 ~ \\mathrm { n m }"
+                    },
+                    {
+                        "type": "text",
+                        "content": ". The "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\varepsilon _ { \\mathrm { r } }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "value of FAPI is slightly lower than reported by Kato et al.43 of 6 and 7 by Subedi et al.44 However, the value "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\varepsilon _ { \\mathrm { r } }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "for CsFAPI thin film was found to be higher and exhibits absorption peaks "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\sim 8 0 2 \\ \\mathrm { n m }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "with a corresponding dielectric constant of 6.90. The dielectric constant and loss of CsFAPI films are higher than FAPI films due to higher polarization in it, attributed to the Cs cations and increase of charge carrier density. "
+                    }
+                ]
+            },
+            "bbox": [
+                502,
+                61,
+                929,
+                320
+            ]
+        },
+        {
+            "type": "title",
+            "content": {
+                "title_content": [
+                    {
+                        "type": "text",
+                        "content": "Photophysical properties "
+                    }
+                ],
+                "level": 1
+            },
+            "bbox": [
+                504,
+                338,
+                675,
+                354
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "The photophysical properties of FAPI and CsFAPI perovskite thin films were investigated by measuring the steady-state PL and TRPL spectra. The PL emission spectra of Glass/FAPI (Fig. 5a) show peak emission around "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "8 0 3 ~ \\mathrm { { \\ n m } }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "and shift to "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "8 1 6 \\ \\mathrm { n m }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "when deposited on ITO substrate, which is similar to the value observed previously.63 The red shift in the PL spectra indicates the increase of defect states in the bandgap of FAPI, which is also evident from the ellipsometer analyses in terms of the increase of void "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\%"
+                    },
+                    {
+                        "type": "text",
+                        "content": "and roughness. These defects provide non-radiative recombination paths for excited electrons, causing a red shift in PL spectra and a decrease in PL intensity. The PL emission peak for CsFAPI thin film (Fig. 5b) deposited on a glass substrate appeared at "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "7 9 9 \\ \\mathrm { n m }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "and showed a reduced intensity when deposited on an ITO substrate. The emission of CsFAPI films was noted to be red-shifted to "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "8 1 6 \\ \\mathrm { n m }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "attributed to emission mediated through the defect states. This emission is similar to what we reported previously16 and in close approximation to the previously reported value of "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "8 1 0 ~ \\mathrm { { n m } }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "from the conventional fabrication route.64,65 Moreover, It can be noted from Fig. 5b that the CsFAPI samples exhibit double peak emission. The dual peak emission is ascribed to the selfabsorption effect,66 perovskite phase transition,67 and the coexistence of 2D and 3D perovskite phases68,69 in the thin films. However, here the self-absorption effect is a possible reason for the appearance of double peak emission in ITO/CsFAPI "
+                    }
+                ]
+            },
+            "bbox": [
+                502,
+                358,
+                929,
+                743
+            ]
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/5558c95b14c889716d09d871e9701c1260950995d15d97af7c253494b2244b93.jpg"
+                },
+                "image_caption": [],
+                "image_footnote": []
+            },
+            "bbox": [
+                524,
+                768,
+                717,
+                885
+            ]
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/703070b7ddd175542089a62ab265bae514c049f8fd7d188026d6b7662114edeb.jpg"
+                },
+                "image_caption": [
+                    {
+                        "type": "text",
+                        "content": "Fig. 5 Steady-state PL spectra of (a) FAPI and (b) CsFAPI thin films fabricated on different substrates. "
+                    }
+                ],
+                "image_footnote": []
+            },
+            "bbox": [
+                717,
+                768,
+                907,
+                887
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "View Article Online "
+                    }
+                ]
+            },
+            "bbox": [
+                831,
+                11,
+                926,
+                20
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "Paper "
+                    }
+                ]
+            },
+            "bbox": [
+                67,
+                30,
+                115,
+                44
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "Energy Advances "
+                    }
+                ]
+            },
+            "bbox": [
+                794,
+                30,
+                927,
+                43
+            ]
+        },
+        {
+            "type": "page_aside_text",
+            "content": {
+                "page_aside_text_content": [
+                    {
+                        "type": "text",
+                        "content": "Open Access Article. Published on 26 August 2024. Downloaded on 4/4/2026 4:01:13 PM.  \n(oc) BY-NC This article is licensed under a Creative Commons Attribution-NonCommercial 3.0 Unported License. "
+                    }
+                ]
+            },
+            "bbox": [
+                3,
+                114,
+                43,
+                627
+            ]
+        },
+        {
+            "type": "page_footer",
+            "content": {
+                "page_footer_content": [
+                    {
+                        "type": "equation_inline",
+                        "content": "\\circledcirc"
+                    },
+                    {
+                        "type": "text",
+                        "content": "2024 The Author(s). Published by the Royal Society of Chemistry "
+                    }
+                ]
+            },
+            "bbox": [
+                67,
+                956,
+                487,
+                969
+            ]
+        },
+        {
+            "type": "page_footer",
+            "content": {
+                "page_footer_content": [
+                    {
+                        "type": "text",
+                        "content": "Energy Adv., 2024, 3, 2512–2519 "
+                    }
+                ]
+            },
+            "bbox": [
+                677,
+                956,
+                873,
+                969
+            ]
+        },
+        {
+            "type": "page_number",
+            "content": {
+                "page_number_content": [
+                    {
+                        "type": "text",
+                        "content": "2515 "
+                    }
+                ]
+            },
+            "bbox": [
+                895,
+                956,
+                927,
+                967
+            ]
+        }
+    ],
+    [
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "because the ITO layer causes the internal reflection in the perovskites layer which is reabsorbed by the perovskites leading to the appearance of dual peak emission. "
+                    }
+                ]
+            },
+            "bbox": [
+                63,
+                60,
+                490,
+                106
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "The TRPL spectra of perovskites on different substrates are shown in Fig. 6. The decay spectra exhibit good fitting to the tri-exponential decay function:70 "
+                    }
+                ]
+            },
+            "bbox": [
+                65,
+                107,
+                490,
+                152
+            ]
+        },
+        {
+            "type": "equation_interline",
+            "content": {
+                "math_content": "I (t) = A + B _ {1} \\mathrm {e} ^ {- t / \\tau_ {1}} + B _ {2} \\mathrm {e} ^ {- t / \\tau_ {2}} + B _ {3} \\mathrm {e} ^ {- t / \\tau_ {3}}",
+                "math_type": "latex",
+                "image_source": {
+                    "path": "images/3bbca5b19f3839db4644cee6533b0d4609ddbf307976090ad1d82add257621b4.jpg"
+                }
+            },
+            "bbox": [
+                149,
+                163,
+                406,
+                182
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "where A is a constant, and "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "B _ { 1 } , B _ { 2 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": ", and "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "B _ { 3 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "are relative amplitudes of radiative, nonradiative, and charge transfer processes respectively.71–73 The lifetime "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\tau _ { 1 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "corresponds to the radiative recombination of excited charge carriers transitioning from the highest occupied molecular orbital (HOMO) to the lowest unoccupied molecular orbital (LUMO) level, the lifetime "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\tau _ { 2 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "is associated with the nonradiative recombination through defects states, and the lifetime "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\tau _ { 3 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "is ascribed to the charge transfer process from perovskites to selective contacts. Table 1 presents the fitting parameters and lifetimes, which reveals that the decay corresponds to "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\tau _ { 1 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "is dominant in both perovskites with similar lifetimes in the range from 0.5 ns while the lifetime "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\tau _ { 2 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "found to be slightly higher than "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\tau _ { 1 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "but has a lower contribution. The value of "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\tau _ { 1 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "found to be similar for the perovskites on glass and ITO. The lifetime "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\tau _ { 3 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "found to be the highest among the three and noted to be from a few ns for perovskite on glass substrates and decreases for perovskites on ITO substrate. "
+                    }
+                ]
+            },
+            "bbox": [
+                63,
+                195,
+                492,
+                469
+            ]
+        },
+        {
+            "type": "title",
+            "content": {
+                "title_content": [
+                    {
+                        "type": "text",
+                        "content": "Electrical parameters "
+                    }
+                ],
+                "level": 1
+            },
+            "bbox": [
+                65,
+                483,
+                213,
+                499
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "The electrical parameters including surface resistivity "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "( \\rho )"
+                    },
+                    {
+                        "type": "text",
+                        "content": ", mobility "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "( \\mu )"
+                    },
+                    {
+                        "type": "text",
+                        "content": ", charge carrier concentration "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "( n )"
+                    },
+                    {
+                        "type": "text",
+                        "content": ", and sheet resistance "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\left( R _ { \\mathrm { S h e e t } } \\right)"
+                    },
+                    {
+                        "type": "text",
+                        "content": "were evaluated from Hall effect measurements and are listed in Table 2. The surface resistivity of FAPI was found to be "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "3 . 4 5 \\ \\times \\ 1 0 ^ { 5 } \\ \\Omega"
+                    },
+                    {
+                        "type": "text",
+                        "content": "cm and noted to be decreased to "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "2 . 4 1 \\times 1 0 ^ { 5 } \\Omega \\mathrm { ~ c ~ }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "m for CsFAPI film. The higher resistivity of FAPI caused higher sheet resistance, as the sheet resistance of thin film is given by "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "R _ { \\mathrm { S h e e t } } = \\rho / _ { t } ,"
+                    },
+                    {
+                        "type": "text",
+                        "content": ", where "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "t"
+                    },
+                    {
+                        "type": "text",
+                        "content": "is film thickness. Arguably, FAPI exhibited a higher sheet resistance than CsFAPI. The mobility in FAPI thin film was determined to be "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\mu = 4 . 7 9 \\ \\times"
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "1 0 ^ { - 1 } \\mathrm { c m } ^ { 2 } \\mathrm { V } ^ { - 1 } \\mathrm { s } ^ { - 1 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "and it increases to "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "8 . 8 7 \\times { 1 0 } ^ { - 1 } { \\mathrm { c m } } ^ { 2 } { \\mathrm { V } } ^ { - 1 } { { s } } ^ { - 1 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "for CsFAPI. The charge carrier density in FAPI found to be "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "3 . 9 9 \\ \\times"
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "1 0 ^ { 1 3 } \\ \\mathrm { c m } ^ { - 3 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": ", slightly higher than CsFAPI which has a carrier density of be "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "2 . 6 1 \\times { 1 0 } ^ { 1 3 } \\mathrm { ~ c m } ^ { - 3 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": ". "
+                    }
+                ]
+            },
+            "bbox": [
+                63,
+                504,
+                490,
+                720
+            ]
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/4be929b9bbd728fba4f510e20daf05769d808a51fcd8ea2eb4afa5e9d1bdf209.jpg"
+                },
+                "image_caption": [],
+                "image_footnote": []
+            },
+            "bbox": [
+                85,
+                745,
+                273,
+                869
+            ]
+        },
+        {
+            "type": "image",
+            "content": {
+                "image_source": {
+                    "path": "images/de9b34d0328a5428c4e8b2797bb34c65d6823471ab7a5de3c765e62e63a07f6a.jpg"
+                },
+                "image_caption": [
+                    {
+                        "type": "text",
+                        "content": "Fig. 6 Decay spectra of (a) FAPI, and (b) CsFAPI films. The black solid line is a fitting line from the bi-exponential decay function: I tð Þ ¼ A þ B1 e - tt1 þ B2 e - tt2 þ B3 e - tt3 . "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "I ( t ) = A + B _ { 1 } \\mathrm { e } ^ { - \\frac { t } { \\tau _ { 1 } } } + B _ { 2 } \\mathrm { e } ^ { - \\frac { t } { \\tau _ { 2 } } } + B _ { 3 } \\mathrm { e } ^ { - \\frac { t } { \\tau _ { 3 } } } ."
+                    }
+                ],
+                "image_footnote": []
+            },
+            "bbox": [
+                278,
+                745,
+                470,
+                867
+            ]
+        },
+        {
+            "type": "table",
+            "content": {
+                "image_source": {
+                    "path": "images/ef62db737d533722f564edb6c28de64f87278893a1f6336abaecb10a938817c4.jpg"
+                },
+                "table_caption": [
+                    {
+                        "type": "text",
+                        "content": "Table 1 The fitting parameters and lifetime of FAPI and CsFAPI thin films extracted from the tri-exponential decay function "
+                    }
+                ],
+                "table_footnote": [],
+                "html": "<table><tr><td>Sample</td><td>τ1(ns)</td><td>B1(%)</td><td>τ2(ns)</td><td>B2(%)</td><td>τ3(ns)</td><td>B3(%)</td><td>τavg(ns)</td><td>χ2</td></tr><tr><td>Glass/FAPI</td><td>0.58</td><td>99.8</td><td>1.31</td><td>0.16</td><td>22.6</td><td>0.04</td><td>0.59</td><td>1.98</td></tr><tr><td>ITO/FAPI</td><td>0.46</td><td>95.3</td><td>0.89</td><td>4.6</td><td>2.2</td><td>0.1</td><td>0.72</td><td>1.47</td></tr><tr><td>Glass/CsFAPI</td><td>0.58</td><td>95.7</td><td>1.57</td><td>4.26</td><td>18.4</td><td>0.04</td><td>0.59</td><td>1.38</td></tr><tr><td>ITO/CsFAPI</td><td>0.45</td><td>96.0</td><td>0.82</td><td>3.7</td><td>1.6</td><td>0.3</td><td>0.46</td><td>1.62</td></tr></table>",
+                "table_type": "simple_table",
+                "table_nest_level": 1
+            },
+            "bbox": [
+                504,
+                88,
+                931,
+                172
+            ]
+        },
+        {
+            "type": "table",
+            "content": {
+                "image_source": {
+                    "path": "images/09ab65975945e194db1ad462c116efbb23daf5c4cadc4089d5a92d7436a4454c.jpg"
+                },
+                "table_caption": [
+                    {
+                        "type": "text",
+                        "content": "Table 2 Electrical parameters of FAPI and CsFAPI extracted from Hall effect "
+                    }
+                ],
+                "table_footnote": [],
+                "html": "<table><tr><td>Sample</td><td>ρ (Ω cm)</td><td>μ (cm2V-1s-1)</td><td>n (cm-3)</td><td>RSheet (Ω cm-2)</td></tr><tr><td>FA1</td><td>3.45 × 105</td><td>4.79 × 10-1</td><td>3.99 × 1013</td><td>8.79 × 109</td></tr><tr><td>CFA1</td><td>2.41 × 105</td><td>8.87 × 10-1</td><td>2.61 × 1013</td><td>6.13 × 109</td></tr></table>",
+                "table_type": "simple_table",
+                "table_nest_level": 1
+            },
+            "bbox": [
+                504,
+                225,
+                931,
+                287
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "We fabricated a "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\mathsf { p } { \\mathsf { - i } } { \\mathsf { - n } }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "type device structure and evaluated the photovoltaics parameters in ITO/PTAA/CsFAPI/PCBM/BCP/ Ag architecture to attest the quality of studied perovskite film, and a typical device from CsFAPI displayed a competitive efficiency of "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "1 6 . 1 4 \\%"
+                    },
+                    {
+                        "type": "text",
+                        "content": "characterized by short-circuit current "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\left( J _ { \\mathrm { S C } } \\right)"
+                    },
+                    {
+                        "type": "text",
+                        "content": "of "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "2 3 . 9 9 5 ~ \\mathrm { \\ m A } ~ \\mathrm { c m } ^ { - 2 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": ", an open circuit voltage "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\left( V _ { \\mathrm { O C } } \\right)"
+                    },
+                    {
+                        "type": "text",
+                        "content": "of "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "9 1 2 { \\mathrm { ~ m V } } _ { \\mathrm { { i } } }"
+                    },
+                    {
+                        "type": "text",
+                        "content": ", and fill factor (FF) of "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "7 3 . 7 4 \\%"
+                    },
+                    {
+                        "type": "text",
+                        "content": "(Fig. S3, ESI†). This is one of the best performances observed in p–i–n configuration for methylammonium-free and additive-free PSCs. The spectral dependence was registered by measuring the external quantum efficiency (EQE) response of the fabricated PSC, which shows its panchromatic absorption characteristics of FAPI (Fig. S4, ESI†), within the absorbance range of 300–850 nm. The integrated urrent density slightly decreases with the current density measured by the J–V curve due to a mismatch in solar illumination. "
+                    }
+                ]
+            },
+            "bbox": [
+                502,
+                304,
+                929,
+                534
+            ]
+        },
+        {
+            "type": "title",
+            "content": {
+                "title_content": [
+                    {
+                        "type": "text",
+                        "content": "3. Experimental "
+                    }
+                ],
+                "level": 1
+            },
+            "bbox": [
+                504,
+                567,
+                684,
+                587
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "The glass and ITO-coated glass substrates "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\left( \\sim 1 0 ~ \\Omega ~ \\mathrm { c m } ^ { - 1 } \\right."
+                    },
+                    {
+                        "type": "text",
+                        "content": ", Xin Yan Technology Ltd) were sequentially cleaned in the ultrasonic bath for 15 min each of Hellmanex solution, DI water, acetone, and methanol followed by drying with nitrogen gas. All the solutions and films were prepared inside a glove box with "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\mathbf { H } _ { 2 } \\mathbf { O } < 1"
+                    },
+                    {
+                        "type": "text",
+                        "content": "ppm and "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\mathrm { O } _ { 2 } < 1 0"
+                    },
+                    {
+                        "type": "text",
+                        "content": "ppm. The synthesis of "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "{ \\mathsf { a } } { \\mathrm { - F A P b I } } _ { 3 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "and "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\mathbf { \\alpha } \\propto \\mathbf { C S _ { 0 . 1 } F A _ { 0 . 9 } P b I _ { 3 } }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "powder was carried out as per our previous report.15,16 For the deposition of perovskites thin films, "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "6 3 3 ~ \\mathrm { m g }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "of "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "{ \\mathsf { a } } { \\mathrm { - F A P b I } } _ { 3 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "and "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "7 6 5 ~ \\mathrm { \\ m g }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "of "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\mathbf { \\alpha } \\propto \\mathbf { C S _ { 0 . 1 } F A _ { 0 . 9 } P b I _ { 3 } }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "precursors were dissolved in 1 ml of the binary solution DMSO and DMF with a volume ratio of "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "{ \\boldsymbol { 1 } } : { \\boldsymbol { 8 } }"
+                    },
+                    {
+                        "type": "text",
+                        "content": ", respectively. The solution was allowed to be stirred for 24 hours at "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "5 0 ~ ^ { \\circ } \\mathrm { C }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "inside the glove box. When precursors were completely dissolved, the solution was filtered with a PTFE filter of "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "0 . 2 2 ~ { \\mu \\mathrm { m } }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "pore size and kept in the hot plate at "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "5 0 ~ ^ { \\circ } \\mathrm { C }"
+                    },
+                    {
+                        "type": "text",
+                        "content": ". The perovskite thin films were deposited by dispensing the "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "6 0 ~ \\mu \\mathrm { L }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "precursor solution onto cleaned substrates and spin-coated at 1000 rpm for "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "^ { 1 0 } \\mathrm { ~ \\ } \\mathbf { s } ,"
+                    },
+                    {
+                        "type": "text",
+                        "content": ", then at 4000 rpm for 30 s. During the last 5 s, chlorobenzene solvent was dispensed to accelerate the crystallization of perovskite films. The spin-casted perovskite thin films were annealed at "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "1 5 0 ~ ^ { \\circ } \\mathrm { C }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "for "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "3 0 \\ \\mathrm { m i n }"
+                    },
+                    {
+                        "type": "text",
+                        "content": ". "
+                    }
+                ]
+            },
+            "bbox": [
+                502,
+                596,
+                929,
+                919
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "View Article Online "
+                    }
+                ]
+            },
+            "bbox": [
+                831,
+                11,
+                927,
+                21
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "Energy Advances "
+                    }
+                ]
+            },
+            "bbox": [
+                67,
+                30,
+                203,
+                44
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "Paper "
+                    }
+                ]
+            },
+            "bbox": [
+                880,
+                30,
+                929,
+                44
+            ]
+        },
+        {
+            "type": "page_aside_text",
+            "content": {
+                "page_aside_text_content": [
+                    {
+                        "type": "text",
+                        "content": "Open Access Article. Published on 26 August 2024. Downloaded on 4/4/2026 4:01:13 PM.  \n[CC BY-NC] This article is licensed under a Creative Commons Attribution-NonCommercial 3.0 Unported License. "
+                    }
+                ]
+            },
+            "bbox": [
+                3,
+                114,
+                43,
+                629
+            ]
+        },
+        {
+            "type": "page_number",
+            "content": {
+                "page_number_content": [
+                    {
+                        "type": "text",
+                        "content": "2516 "
+                    }
+                ]
+            },
+            "bbox": [
+                68,
+                956,
+                102,
+                967
+            ]
+        },
+        {
+            "type": "page_footer",
+            "content": {
+                "page_footer_content": [
+                    {
+                        "type": "text",
+                        "content": "Energy Adv., 2024, 3, 2512–2519 "
+                    }
+                ]
+            },
+            "bbox": [
+                122,
+                956,
+                319,
+                969
+            ]
+        },
+        {
+            "type": "page_footer",
+            "content": {
+                "page_footer_content": [
+                    {
+                        "type": "equation_inline",
+                        "content": "\\circledcirc"
+                    },
+                    {
+                        "type": "text",
+                        "content": "2024 The Author(s). Published by the Royal Society of Chemistry "
+                    }
+                ]
+            },
+            "bbox": [
+                509,
+                956,
+                929,
+                970
+            ]
+        }
+    ],
+    [
+        {
+            "type": "title",
+            "content": {
+                "title_content": [
+                    {
+                        "type": "text",
+                        "content": "Device fabrication "
+                    }
+                ],
+                "level": 1
+            },
+            "bbox": [
+                67,
+                61,
+                193,
+                74
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "The fabrication of the p–i–n devices involved a series of steps that included cleaning, depositing, and annealing materials. The bottom electrodes of the p–i–n device were made of ITOcoated glass substrates that were laser-etched and sonicated in a sequence of solvents: Hellmanex II "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "( 2 \\ \\mathrm { \\ v o l \\% }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "in deionized water), deionized water, ethanol, acetone, and isopropanol. The cleaned ITO substrates were then exposed to UV-ozone for 30 minutes before use. A chlorobenzene solution of PTAA as-HTM was spin-coated onto the ITO substrates at 3000 rpm for 30 s. The perovskite "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\mathbf { C } s _ { 0 . 1 } \\mathbf { F A } _ { 0 . 9 } \\mathbf { P b } \\mathbf { I } _ { 3 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "was prepared following the method reported above. A PCBM solution of "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "1 5 ~ \\mathrm { m g } \\mathrm { m L } ^ { - 1 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "in chlorobenzene was spin-coated on the perovskite film at room temperature at 1000 rpm (500 rpm) for 20 s and then annealed at "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "{ \\bf 9 0 } ^ { \\textup { O } } \\mathrm { C }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "for 10 min. A BCP layer "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\mathbf { \\hat { 0 . 5 } \\ m g \\ m L ^ { - 1 } }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "in IPA) was spincoated on the PCBM layer at 5000 rpm for 40 s. The device was finished by evaporating Ag (80 nm, "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "< 1 \\mathrm { ~ \\mathring { A } ~ s ^ { - 1 } } ]"
+                    },
+                    {
+                        "type": "text",
+                        "content": "in a thermal evaporator under low vacuum conditions (below "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "{ { 1 0 } ^ { - 6 } }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "torr). "
+                    }
+                ]
+            },
+            "bbox": [
+                63,
+                80,
+                492,
+                341
+            ]
+        },
+        {
+            "type": "title",
+            "content": {
+                "title_content": [
+                    {
+                        "type": "text",
+                        "content": "Characterization of perovskites thin-films and device "
+                    }
+                ],
+                "level": 1
+            },
+            "bbox": [
+                65,
+                355,
+                428,
+                369
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "The optical constants were evaluated with the spectroscopic ellipsometer measurements of thin films in the range of 450– "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "1 0 0 0 \\ \\mathrm { n m }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "using Smart-SE from Horiba. The measured ellipsometer data were fitted by the three-oscillator Tauc–Lorentz (T–L) model using the optical model (Fig. 1a and b), and output parameters were evaluated only for the perovskites layer. The PL characteristics and the fluorescence lifetime of the samples were examined using a DeltaFlex TCSPC Lifetime Fluorometer from Horiba. This device enabled us to stimulate the samples with a Delta-diode 510L laser with a peak wavelength of "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\lambda ="
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "5 1 0 \\pm 1 0 ~ \\mathrm { n m }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "and to record the fluorescence decay at the maximum emission wavelength. The electrical properties were evaluated using a Hall Effect system from MMR Technologies Inc. that comprised a temperature controller K2000 and a current controller H5000. We conducted the measurements on "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "1 . 0 \\ \\mathrm { c m } ^ { 2 }"
+                    },
+                    {
+                        "type": "text",
+                        "content": "square samples with four silver contacts at the corner of the thin film. The absorption spectra of the fabricated thin films were measured using an Agilent Cary 5000 UV-vis-NIR spectrophotometer. The photovoltaics properties were registered with the help of a class 3A Newport solar simulator connected to Keithley. "
+                    }
+                ]
+            },
+            "bbox": [
+                63,
+                374,
+                492,
+                698
+            ]
+        },
+        {
+            "type": "title",
+            "content": {
+                "title_content": [
+                    {
+                        "type": "text",
+                        "content": "4. Conclusions "
+                    }
+                ],
+                "level": 1
+            },
+            "bbox": [
+                65,
+                721,
+                236,
+                739
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "To conclude, utilizing pre-synthesized perovskite microcrystals, we examined the optical, photophysical, and electrical characteristics of FAPI and CsFAPI thin films. The spectroscopic ellipsometer investigation of the CsFAPI exhibits a higher refractive index and dielectric constant as compared to pure FAPI thin film. Time-resolved fluorescence decay experiments suggest similar charge carriers’ lifetime for both perovskites. We noted that Cs incorporation improved the electrical characteristics by lowering the resistivity and raising charge carrier mobility, suggesting the beneficial role of Cs in FAPI films for application in solar cells. "
+                    }
+                ]
+            },
+            "bbox": [
+                63,
+                750,
+                492,
+                919
+            ]
+        },
+        {
+            "type": "title",
+            "content": {
+                "title_content": [
+                    {
+                        "type": "text",
+                        "content": "Data availability "
+                    }
+                ],
+                "level": 1
+            },
+            "bbox": [
+                505,
+                56,
+                680,
+                77
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "The data supporting this article have been included as part of the "
+                    },
+                    {
+                        "type": "equation_inline",
+                        "content": "\\mathrm { E S I } , \\dag"
+                    },
+                    {
+                        "type": "text",
+                        "content": "and further raw data are available upon request from the authors. "
+                    }
+                ]
+            },
+            "bbox": [
+                502,
+                86,
+                931,
+                130
+            ]
+        },
+        {
+            "type": "title",
+            "content": {
+                "title_content": [
+                    {
+                        "type": "text",
+                        "content": "Conflicts of interest "
+                    }
+                ],
+                "level": 1
+            },
+            "bbox": [
+                504,
+                160,
+                724,
+                179
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "There are no conflicts to declare. "
+                    }
+                ]
+            },
+            "bbox": [
+                504,
+                189,
+                732,
+                204
+            ]
+        },
+        {
+            "type": "title",
+            "content": {
+                "title_content": [
+                    {
+                        "type": "text",
+                        "content": "Acknowledgements "
+                    }
+                ],
+                "level": 1
+            },
+            "bbox": [
+                504,
+                234,
+                722,
+                255
+            ]
+        },
+        {
+            "type": "paragraph",
+            "content": {
+                "paragraph_content": [
+                    {
+                        "type": "text",
+                        "content": "This work received funding from the European Union H2020 Programme under a European Research Council Consolidator grant [MOLEMAT, 726360]. Support from the Spanish Ministry of Science and Innovation (PID2019-111774RB-100/ AEI/10.13039/501100011033 and INTERACTION {PID2021- 129085OB-I00}) is also acknowledged. MTK extend their sincere gratitude to the Deanship of Scientific Research at the Islamic University of Madinah for financially supporting this work. We would also like to acknowledge the help of Naveen Harindu Hemasiri. "
+                    }
+                ]
+            },
+            "bbox": [
+                502,
+                263,
+                929,
+                415
+            ]
+        },
+        {
+            "type": "title",
+            "content": {
+                "title_content": [
+                    {
+                        "type": "text",
+                        "content": "References "
+                    }
+                ],
+                "level": 1
+            },
+            "bbox": [
+                505,
+                444,
+                630,
+                463
+            ]
+        },
+        {
+            "type": "list",
+            "content": {
+                "list_type": "reference_list",
+                "list_items": [
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "1 M. A. Green, E. D. Dunlop, G. Siefer, M. Yoshita, N. Kopidakis, K. Bothe and X. Hao, Solar cell efficiency tables (Version 61), Prog. Photovoltaics, 2023, 31, 3–16. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "2 R. Wang, T. Huang, J. Xue, J. Tong, K. Zhu and Y. Yang, Nat. Photonics, 2021, 15, 411–425. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "3 T. C. Sum and N. Mathews, Energy Environ. Sci., 2014, 7, 2518–2534. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "4 J. Chen, X. Cai, D. Yang, D. Song, J. Wang, J. Jiang, A. Ma, S. Lv, M. Z. Hu and C. Ni, J. Power Sources, 2017, 355, 98–133. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "5 F. Khan, B. D. Rezgui, M. T. Khan and F. Al-Sulaiman, Renewable Sustainable Energy Rev., 2022, 165, 112553. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "6 J. A. Christians, P. A. M. Herrera and P. V. Kamat, J. Am. Chem. Soc., 2015, 137, 1530–1538. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "7 F. F. Targhi, Y. S. Jalili and F. Kanjouri, Results Phys., 2018, 10, 616–627. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "8 I. C. Kaya, K. P. S. Zanoni, F. Palazon, M. Sessolo, H. Akyildiz, S. Sonmezoglu and H. J. Bolink, Adv. Energy Sustainability Res., 2021, 2, 2000065. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "9 D. Zhang, H. Zhang, H. Guo, F. Ye, S. Liu and Y. Wu, Adv. Funct. Mater., 2022, 32, 2200174. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "10 J. Jeong, M. Kim, J. Seo, H. Lu, P. Ahlawat, A. Mishra, Y. Yang, M. A. Hope, F. T. Eickemeyer, M. Kim, Y. J. Yoon, I. W. Choi, B. P. Darwich, S. J. Choi, Y. Jo, J. H. Lee, B. Walker, S. M. Zakeeruddin, L. Emsley, U. Rothlisberger, A. Hagfeldt, D. S. Kim, M. Gra¨tzel and J. Y. Kim, Nature, 2021, 592, 381–385. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "11 V. Pool, B. Dou and D. Van Campen, Nat. Commun., 2017, 8, 14075. "
+                            }
+                        ]
+                    }
+                ]
+            },
+            "bbox": [
+                507,
+                473,
+                929,
+                917
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "View Article Online "
+                    }
+                ]
+            },
+            "bbox": [
+                831,
+                11,
+                927,
+                21
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "Paper "
+                    }
+                ]
+            },
+            "bbox": [
+                67,
+                30,
+                115,
+                44
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "Energy Advances "
+                    }
+                ]
+            },
+            "bbox": [
+                794,
+                30,
+                927,
+                44
+            ]
+        },
+        {
+            "type": "page_aside_text",
+            "content": {
+                "page_aside_text_content": [
+                    {
+                        "type": "text",
+                        "content": "Open Access Article. Published on 26 August 2024. Downloaded on 4/4/2026 4:01:13 PM.  \n(CC) BY-NC This article is licensed under a Creative Commons Attribution-NonCommercial 3.0 Unported License. "
+                    }
+                ]
+            },
+            "bbox": [
+                3,
+                114,
+                43,
+                627
+            ]
+        },
+        {
+            "type": "page_footer",
+            "content": {
+                "page_footer_content": [
+                    {
+                        "type": "equation_inline",
+                        "content": "\\circledcirc"
+                    },
+                    {
+                        "type": "text",
+                        "content": "2024 The Author(s). Published by the Royal Society of Chemistry "
+                    }
+                ]
+            },
+            "bbox": [
+                67,
+                955,
+                487,
+                969
+            ]
+        },
+        {
+            "type": "page_footer",
+            "content": {
+                "page_footer_content": [
+                    {
+                        "type": "text",
+                        "content": "Energy Adv., 2024, 3, 2512–2519 "
+                    }
+                ]
+            },
+            "bbox": [
+                677,
+                956,
+                875,
+                969
+            ]
+        },
+        {
+            "type": "page_number",
+            "content": {
+                "page_number_content": [
+                    {
+                        "type": "text",
+                        "content": "2517 "
+                    }
+                ]
+            },
+            "bbox": [
+                895,
+                956,
+                927,
+                967
+            ]
+        }
+    ],
+    [
+        {
+            "type": "list",
+            "content": {
+                "list_type": "reference_list",
+                "list_items": [
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "12 R. Zhi, C.-Q. Yang, M. U. Rothmann, H.-Q. Du, Y. Jiang, Y.-Y. Xu, Z.-W. Yin, Y.-P. Mo, W. Dong, G. Liang, U. Bach, Y.-B. Cheng and W. Li, ACS Energy Lett., 2023, 8, 2620–2629. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "13 C. Fei, N. Li, M. Wang, X. Wang, H. Gu, B. Chen, Z. Zhang, Z. Ni, H. Jiao, W. Xu, Z. Shi, Y. Yan and J. Huang, Science, 2023, 380, 823–829. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "14 M. P. U. Haris, E. Ruiz, S. Kazim and S. Ahmad, Cell Rep. Phys. Sci., 2023, 4, 101516. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "15 M. P. U. Haris, S. Kazim and S. Ahmad, ACS Appl. Mater. Interfaces, 2022, 14, 24546–24556. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "16 M. P. U. Haris, S. Kazim and S. Ahmad, ACS Appl. Energy Mater., 2021, 4, 2600–2606. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "17 Y. Zhang, S.-G. Kim, D.-K. Lee and N.-G. Park, ChemSusChem, 2018, 11, 1813–1823. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "18 Y. Zhang, S. Seo, S. Y. Lim, Y. Kim, S.-G. Kim, D.-K. Lee, S.-H. Lee, H. Shin, H. Cheong and N.-G. Park, ACS Energy Lett., 2020, 5, 360–366. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "19 J. Wang, F. Meng, R. Li, S. Chen, X. Huang, J. Xu, X. Lin, R. Chen, H. Wu and H.-L. Wang, Sol. RRL, 2020, 4, 2000091. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "20 M. T. Khan, M. Shkir, I. Yahia, A. Almohammedi and S. AlFaify, Superlattices Microstruct., 2020, 138, 106370. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "21 H. E. Atyia and N. A. Hegab, Solid State Sci., 2014, 454, 189–196. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "22 S. Zwerdling, J. Opt. Soc. Am., 1970, 60, 787–790. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "23 D. Poelman and P. F. Smet, J. Phys. D: Appl. Phys., 2003, 36, 1850. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "24 A. A. M. Farag, A. Ashery and M. A. Shenashen, Phys. B, 2012, 407(13), 2404–2411. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "25 S. So¨nmezog˘lu, G. Çankaya and N. Serin, Mater. Technol., 2012, 7, 251–256. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "26 S. So¨nmezog˘lu and O¨. A. So¨nmezog˘lu, Mater. Sci. Eng., C, 2011, 31, 1619–1624. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "27 H. Fujiwara, Spectroscopic Ellipsometry: Principles and Applications. John Wiley & Sons, Ltd., Chichester, 2007. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "28 H. Zhou, Science, 2014, 345, 542–546. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "29 X. Wang, J. Gong, X. Shan, M. Zhang, Z. Xu, R. Dai, Z. Wang, S. Wang, X. Fang and Z. Zhang, J. Phys. Chem. C, 2019, 123, 1362–1369. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "30 S. Brittman and E. C. Garnett, J. Phys. Chem. C, 2016, 120, 616–620. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "31 M. Shirayama, H. Kadowaki, T. Miyadera, T. Sugita, M. Tamakoshi, M. Kato, T. Fujiseki, D. Murata, S. Hara, T. N. Murakami, S. Fujimoto, M. Chikamatsu and H. Fujiwara, Phys. Rev. Appl., 2016, 5, 1–25. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "32 L. Calio, S. Kazim, M. Graetzel and S. Ahmad, Angew. Chem., Int. Ed., 2016, 55, 14522–14545. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "33 M. P. U. Haris, S. Kazim, M. Pegu, M. Deepa and S. Ahmad, Phys. Chem. Chem. Phys., 2021, 23, 9049–9060. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "34 M. Petrovic´, V. Chellappan and S. Ramakrishna, Sol. Energy, 2015, 122, 678–699. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "35 H. Li, C. Cui, X. Xu, S. Bian, C. Ngaojampa, P. Ruankham and A. P. Jaroenjittchai, Sol. Energy, 2020, 212, 48–61. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "36 J. Werner, G. Nogay, F. Sahli, T. C. J. Yang, M. Brauninger, G. Christmann, A. Walter, B. A. Kamino, P. Fiala, P. Loper, S. Nicolay, Q. Jeangros, B. Niesen and C. Ballif, ACS Energy Lett., 2018, 3, 742–747. "
+                            }
+                        ]
+                    }
+                ]
+            },
+            "bbox": [
+                67,
+                60,
+                490,
+                917
+            ]
+        },
+        {
+            "type": "list",
+            "content": {
+                "list_type": "reference_list",
+                "list_items": [
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "37 I. E. Castelli, J. M. Garcı´a-Lastra, K. S. Thygesen and K. W. Jacobsen, APL Mater., 2014, 2, 3–10. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "38 K. Ghimire, A. Cimaroli, F. Hong, T. Shi, N. Podraza and Y. Yan, 2015 IEEE 42nd Photovoltaic Specialist Conference (PVSC), New Orleans, LA, 1–5. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "39 Y. Jiang, A. M. Soufiani, A. Gentle, F. Huang, A. Ho-Baillie and M. A. Green, Appl. Phys. Lett., 2016, 108, 061905. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "40 P. Lo¨per, M. Stuckelberger, B. Niesen, J. Werner, M. Filipi, S.-J. Moon, J.-H. Yum, M. Topi, S. D. Wolf and C. Ballif, J. Phys. Chem. Lett., 2015, 6, 66–71. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "41 M. S. Alias, I. Dursun, M. I. Saidaminov, E. M. Diallo, P. Mishra, T. K. Ng, O. M. Bakr and B. S. Ooi, Opt. Exp., 2016, 24, 16587. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "42 P. F. Ndione, Z. Li and K. Zhu, J. Mater. Chem. C, 2016, 4, 7775. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "43 M. Kato, T. Fujiseki, T. Miyadera, T. Sugita, S. Fujimoto, M. Tamakoshi, M. Chikamatsu and H. Fujiwara, J. Appl. Phys., 2017, 121, 115501. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "44 B. Subedi, L. Guan, Y. Yu, K. Ghimire, P. Uprety, Y. Yan and N. J. Podraza, Sol. Energy Mater. Sol. Cells, 2018, 188, 228. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "45 M. Zhao, Y. Shi, J. Dai and J. Lian, J. Mater. Chem. C, 2018, 6, 10450. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "46 M. I. Alonso, B. Charles, A. Francisco-Lo´pez, M. Garriga, M. T. Weller and A. R. Gon˜i, J. Vac. Sci. Technol., B, 2019, 37, 062901. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "47 M. T. Khan, M. Shakir, B. Alhouri, A. Almohammedi and Y. A. M. Ismail, Optik, 2022, 260, 169092. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "48 Spectroscopic Ellipsometry Principles and Applications by H. Fujiwara, (2007) John Wiley & Sons Ltd., ISBN: 978-0-470- 01608-4. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "49 G. E. Jellison, Jr and F. A. Modine, Appl. Phys. Lett., 1996, 69, 371–373. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "50 J. Koh, H. Fujiwara, P. I. Rovira, A. S. Ferlauto, J. A. Zapien, C. R. Wronski and R. Messier, Appl. Surf. Sci., 2000, 154–155, 217–228. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "51 J. Yang, Y. Jiang, L. Li and M. Gao, Appl. Surf. Sci., 2017, 421(Part B), 446–452. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "52 W. Belhadj, A. Timoumi, F. A. Alamer, O. H. Alsalmi and S. N. Alamri, Results Phys., 2021, 30, 104867. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "53 M. Kato, T. Fujiseki, T. Miyadera, T. Sugita, S. Fujimoto, M. Tamakoshi, M. Chikamastu and H. Fujiwara, J. Appl. Phys., 2017, 121, 11501. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "54 J. Tauc, R. Grigorovici and A. Vancu, Phys. Status Solidi, 1966, 15, 627–637. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "55 D. A. G. Bruggeman, Ann. Phys., 1935, 416, 636–664. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "56 S. J. Fang, W. Chen and T. Yamanaka, Appl. Phys. Lett., 1996, 68, 2837–2839. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "57 D. Li, W. Zhang and A. Goullet, Mod. Phys. Lett. B, 2020, 34, 2050228. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "58 R. Chen and J. C. West, IEEE Trans. Geosci. Remote Sens., 1995, 33, 1206–1213. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "59 M. S. Alias, I. Dursun, M. I. Saidaminov, E. M. Diallo, P. Mishra, T. K. Ng, O. M. Bakr and B. S. Ooi, Opt. Express, 2016, 24, 16586. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "60 M. A. Green, Y. Jiang, A. M. Soufiani and A. Ho-Baillie, J. Phys. Chem. Lett., 2015, 6, 4774–4785. "
+                            }
+                        ]
+                    }
+                ]
+            },
+            "bbox": [
+                505,
+                60,
+                927,
+                917
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "View Article Online "
+                    }
+                ]
+            },
+            "bbox": [
+                831,
+                11,
+                927,
+                21
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "Energy Advances "
+                    }
+                ]
+            },
+            "bbox": [
+                67,
+                30,
+                203,
+                44
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "Paper "
+                    }
+                ]
+            },
+            "bbox": [
+                880,
+                30,
+                927,
+                44
+            ]
+        },
+        {
+            "type": "page_aside_text",
+            "content": {
+                "page_aside_text_content": [
+                    {
+                        "type": "text",
+                        "content": "Open Access Article. Published on 26 August 2024. Downloaded on 4/4/2026 4:01:13 PM.  \n(oc) BY-NC This article is licensed under a Creative Commons Attribution-NonCommercial 3.0 Unported License. "
+                    }
+                ]
+            },
+            "bbox": [
+                3,
+                114,
+                43,
+                627
+            ]
+        },
+        {
+            "type": "page_number",
+            "content": {
+                "page_number_content": [
+                    {
+                        "type": "text",
+                        "content": "2518 "
+                    }
+                ]
+            },
+            "bbox": [
+                68,
+                957,
+                100,
+                967
+            ]
+        },
+        {
+            "type": "page_footer",
+            "content": {
+                "page_footer_content": [
+                    {
+                        "type": "text",
+                        "content": "Energy Adv., 2024, 3, 2512–2519 "
+                    }
+                ]
+            },
+            "bbox": [
+                122,
+                957,
+                319,
+                969
+            ]
+        },
+        {
+            "type": "page_footer",
+            "content": {
+                "page_footer_content": [
+                    {
+                        "type": "equation_inline",
+                        "content": "\\circledcirc"
+                    },
+                    {
+                        "type": "text",
+                        "content": "2024 The Author(s). Published by the Royal Society of Chemistry "
+                    }
+                ]
+            },
+            "bbox": [
+                509,
+                956,
+                927,
+                969
+            ]
+        }
+    ],
+    [
+        {
+            "type": "list",
+            "content": {
+                "list_type": "reference_list",
+                "list_items": [
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "61 Z. Xie, S. Sun, Y. Yan, L. Zhang, R. Hou, F. Tian and G. G. Qin, J. Phys.: Condens. Matter, 2017, 29(24), 245702. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "62 L. Jin-Wook, K. Deok-Hwan, K. Hui-Seon, S. Seung-Woo, C. S. M and P. Nam-Gyu, Adv. Energy Mater., 2015, 5, 1501310. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "63 G. S. Shin, Y. Zhang and N.-G. Park, ACS Appl. Mater. Interfaces, 2020, 12, 15167–15174. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "64 D. S. Assi, M. P. Haris, V. Karthikeyan, S. Kazim, S. Ahmad and V. A. L. Roy, Adv. Electron. Mater., 2023, 9, 2300285. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "65 M. Herna´ndez, M. Pacio, H. Jua´rez, L. E. Serrano and A. Pacio, J. Phys.: Conf. Ser., 2024, 2699, 012019. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "66 K. Schotz, A. M. Askar, W. Peng, D. Seeberger, T. P. Gujar, M. Thelakkat, A. Kohler, S. Huettner, O. M. Bakr, K. Shankar and F. Panzer, J. Mater. Chem. C, 2020, 8, 2289–2300. "
+                            }
+                        ]
+                    }
+                ]
+            },
+            "bbox": [
+                67,
+                60,
+                490,
+                274
+            ]
+        },
+        {
+            "type": "list",
+            "content": {
+                "list_type": "reference_list",
+                "list_items": [
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "67 R. Chulia-Jordan, E. Mas-Marza´, A. Segura, J. Bisquert and J. P. Martı´nez-Pastor, J. Phys. Chem. C, 2018, 122, 22717–22727. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "68 S. M. Gowdru, J.-C. Lin, S.-T. Wang, Y.-C. Chen, K.-C. Wu, C.-N. Jiang, Y.-D. Chen, S.-S. Li, Y. J. Chang and D.-Y. Wang, Nanomaterials, 2022, 12, 1816. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "69 M. M. Abdelhamied, Y. Gao, X. H. Li and W. Liu, Appl. Phys. A: Mater. Sci. Process., 2022, 128, 57. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "70 A. Almohammedi, M. T. Khan, M. Benghanem, S. Aboud, M. Shakir and S. Alfaify, Mater. Sci. Semicond. Process., 2020, 120, 105272. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "71 F. Khan, M. T. Khan, S. Rehman and F. Al-Sulaiman, Surf. Interfaces, 2022, 31, 102066. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "72 M. T. Khan and F. Khan, Mater. Lett., 2022, 323, 132578. "
+                            }
+                        ]
+                    },
+                    {
+                        "item_type": "text",
+                        "item_content": [
+                            {
+                                "type": "text",
+                                "content": "73 M. T. Khan, Mater. Sci. Semicond. Process., 2023, 153, 107172. "
+                            }
+                        ]
+                    }
+                ]
+            },
+            "bbox": [
+                505,
+                60,
+                927,
+                273
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "View Article Online "
+                    }
+                ]
+            },
+            "bbox": [
+                831,
+                11,
+                927,
+                21
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "Paper "
+                    }
+                ]
+            },
+            "bbox": [
+                67,
+                30,
+                115,
+                44
+            ]
+        },
+        {
+            "type": "page_header",
+            "content": {
+                "page_header_content": [
+                    {
+                        "type": "text",
+                        "content": "Energy Advances "
+                    }
+                ]
+            },
+            "bbox": [
+                794,
+                30,
+                927,
+                44
+            ]
+        },
+        {
+            "type": "page_aside_text",
+            "content": {
+                "page_aside_text_content": [
+                    {
+                        "type": "text",
+                        "content": "Open Access Article. Published on 26 August 2024. Downloaded on 4/4/2026 4:01:13 PM.  \n(oc) BY-NC This article is licensed under a Creative Commons Attribution-NonCommercial 3.0 Unported License. "
+                    }
+                ]
+            },
+            "bbox": [
+                3,
+                114,
+                43,
+                627
+            ]
+        },
+        {
+            "type": "page_footer",
+            "content": {
+                "page_footer_content": [
+                    {
+                        "type": "equation_inline",
+                        "content": "\\circledcirc"
+                    },
+                    {
+                        "type": "text",
+                        "content": "2024 The Author(s). Published by the Royal Society of Chemistry "
+                    }
+                ]
+            },
+            "bbox": [
+                67,
+                956,
+                487,
+                969
+            ]
+        },
+        {
+            "type": "page_footer",
+            "content": {
+                "page_footer_content": [
+                    {
+                        "type": "text",
+                        "content": "Energy Adv., 2024, 3, 2512–2519 "
+                    }
+                ]
+            },
+            "bbox": [
+                675,
+                956,
+                873,
+                969
+            ]
+        },
+        {
+            "type": "page_number",
+            "content": {
+                "page_number_content": [
+                    {
+                        "type": "text",
+                        "content": "2519 "
+                    }
+                ]
+            },
+            "bbox": [
+                894,
+                956,
+                927,
+                967
+            ]
+        }
+    ]
+]
