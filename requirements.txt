@@ -1,0 +1,8 @@
+numpy
+pandas
+scipy
+matplotlib
+lmfit
+beautifulsoup4
+PyMuPDF
+tmm

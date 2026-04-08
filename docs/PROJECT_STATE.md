@@ -4,9 +4,9 @@
 
 ## 1. Current Snapshot
 
-- 更新时间：2026-04-06
-- 当前判断 Phase：`Phase 04`
-- 阶段定义：`基于 Phase 03 六参数基线，前向预测 SAM/PVK 界面空气隙在 850-1500 nm 的反射率可检测性`
+- 更新时间：2026-04-08
+- 当前判断 Phase：`Phase 06`
+- 阶段定义：`基于 Phase 05c 全栈对齐 n-k 表，构建全器件双模式微腔剥离缺陷指纹沙盒`
 - 当前可用能力：
   - 已有 `step01_absolute_calibration.py`，可将样品与银镜原始计数转换为绝对反射率
   - 已有 `step01b_cauchy_extrapolation.py`，可基于 [LIT-0001] 的 `ITO/CsFAPI` 数字化折射率曲线生成 `750-1100 nm` 的 CsFAPI 扩展 `n-k` 中间件
@@ -18,15 +18,22 @@
   - 已有 `diagnostics_shape_mismatch.py`，可在独立沙盒中对 ITO 近红外吸收、厚度不均匀性和 PVK 色散斜率做形状畸变诊断
   - 已有 `step02_digitize_fapi_optical_constants.py`，可从 `LIT-0001` 的 Fig. 2 原图数字化提取 FAPI 的 `n/κ` 曲线并输出 QA 图
   - 已有 `step02_digitize_csfapi_optical_constants.py`，可从 `LIT-0001` 的 Fig. 3 原图数字化提取 CsFAPI 的 `n/κ` 曲线并输出 QA 图
+  - 已有 `step05_parse_ellipsometry_markdown.py`，可从 `resources/n-kdata/*/full.md` 解析椭偏报告并构建 `materials_master_db.json`
+  - 已有 `step05b_verify_against_pdf.py`，可用原始 PDF 交叉验证材料数据库中的厚度、RMSE、波段范围与模型完整性
+  - 已有 `step05c_build_aligned_nk_stack.py`，可生成 `400-1100 nm / 1 nm` 的全栈对齐 `n-k` 表 `aligned_full_stack_nk.csv`
+  - 已有 `src/core/full_stack_microcavity.py`，可基于 `aligned_full_stack_nk.csv` 构建 `Baseline / Case A / Case B` 三种全器件微腔堆栈，并在厚玻璃前表面非相干、后侧薄膜相干的几何下求反射率
+  - 已有 `step06_dual_mode_microcavity_sandbox.py`，可扫描 `d_air = 0-50 nm`，输出双模式 `R / ΔR` 指纹字典、40 nm 对比图和 2D 雷达热力图
   - 已产出标准中间文件 `data/processed/target_reflectance.csv` 与 `data/processed/CsFAPI_nk_extended.csv`
   - 已完成 Phase 02 形状畸变诊断，当前证据指向：ITO 近红外吸收失真是长波端托平与整体形状失配的主导因素
   - 已完成 Phase 04 空气隙前向预测，当前基线下 `d_air = 2 nm` 与 `5 nm` 的 `max(|ΔR|)` 分别约为 `0.538%` 与 `1.347%`，均高于 `0.2%` 典型噪声线
   - 已完成 Phase 04a 空气隙诊断沙盒：在 `bad-23` 上加入 `d_air` 后，`chi-square` 由 `0.03197` 降至 `0.01619`，`d_air` 收敛到约 `39.9 nm`，但仍未低于 `0.01`
   - 已完成 Phase 04b 空气隙空间定位：对 `bad-20-2` 的 L1/L2/L3 三个 7 参数模型中，L3 (`SAM/PVK`) 的 `chi-square` 最低，但材料参数锁死时仍未优于 6 参数基线；释放材料参数后 `chi-square` 可进一步降至 `0.01932`
+  - 已完成 Phase 05c 全栈对齐 `n-k` 表构建：`aligned_full_stack_nk.csv` 共 `701` 行，无 `NaN/Inf`
+  - 已完成 Phase 06 全器件微腔探伤沙盒：成功生成 `Case A / Case B` 双模式 `ΔR` 理论指纹字典与雷达图
 - 当前未完成内容：
-  - 尚未建立 `src/core/` 公共物理模块
   - 尚未把历史目录完全迁移到 `AGENTS.md` 规定的新结构
   - 尚未形成规范化的 Phase 日志、资源索引和结构化结果台账
+  - 尚缺自动化回归测试，用于锁定 `Phase 05c/06` 的全栈读表与 TMM 输出
 
 ## 2. Current Directory Tree
 
@@ -35,10 +42,14 @@
 ```text
 TMM-interference-spectrum/
 ├── AGENTS.md
+├── requirements.txt
 ├── docs/
 │   ├── LITERATURE_MAP.md
 │   └── PROJECT_STATE.md
 ├── src/
+│   ├── core/
+│   │   ├── __init__.py
+│   │   └── full_stack_microcavity.py
 │   └── scripts/
 │       ├── diagnostics_shape_mismatch.py
 │       ├── step01_absolute_calibration.py
@@ -49,18 +60,28 @@ TMM-interference-spectrum/
 │       ├── step03_batch_fit_samples.py
 │       ├── step03_forward_simulation.py
 │       ├── step04a_air_gap_diagnostic.py
-│       └── step04b_air_gap_localization.py
+│       ├── step04b_air_gap_localization.py
+│       ├── step04c_fingerprint_mapping.py
+│       ├── step05_parse_ellipsometry_markdown.py
+│       ├── step05b_verify_against_pdf.py
+│       ├── step05c_build_aligned_nk_stack.py
+│       └── step06_dual_mode_microcavity_sandbox.py
 ├── data/
 │   └── processed/
 │       ├── CsFAPI_nk_extended.csv
+│       ├── phase03_batch_fit/
 │       ├── phase04a/
 │       ├── phase04b/
-│       ├── phase03_batch_fit/
+│       ├── phase04c/
+│       ├── phase06/
 │       └── target_reflectance.csv
 ├── resources/
 │   ├── digitized/
 │   │   ├── phase02_fig2_fapi_optical_constants_digitized.csv
 │   │   └── phase02_fig3_csfapi_optical_constants_digitized.csv
+│   ├── n-kdata/
+│   ├── aligned_full_stack_nk.csv
+│   ├── materials_master_db.json
 │   ├── GCC-1022系列xlsx.xlsx
 │   ├── ITO_20 Ohm_105 nm_e1e2.mat
 │   ├── CsFAPI_TL_parameters_and_formulas.md
@@ -79,11 +100,16 @@ TMM-interference-spectrum/
 │   │   ├── phase04_air_gap_prediction.png
 │   │   ├── phase04a_air_gap_diagnostic.png
 │   │   ├── phase04b_localization.png
+│   │   ├── phase04c_fingerprint_mapping.png
+│   │   ├── phase06_dual_mode_delta_r_40nm_850_1100.png
+│   │   ├── phase06_dual_mode_radar_map.png
 │   │   └── tmm_inversion_result.png
 │   └── logs/
 │       ├── phase03_batch_fit/
+│       ├── phase04c_fingerprint_mapping.md
 │       ├── phase04a_air_gap_diagnostic.md
 │       ├── phase04b_localization.md
+│       ├── phase06_dual_mode_microcavity_sandbox.md
 │       ├── phase02_shape_diagnostic_report.md
 │       ├── phase02_fig2_fapi_digitization_notes.md
 │       └── phase02_fig3_csfapi_digitization_notes.md
@@ -101,8 +127,8 @@ TMM-interference-spectrum/
 
 - `test_data/` 仍然承担原始测量数据目录职责，后续应迁移或重命名到 `data/raw/`
 - `reference/` 目前存放论文拆解结果，按新规范更适合逐步并入 `resources/references/`
-- `src/core/` 尚不存在，脚本中的复用逻辑目前仍散落在 `src/scripts/`
-- 项目根尚无 `README.md`
+- `src/core/` 已开始建立，但 `step01/step02/step04` 的大量复用逻辑仍散落在 `src/scripts/`
+- 项目根已有 `requirements.txt`，但仍缺正式 `README.md`
 
 这些偏差当前不会阻断现有流程，但属于后续需要收敛的结构债务。
 
@@ -380,6 +406,33 @@ TMM-interference-spectrum/
 - `results/figures/diagnostic_shape_analysis.png`
 - `results/logs/phase02_shape_diagnostic_report.md`
 
+### 4.11 `step06_dual_mode_microcavity_sandbox.py`
+
+- 文件位置：`src/scripts/step06_dual_mode_microcavity_sandbox.py`
+- 主要职责：直接消费 `Phase 05c` 的 `aligned_full_stack_nk.csv`，在全器件几何下构建 `Baseline / Case A / Case B` 双模式微腔缺陷指纹字典
+
+输入：
+- `resources/aligned_full_stack_nk.csv`
+- `resources/materials_master_db.json`
+- `src/core/full_stack_microcavity.py`
+
+核心处理流程：
+- 校验 `aligned_full_stack_nk.csv` 是否满足 `400-1100 nm / 1 nm` 的完整网格和固定列约定
+- 校验 `materials_master_db.json` 中的 `ITO / NIOX / C60` 厚度是否与 `Phase 06` 口径一致
+- 在厚玻璃前表面采用 `Air -> Glass` 非相干反射级联，在玻璃后侧薄膜堆栈采用相干 TMM
+- 构建三种层序：
+  - `Baseline: Glass -> ITO -> NiOx -> PVK -> C60 -> Ag`
+  - `Case A: Glass -> ITO -> NiOx -> PVK -> C60 -> Air_Gap -> Ag`
+  - `Case B: Glass -> ITO -> NiOx -> PVK -> Air_Gap -> C60 -> Ag`
+- 对 `d_air = 0-50 nm` 做逐 nm 扫描，输出 `R(lambda)` 和 `ΔR(lambda) = R(d_air) - R(0)`
+- 生成 `d_air = 40 nm` 的双模式长波差分对比图，以及 `Case A / Case B` 双 panel 雷达热力图
+
+输出：
+- `data/processed/phase06/phase06_dual_mode_fingerprint_dictionary.csv`
+- `results/figures/phase06_dual_mode_delta_r_40nm_850_1100.png`
+- `results/figures/phase06_dual_mode_radar_map.png`
+- `results/logs/phase06_dual_mode_microcavity_sandbox.md`
+
 ## 5. Data Flow
 
 当前项目主数据流如下：
@@ -455,6 +508,34 @@ reference/Khan.../images/4ad6d508...
 reference/Khan.../images/885e29d3...
     -> step02_digitize_csfapi_optical_constants.py
     -> resources/digitized/phase02_fig3_csfapi_optical_constants_digitized.csv
+
+resources/n-kdata/*/full.md
+    -> step05_parse_ellipsometry_markdown.py
+    -> resources/materials_master_db.json
+
+resources/n-kdata/*.pdf
+resources/materials_master_db.json
+    -> step05b_verify_against_pdf.py
+    -> resources/materials_master_db.json
+
+resources/materials_master_db.json
+resources/ITO-NK值.csv
+resources/NIOX-NK值.csv
+resources/C60nk值.csv
+resources/SNO-NK值.csv
+data/processed/CsFAPI_nk_extended.csv
+resources/digitized/phase02_fig3_csfapi_optical_constants_digitized.csv
+resources/Ag.csv
+    -> step05c_build_aligned_nk_stack.py
+    -> resources/aligned_full_stack_nk.csv
+
+resources/aligned_full_stack_nk.csv
+resources/materials_master_db.json
+    -> step06_dual_mode_microcavity_sandbox.py (全器件读表 -> Baseline/Case A/Case B 堆栈构建 -> d_air 扫描 -> 双模式 ΔR 字典 / 对比图 / 雷达图)
+    -> data/processed/phase06/phase06_dual_mode_fingerprint_dictionary.csv
+    -> results/figures/phase06_dual_mode_delta_r_40nm_850_1100.png
+    -> results/figures/phase06_dual_mode_radar_map.png
+    -> results/logs/phase06_dual_mode_microcavity_sandbox.md
 ```
 
 可按 SOP 理解为：
@@ -465,7 +546,9 @@ reference/Khan.../images/885e29d3...
 4. `step03_forward_simulation.py` 继承上述基线，并通过 `Air_Gap` 缺陷层把反演引擎扩展为“前向预测雷达”，直接输出隐性剥离在 `850-1500 nm` 的 `R / ΔR` 可检测性图
 5. `step04a_air_gap_diagnostic.py` 进一步把代表性原始谱拉回到单样品诊断闭环，用 `good-21` 作为参考样本、在 `bad-23` 上显式检验 `SAM/PVK` 空气隙假设
 6. `step04b_air_gap_localization.py` 则进一步把假设从“是否有空气隙”推进到“空气隙最可能位于哪个界面，以及材料参数是否也必须发生漂移”
-7. 当前脚本链已经具备“测量数据 -> 标准中间数据 + 文献外推中间数据 -> 六参数反演基线 -> 空气隙前向预测 -> 单样品空气隙诊断 -> 空间定位与材料弛豫”的 Phase 04 闭环
+7. `step05` / `step05b` / `step05c` 进一步把材料报告解析、PDF 校验和全栈 `n-k` 对齐表建立为长期可复用的数据层
+8. `step06_dual_mode_microcavity_sandbox.py` 则在不再引入拟合自由度的前提下，把全栈材料表直接转为双模式微腔缺陷字典，用于后续缺陷定量和指纹匹配
+9. 当前脚本链已经具备“文献数字化 / 椭偏报告解析 -> 材料数据库 -> 全栈对齐 `n-k` 表 -> 全器件双模式 `ΔR` 指纹字典”的 Phase 06 闭环
 
 ## 6. Key Physical / Numerical Assumptions
 
@@ -577,14 +660,14 @@ reference/Khan.../images/885e29d3...
 
 ### 8.1 复用逻辑仍未模块化
 
-- 当前 `src/scripts/` 内部包含了大量可复用函数
+- 当前已新增 `src/core/full_stack_microcavity.py`，但 `src/scripts/` 内部仍包含大量可复用函数
 - 若继续扩展更多步骤脚本，重复代码风险会快速上升
 - 建议后续将以下逻辑下沉到 `src/core/`：
   - 列名识别与 CSV 读取
   - 波段裁剪与插值域校验
   - ITO 数据解析
   - Cauchy 外推
-  - TMM 反射率计算
+  - 厚玻璃非相干/后侧堆栈相干的通用 TMM 级联
 
 ### 8.2 资源文件格式存在隐式脆弱性
 
@@ -670,24 +753,35 @@ reference/Khan.../images/885e29d3...
   - `NiOx k` 触及 `-15%` 下边界
 - 这说明 `bad-20-2` 的异常不能仅靠“空气隙位置正确”解释，还伴随着明显的材料吸收/色散漂移需求
 
+### 8.13 Phase 06 直接依赖工程化全栈 n-k 表
+
+- `step06_dual_mode_microcavity_sandbox.py` 直接读取 `aligned_full_stack_nk.csv` 做全栈前向仿真
+- 这提升了全器件指纹生成的一致性，但也把 `Phase 05c` 的工程外推风险直接传递到了 `Phase 06`
+- 当前最重要的继承风险包括：
+  - `NiOx` 长波 `k` 尾部仍是启发式保守延伸
+  - `PVK 400-449 nm` 属于边界补齐，不是原始测量真值
+  - `Case A / Case B` 的绝对 `ΔR` 幅值对这些尾部处理仍敏感
+- 因此当前 `Phase 06` 更适合用于“模式区分和相位形态”而非直接输出高置信材料常数结论
+
 ## 9. Recent Update Summary
 
-- 更新时间：`2026-04-06`
-- 当前 Phase：`Phase 04`
+- 更新时间：`2026-04-08`
+- 当前 Phase：`Phase 06`
 - 本次新增/修改：
-  - 新增 `step04b_air_gap_localization.py`，基于 `test_data/good-21.csv` 与 `test_data/bad-20-2.csv` 完成三种界面位置的空气隙空间定位
-  - 新增 `data/processed/phase04b/good-21_calibrated.csv` 与 `data/processed/phase04b/bad-20-2_calibrated.csv`
-  - 输出 `results/figures/phase04b_localization.png` 与 `results/logs/phase04b_localization.md`
-  - 更新 `PROJECT_STATE.md`，记录 `bad-20-2` 的空间定位结论与材料参数弛豫需求
+  - 新增 `src/core/full_stack_microcavity.py`，将 `Phase 05c` 的全栈对齐 `n-k` 表封装为可直接求解的全器件微腔模型
+  - 新增 `src/scripts/step06_dual_mode_microcavity_sandbox.py`，完成 `Case A / Case B` 在 `d_air = 0-50 nm` 下的全谱 `R / ΔR` 扫描
+  - 新增 `data/processed/phase06/phase06_dual_mode_fingerprint_dictionary.csv`
+  - 输出 `results/figures/phase06_dual_mode_delta_r_40nm_850_1100.png` 与 `results/figures/phase06_dual_mode_radar_map.png`
+  - 输出 `results/logs/phase06_dual_mode_microcavity_sandbox.md`
+  - 更新 `requirements.txt` 与 `PROJECT_STATE.md`
 - 已验证结论：
-  - `good-21` 的代表谱 6 参数拟合仍可稳定收敛，可作为 `bad-20-2` 的材料参数基准
-  - 对 `bad-20-2` 的三种空间定位模型中，`L3 (SAM/PVK)` 的 `chi-square` 最低，明显优于 `L1` 与 `L2`
-  - 在 `L3` 位置上，空气隙厚度收敛到约 `40-42 nm`
-  - 但锁定材料参数时，`L3 7p` 仍未优于 `bad-20-2` 的 6 参数基线；进一步释放材料参数后，`chi-square` 才降至约 `0.019323`
+  - `Case A / Case B` 在 `d_air = 0 nm` 时都能严格退化回 baseline
+  - 双模式指纹字典行数满足 `2 * 51 * 701 = 71502`
+  - `Phase 06` 已可直接输出 `850-1100 nm` 的双模式差分对比和 `400-1100 nm` 的全谱雷达图
 - 仍待验证：
-  - 即使在最佳位置并做材料弛豫后，`chi-square` 仍未低于 `0.01`
-  - `NiOx k` 在 10 参数弛豫中触及 `-15%` 下边界，说明当前约束下仍存在未被完全吸收的退化机制
-  - 后续仍需继续检查 ITO 退化、NiOx 吸收变化、PVK 色散偏移或其他界面共同退化
+  - `400-650 nm` 是否在实验上保持近零响应，还需要后续用真实缺陷样本做指纹对比
+  - `NiOx` 长波 `k` 与 `PVK 400-449 nm` 的工程外推仍可能影响 Phase 06 的绝对幅值判断
+  - 后续仍需结合真实缺陷谱验证 `Case A / Case B` 的形态可分性是否足以支持定量分类
 
 ## 10. Recommended Next Actions
 
@@ -695,7 +789,7 @@ reference/Khan.../images/885e29d3...
 
 1. 建立 `data/raw/`，并把 `test_data/` 中实际原始测量 CSV 迁移到规范目录
 2. 创建结构化反演结果输出文件，记录 `d_bulk`、`d_rough`、`ito_alpha`、`chi-square` 与外推参数 `A/B`
-3. 将 `step01`/`step01b`/`step02` 中可复用逻辑下沉到 `src/core/`
+3. 继续将 `step01`/`step01b`/`step02`/`step04` 中可复用逻辑下沉到 `src/core/`
 4. 建立 `docs/RESOURCE_INDEX.md`，说明 ITO、银镜基准、论文资料与数字化资源的来源和格式
 5. 建立 `README.md`，补齐项目运行入口、依赖安装和 Phase 概览
 
@@ -842,3 +936,33 @@ reference/Khan.../images/885e29d3...
   - `NiOx` 长波 `k` 尾部当前按启发式保守延伸，尚未结合额外文献或独立红外测量做物理定标。
   - `PVK 400-449 nm` 来源于短程边界外推，仅用于补齐统一网格，不应直接作为高置信材料常数结论引用。
   - 验证图当前放置在 `docs/images/` 以服务状态文档核查；若后续形成批量图表流程，建议同步纳入 `results/figures/` 体系管理。
+
+## Phase 06 Update (2026-04-08)
+
+- Current Phase: `Phase 06`
+- Update summary:
+  - 已新增 `src/core/full_stack_microcavity.py`，把 `aligned_full_stack_nk.csv` 封装为可直接求解的全器件微腔堆栈模块。
+  - 已新增 `src/scripts/step06_dual_mode_microcavity_sandbox.py`，构建 `Baseline / Case A / Case B` 三种层序，并在 `d_air = 0-50 nm` 上输出双模式差分指纹字典。
+  - 已生成 `data/processed/phase06/phase06_dual_mode_fingerprint_dictionary.csv`、`results/figures/phase06_dual_mode_delta_r_40nm_850_1100.png`、`results/figures/phase06_dual_mode_radar_map.png` 与 `results/logs/phase06_dual_mode_microcavity_sandbox.md`。
+- Data flow:
+  - `resources/materials_master_db.json`
+  - `resources/aligned_full_stack_nk.csv`
+  - `src/core/full_stack_microcavity.py`
+  - `src/scripts/step06_dual_mode_microcavity_sandbox.py`
+  - `data/processed/phase06/phase06_dual_mode_fingerprint_dictionary.csv`
+  - `results/figures/phase06_dual_mode_delta_r_40nm_850_1100.png`
+  - `results/figures/phase06_dual_mode_radar_map.png`
+  - `results/logs/phase06_dual_mode_microcavity_sandbox.md`
+- Geometry / modeling policy:
+  - `Air -> Glass` 前表面按非相干强度级联处理。
+  - 玻璃后侧薄膜堆栈按法向入射相干 TMM 处理。
+  - `Ag` 作为半无限背电极。
+  - `d_air = 0 nm` 时 `Case A / Case B` 都必须退化为 `Baseline`。
+- Verified results:
+  - `Case A` 与 `Case B` 的零空气隙退化检查通过。
+  - 指纹字典行数满足 `71502`。
+  - 双 panel 雷达图使用相同色标，满足 A/B 形态对比需求。
+- Risks / pending checks:
+  - `400-650 nm` 在模型中不会被人为清零，是否在实验上近似零响应仍需后续数据验证。
+  - `NiOx` 长波 `k` 与 `PVK 400-449 nm` 的工程补齐风险会直接传递到 `Phase 06` 的绝对幅值判断。
+  - 当前结果更适合作为缺陷模式指纹字典，而非直接当作已验证的材料真值结论。
