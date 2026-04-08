@@ -794,3 +794,51 @@ reference/Khan.../images/885e29d3...
 - Risks / pending checks:
   - PDF 表格文本抽取可稳定支持宏观锚点与空字段补漏，但对已存在的多振子详细参数仍维持 “JSON 优先，PDF 仅补漏” 原则，避免表格错位引入假修复。
   - `sample_id` 的字符编码噪声仍来自源报告文本，本轮未做额外清洗。
+
+## Phase 05c Update (2026-04-08)
+
+- Current Phase: `Phase 05c`
+- Update summary:
+  - 已新增 `src/scripts/step05c_build_aligned_nk_stack.py`，构建 `400-1100 nm`、`1 nm` 步长的统一波长网格，并输出可直接供 TMM 读取的全栈 `n-k` 表。
+  - 已生成 `resources/aligned_full_stack_nk.csv`，统一包含 `Glass / ITO / NiOx / PVK / C60 / SnOx / Ag` 七种材料的对齐光学常数。
+  - 已生成 `docs/images/nk_extrapolation_check.png`，用于人工核查 `ITO k` 与 `C60 n` 在 `900 nm` 拼接点附近的连续性。
+- Data flow:
+  - `resources/materials_master_db.json`
+  - `resources/ITO-NK值.csv`, `resources/NIOX-NK值.csv`, `resources/C60nk值.csv`, `resources/SNO-NK值.csv`
+  - `data/processed/CsFAPI_nk_extended.csv`
+  - `resources/digitized/phase02_fig3_csfapi_optical_constants_digitized.csv`
+  - `resources/Ag.csv`
+  - `src/scripts/step05c_build_aligned_nk_stack.py`
+  - `resources/aligned_full_stack_nk.csv`
+- Extrapolation / stitching policy:
+  - `ITO / NiOx / C60 / SnOx` 先对实测区做 cubic interpolation，再在真实测量上界约 `900 nm` 处执行长波外推。
+  - `n` 尾部采用简化 Cauchy 公式 `n(lambda) = A + B / lambda^2` 拟合最后 `200 nm` 实测区后外推。
+  - `k` 尾部按启发式分支处理：
+    - `C60 / SnOx` 判定为透明尾，`900-1100 nm` 平滑收敛到 `0`
+    - `ITO` 判定为 Drude-like 上升尾，保持单调不减
+    - `NiOx` 尾部不满足透明条件，按保守上升尾策略延伸，避免长波震荡
+  - `PVK` 采用双源拼接：
+    - `750-1100 nm` 使用 `data/processed/CsFAPI_nk_extended.csv`
+    - `450-749 nm` 使用 [LIT-0001] Fig. 3 数字化 `ITO/CsFAPI`
+    - `400-449 nm` 通过局部边界外推补齐
+  - 拼接点两侧使用 `5 nm` 小窗口局部平滑，保证工程数据表连续可读。
+- Verified results:
+  - `resources/aligned_full_stack_nk.csv` 共 `701` 行，全部输出列无 `NaN/Inf`。
+  - 输出列顺序已固定为：
+    - `Wavelength_nm`
+    - `n_Glass`, `k_Glass`
+    - `n_ITO`, `k_ITO`
+    - `n_NiOx`, `k_NiOx`
+    - `n_PVK`, `k_PVK`
+    - `n_C60`, `k_C60`
+    - `n_SnOx`, `k_SnOx`
+    - `n_Ag`, `k_Ag`
+  - `Glass` 常数列已固定为 `n = 1.515`, `k = 0`。
+  - `ITO` 长波 `k` 在 `900-1100 nm` 区间保持单调不减。
+  - `PVK` 在 `449/450 nm` 与 `749/750 nm` 拼接处未出现明显跳变。
+- Engineering scope note:
+  - 本轮 `Phase 05c` 的长波外推属于下游 TMM 读表所需的工程整理层，不等同于已经完成文献约束或实验复测验证的最终材料真值数据库。
+- Risks / pending checks:
+  - `NiOx` 长波 `k` 尾部当前按启发式保守延伸，尚未结合额外文献或独立红外测量做物理定标。
+  - `PVK 400-449 nm` 来源于短程边界外推，仅用于补齐统一网格，不应直接作为高置信材料常数结论引用。
+  - 验证图当前放置在 `docs/images/` 以服务状态文档核查；若后续形成批量图表流程，建议同步纳入 `results/figures/` 体系管理。
