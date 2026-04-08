@@ -1,0 +1,220 @@
+{
+  "C60": {
+    "material_name": "C60",
+    "source_md": "resources/n-kdata/C60/full.md",
+    "sample_id": "C60-20-g lass- 后 后 后 - 1",
+    "thickness_nm": 18.494,
+    "rmse": 0.19526,
+    "wavelength_range_nm": {
+      "min": 260.19,
+      "max": 899.93
+    },
+    "requires_extrapolation": true,
+    "dispersion_models": [
+      "Tauc-Lorentz",
+      "Lorentz",
+      "Lorentz"
+    ],
+    "fit_parameters": [
+      {
+        "model_index": 1,
+        "model_name": "Tauc-Lorentz",
+        "parameters": {
+          "A": 25.25319,
+          "E0": 4.7205,
+          "C": 1.34603,
+          "Eg": 2.22511
+        }
+      },
+      {
+        "model_index": 2,
+        "model_name": "Lorentz",
+        "parameters": {
+          "f": 0.35695,
+          "E0": 3.55858,
+          "Γ": 0.43402
+        }
+      },
+      {
+        "model_index": 3,
+        "model_name": "Lorentz",
+        "parameters": {
+          "f": 0.26273,
+          "E0": 2.7432,
+          "Γ": 0.58411
+        }
+      },
+      {
+        "model_index": null,
+        "model_name": "Global",
+        "parameters": {
+          "Eps_inf": 1.93708
+        }
+      }
+    ],
+    "derived_parameters": {
+      "n_at_632_8_nm": 2.107,
+      "k_at_632_8_nm": 0.0476
+    },
+    "parse_warnings": []
+  },
+  "ITO": {
+    "material_name": "ITO",
+    "source_md": "resources/n-kdata/ITO/full.md",
+    "sample_id": "ITO-20-g lass- 后 后 后 - 1",
+    "thickness_nm": 19.595,
+    "rmse": 0.05936,
+    "wavelength_range_nm": {
+      "min": 290.61,
+      "max": 899.93
+    },
+    "requires_extrapolation": true,
+    "dispersion_models": [
+      "Cauchy",
+      "Lorentz"
+    ],
+    "fit_parameters": [
+      {
+        "model_index": 1,
+        "model_name": "Cauchy",
+        "parameters": {
+          "B": 0.046758,
+          "C": 1.706e-09,
+          "D": 0.055902,
+          "E": -0.077691,
+          "F": 0.0022355
+        }
+      },
+      {
+        "model_index": 2,
+        "model_name": "Lorentz",
+        "parameters": {
+          "f": 2.04999,
+          "E0": 4.68503,
+          "Γ": 1.89563
+        }
+      },
+      {
+        "model_index": null,
+        "model_name": "Global",
+        "parameters": {
+          "Eps_inf": 0.15227,
+          "N_inf": 1.15106
+        }
+      }
+    ],
+    "derived_parameters": {
+      "n_at_632_8_nm": 2.0323,
+      "k_at_632_8_nm": 0.0428
+    },
+    "parse_warnings": []
+  },
+  "NIOX": {
+    "material_name": "NIOX",
+    "source_md": "resources/n-kdata/NIOX/full.md",
+    "sample_id": "5 - 1",
+    "thickness_nm": 22.443,
+    "rmse": 0.07966,
+    "wavelength_range_nm": {
+      "min": 290.61,
+      "max": 899.93
+    },
+    "requires_extrapolation": true,
+    "dispersion_models": [
+      "Tauc-Lorentz",
+      "Gauss",
+      "Lorentz"
+    ],
+    "fit_parameters": [
+      {
+        "model_index": 1,
+        "model_name": "Tauc-Lorentz",
+        "parameters": {
+          "A": 61.48773,
+          "E0": 7.1813,
+          "C": 1.0016e-15,
+          "Eg": 2.95995
+        }
+      },
+      {
+        "model_index": 2,
+        "model_name": "Gauss",
+        "parameters": {
+          "Amp": 1.68799,
+          "E0": 4.61996,
+          "Br": 2.12908
+        }
+      },
+      {
+        "model_index": 3,
+        "model_name": "Lorentz",
+        "parameters": {
+          "f": 1.71587,
+          "E0": 2.42066,
+          "Γ": 5.0
+        }
+      },
+      {
+        "model_index": null,
+        "model_name": "Global",
+        "parameters": {
+          "Eps_inf": 1.4488e-05
+        }
+      }
+    ],
+    "derived_parameters": {
+      "n_at_632_8_nm": 2.0476,
+      "k_at_632_8_nm": 0.2458
+    },
+    "parse_warnings": []
+  },
+  "sno": {
+    "material_name": "sno",
+    "source_md": "resources/n-kdata/sno/full.md",
+    "sample_id": "1 -3",
+    "thickness_nm": 20.156,
+    "rmse": 0.28621,
+    "wavelength_range_nm": {
+      "min": 280.47,
+      "max": 899.93
+    },
+    "requires_extrapolation": true,
+    "dispersion_models": [
+      "Lorentz",
+      "Tauc-Lorentz"
+    ],
+    "fit_parameters": [
+      {
+        "model_index": 1,
+        "model_name": "Lorentz",
+        "parameters": {
+          "f": 1.04429,
+          "E0": 9.91314,
+          "Γ": 5.0
+        }
+      },
+      {
+        "model_index": 2,
+        "model_name": "Tauc-Lorentz",
+        "parameters": {
+          "A": 0.0,
+          "E0": 10.0,
+          "C": 5.0,
+          "Eg": 0.0
+        }
+      },
+      {
+        "model_index": null,
+        "model_name": "Global",
+        "parameters": {
+          "Eps_inf": 2.45093
+        }
+      }
+    ],
+    "derived_parameters": {
+      "n_at_632_8_nm": 1.878,
+      "k_at_632_8_nm": 0.0297
+    },
+    "parse_warnings": []
+  }
+}

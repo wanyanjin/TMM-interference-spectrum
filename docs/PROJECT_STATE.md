@@ -744,3 +744,28 @@ reference/Khan.../images/885e29d3...
 - Processed calibration outputs:
   - `data/processed/phase04c/good-21_calibrated.csv`
   - `data/processed/phase04c/bad-20-2_calibrated.csv`
+
+## Phase 05 Update (2026-04-08)
+
+- Current Phase: `Phase 05`
+- Update summary:
+  - 已通过结构化 Markdown 完成物理参数数据库解析。
+  - 新增脚本 `src/scripts/step05_parse_ellipsometry_markdown.py`，扫描 `resources/n-kdata/*/full.md`，使用 `BeautifulSoup` 解析 HTML 表格，并辅以正则提取概览厚度。
+  - 新增材料数据库 `resources/materials_master_db.json`，当前覆盖 `C60`、`ITO`、`NIOX`、`sno` 四种材料。
+  - 当前输出字段包括：`thickness_nm`、`rmse`、`wavelength_range_nm`、`requires_extrapolation`、`dispersion_models`、`fit_parameters`、`derived_parameters`、`parse_warnings`。
+- Data flow:
+  - `resources/n-kdata/<material>/full.md`
+  - `src/scripts/step05_parse_ellipsometry_markdown.py`
+  - `resources/materials_master_db.json`
+- Verified results:
+  - `ITO`: `Thickness = 19.595 nm`, `RMSE = 0.05936`, models = `Cauchy + Lorentz`
+  - `C60`: `Thickness = 18.494 nm`, `Eg = 2.22511 eV`, models = `Tauc-Lorentz + Lorentz + Lorentz`
+  - `NIOX`: `Thickness = 22.443 nm`, models = `Tauc-Lorentz + Gauss + Lorentz`
+  - `sno`: `Thickness = 20.156 nm`, models = `Lorentz + Tauc-Lorentz`
+  - 四种材料的报告最高波长均低于 `1100 nm`，因此全部标记 `requires_extrapolation = true`
+- Dependency note:
+  - Phase 05 解析链新增运行依赖 `beautifulsoup4`
+- Risks / pending checks:
+  - 当前 `full.md` 样本都能从文本和表格中直接提取关键参数，尚未触发 `IMAGE_ONLY_ERROR`
+  - 若后续报告把厚度、振子参数或拟合质量只保留为 `![](images/...)` 图像占位，现有脚本会输出 `WARNING` 并把对应 JSON 字段写为 `null`
+  - `sample_id` 仍保留原始 Markdown 文本，部分报告存在源文件字符编码噪声，后续如需对样品名做检索，建议增加单独清洗规则
