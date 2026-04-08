@@ -56,7 +56,18 @@
       "n_at_632_8_nm": 2.107,
       "k_at_632_8_nm": 0.0476
     },
-    "parse_warnings": []
+    "parse_warnings": [],
+    "pdf_validation": {
+      "pdf_source": "resources/n-kdata/C60.pdf",
+      "checks_passed": [
+        "thickness_nm",
+        "rmse",
+        "wavelength_range_nm",
+        "dispersion_models"
+      ],
+      "repaired_fields": [],
+      "manual_review_fields": []
+    }
   },
   "ITO": {
     "material_name": "ITO",
@@ -107,7 +118,18 @@
       "n_at_632_8_nm": 2.0323,
       "k_at_632_8_nm": 0.0428
     },
-    "parse_warnings": []
+    "parse_warnings": [],
+    "pdf_validation": {
+      "pdf_source": "resources/n-kdata/ITO.pdf",
+      "checks_passed": [
+        "thickness_nm",
+        "rmse",
+        "wavelength_range_nm",
+        "dispersion_models"
+      ],
+      "repaired_fields": [],
+      "manual_review_fields": []
+    }
   },
   "NIOX": {
     "material_name": "NIOX",
@@ -166,7 +188,18 @@
       "n_at_632_8_nm": 2.0476,
       "k_at_632_8_nm": 0.2458
     },
-    "parse_warnings": []
+    "parse_warnings": [],
+    "pdf_validation": {
+      "pdf_source": "resources/n-kdata/NIOX.pdf",
+      "checks_passed": [
+        "thickness_nm",
+        "rmse",
+        "wavelength_range_nm",
+        "dispersion_models"
+      ],
+      "repaired_fields": [],
+      "manual_review_fields": []
+    }
   },
   "sno": {
     "material_name": "sno",
@@ -215,6 +248,17 @@
       "n_at_632_8_nm": 1.878,
       "k_at_632_8_nm": 0.0297
     },
-    "parse_warnings": []
+    "parse_warnings": [],
+    "pdf_validation": {
+      "pdf_source": "resources/n-kdata/sno拟合曲线.pdf",
+      "checks_passed": [
+        "thickness_nm",
+        "rmse",
+        "wavelength_range_nm",
+        "dispersion_models"
+      ],
+      "repaired_fields": [],
+      "manual_review_fields": []
+    }
   }
 }

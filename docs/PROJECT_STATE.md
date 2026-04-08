@@ -769,3 +769,28 @@ reference/Khan.../images/885e29d3...
   - 当前 `full.md` 样本都能从文本和表格中直接提取关键参数，尚未触发 `IMAGE_ONLY_ERROR`
   - 若后续报告把厚度、振子参数或拟合质量只保留为 `![](images/...)` 图像占位，现有脚本会输出 `WARNING` 并把对应 JSON 字段写为 `null`
   - `sample_id` 仍保留原始 Markdown 文本，部分报告存在源文件字符编码噪声，后续如需对样品名做检索，建议增加单独清洗规则
+
+## Phase 05b Update (2026-04-08)
+
+- Current Phase: `Phase 05b`
+- Update summary:
+  - 已完成 PDF 与 JSON 的交叉验证，数据库双重校验通过。
+  - 新增脚本 `src/scripts/step05b_verify_against_pdf.py`，直接读取 `resources/n-kdata/*.pdf`，用 `PyMuPDF` 提取文本并与 `materials_master_db.json` 做宏观锚点与模型完整性比对。
+  - 在数据库中新增 `pdf_validation` 字段，记录每个材料对应的 PDF 来源、通过的校验项、自动修复字段和人工介入字段。
+- Data flow:
+  - `resources/n-kdata/*.pdf`
+  - `src/scripts/step05b_verify_against_pdf.py`
+  - `resources/materials_master_db.json`
+- Verified results:
+  - `C60`、`ITO`、`NIOX`、`sno` 均成功映射到唯一 PDF 源文件。
+  - 四种材料均通过 `thickness_nm`、`rmse`、`wavelength_range_nm` 与 `dispersion_models` 校验。
+  - 当前正式数据库无宏观锚点冲突，无需自动覆写修复。
+  - `requires_extrapolation` 复核后仍全部为 `true`，与 PDF 波长上限 `< 1100 nm` 一致。
+- Dry-run repair validation:
+  - 对临时测试 JSON 人为置空 `ITO.thickness_nm` 后，脚本可从 `ITO.pdf` 自动补回厚度。
+  - 对临时测试 JSON 人为清空 `NIOX` 的 `Gauss` 参数后，脚本可按模型顺序从 PDF 结果块补回 `Amp/E0/Br`。
+- Dependency note:
+  - Phase 05b 使用现有环境中的 `PyMuPDF (fitz)`，未新增新的 PDF 依赖。
+- Risks / pending checks:
+  - PDF 表格文本抽取可稳定支持宏观锚点与空字段补漏，但对已存在的多振子详细参数仍维持 “JSON 优先，PDF 仅补漏” 原则，避免表格错位引入假修复。
+  - `sample_id` 的字符编码噪声仍来自源报告文本，本轮未做额外清洗。
