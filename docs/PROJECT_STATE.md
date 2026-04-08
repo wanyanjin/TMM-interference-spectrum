@@ -5,8 +5,8 @@
 ## 1. Current Snapshot
 
 - 更新时间：2026-04-08
-- 当前判断 Phase：`Phase 06`
-- 阶段定义：`基于 Phase 05c 全栈对齐 n-k 表，构建全器件双模式微腔剥离缺陷指纹沙盒`
+- 当前判断 Phase：`Phase 07`
+- 阶段定义：`构建全谱三分区基准、前后界面宏观正交雷达，并为后续 LM 反演预研标准前向接口`
 - 当前可用能力：
   - 已有 `step01_absolute_calibration.py`，可将样品与银镜原始计数转换为绝对反射率
   - 已有 `step01b_cauchy_extrapolation.py`，可基于 [LIT-0001] 的 `ITO/CsFAPI` 数字化折射率曲线生成 `750-1100 nm` 的 CsFAPI 扩展 `n-k` 中间件
@@ -21,8 +21,9 @@
   - 已有 `step05_parse_ellipsometry_markdown.py`，可从 `resources/n-kdata/*/full.md` 解析椭偏报告并构建 `materials_master_db.json`
   - 已有 `step05b_verify_against_pdf.py`，可用原始 PDF 交叉验证材料数据库中的厚度、RMSE、波段范围与模型完整性
   - 已有 `step05c_build_aligned_nk_stack.py`，可生成 `400-1100 nm / 1 nm` 的全栈对齐 `n-k` 表 `aligned_full_stack_nk.csv`
-  - 已有 `src/core/full_stack_microcavity.py`，可基于 `aligned_full_stack_nk.csv` 构建 `Baseline / Case A / Case B` 三种全器件微腔堆栈，并在厚玻璃前表面非相干、后侧薄膜相干的几何下求反射率
+  - 已有 `src/core/full_stack_microcavity.py`，可基于 `aligned_full_stack_nk.csv` 构建 `Baseline / Case A / Case B / Front / Back` 五类全器件微腔堆栈，并暴露 `forward_model_for_fitting()` 作为后续 LM 目标函数入口
   - 已有 `step06_dual_mode_microcavity_sandbox.py`，可扫描 `d_air = 0-50 nm`，输出双模式 `R / ΔR` 指纹字典、40 nm 对比图和 2D 雷达热力图
+  - 已有 `step07_orthogonal_radar_and_baseline.py`，可输出 pristine 全谱三分区基准图、Front/Back 正交雷达图与 `Phase 07` 指纹字典
   - 已产出标准中间文件 `data/processed/target_reflectance.csv` 与 `data/processed/CsFAPI_nk_extended.csv`
   - 已完成 Phase 02 形状畸变诊断，当前证据指向：ITO 近红外吸收失真是长波端托平与整体形状失配的主导因素
   - 已完成 Phase 04 空气隙前向预测，当前基线下 `d_air = 2 nm` 与 `5 nm` 的 `max(|ΔR|)` 分别约为 `0.538%` 与 `1.347%`，均高于 `0.2%` 典型噪声线
@@ -30,10 +31,11 @@
   - 已完成 Phase 04b 空气隙空间定位：对 `bad-20-2` 的 L1/L2/L3 三个 7 参数模型中，L3 (`SAM/PVK`) 的 `chi-square` 最低，但材料参数锁死时仍未优于 6 参数基线；释放材料参数后 `chi-square` 可进一步降至 `0.01932`
   - 已完成 Phase 05c 全栈对齐 `n-k` 表构建：`aligned_full_stack_nk.csv` 共 `701` 行，无 `NaN/Inf`
   - 已完成 Phase 06 全器件微腔探伤沙盒：成功生成 `Case A / Case B` 双模式 `ΔR` 理论指纹字典与雷达图
+  - 已完成 Phase 07 正交界面探伤预研：`front` 在 `Zone 1 (400-650 nm)` 的最大差分信号约 `28.16%`，显著强于 `back` 的约 `0.71%`
 - 当前未完成内容：
   - 尚未把历史目录完全迁移到 `AGENTS.md` 规定的新结构
   - 尚未形成规范化的 Phase 日志、资源索引和结构化结果台账
-  - 尚缺自动化回归测试，用于锁定 `Phase 05c/06` 的全栈读表与 TMM 输出
+  - 尚缺自动化回归测试，用于锁定 `Phase 05c/06/07` 的全栈读表与 TMM 输出
 
 ## 2. Current Directory Tree
 
@@ -65,7 +67,8 @@ TMM-interference-spectrum/
 │       ├── step05_parse_ellipsometry_markdown.py
 │       ├── step05b_verify_against_pdf.py
 │       ├── step05c_build_aligned_nk_stack.py
-│       └── step06_dual_mode_microcavity_sandbox.py
+│       ├── step06_dual_mode_microcavity_sandbox.py
+│       └── step07_orthogonal_radar_and_baseline.py
 ├── data/
 │   └── processed/
 │       ├── CsFAPI_nk_extended.csv
@@ -74,6 +77,7 @@ TMM-interference-spectrum/
 │       ├── phase04b/
 │       ├── phase04c/
 │       ├── phase06/
+│       ├── phase07/
 │       └── target_reflectance.csv
 ├── resources/
 │   ├── digitized/
@@ -103,6 +107,8 @@ TMM-interference-spectrum/
 │   │   ├── phase04c_fingerprint_mapping.png
 │   │   ├── phase06_dual_mode_delta_r_40nm_850_1100.png
 │   │   ├── phase06_dual_mode_radar_map.png
+│   │   ├── phase07_baseline_3zones.png
+│   │   ├── phase07_orthogonal_radar.png
 │   │   └── tmm_inversion_result.png
 │   └── logs/
 │       ├── phase03_batch_fit/
@@ -110,6 +116,7 @@ TMM-interference-spectrum/
 │       ├── phase04a_air_gap_diagnostic.md
 │       ├── phase04b_localization.md
 │       ├── phase06_dual_mode_microcavity_sandbox.md
+│       ├── phase07_orthogonal_radar_diagnostic.md
 │       ├── phase02_shape_diagnostic_report.md
 │       ├── phase02_fig2_fapi_digitization_notes.md
 │       └── phase02_fig3_csfapi_digitization_notes.md
@@ -433,6 +440,28 @@ TMM-interference-spectrum/
 - `results/figures/phase06_dual_mode_radar_map.png`
 - `results/logs/phase06_dual_mode_microcavity_sandbox.md`
 
+### 4.12 `step07_orthogonal_radar_and_baseline.py`
+
+- 文件位置：`src/scripts/step07_orthogonal_radar_and_baseline.py`
+- 主要职责：在 `Phase 06` 全栈读表框架上，构建 pristine 全谱三分区基准图与 `front/back` 正交界面探伤雷达
+
+输入：
+- `resources/aligned_full_stack_nk.csv`
+- `resources/materials_master_db.json`
+- `src/core/full_stack_microcavity.py`
+
+核心处理流程：
+- 通过 `forward_model_for_fitting(wavelengths_nm, d_air_nm, interface_type)` 暴露标准纯实数前向接口，作为后续 LM 目标函数插槽
+- 用 `d_air = 0 nm` 生成 pristine 全谱绝对反射率基准，并按 `400-650 / 650-810 / 810-1100 nm` 三分区绘制背景隔离图
+- 对 `front (NiOx/PVK)` 与 `back (PVK/C60)` 分别执行 `d_air = 0-50 nm` 扫描，输出共享色标的双 panel `ΔR` 雷达图
+- 生成 `Phase 07` 指纹字典与分区诊断日志，并显式比较 Zone 1 下前后界面信号强弱
+
+输出：
+- `data/processed/phase07/phase07_orthogonal_fingerprint_dictionary.csv`
+- `results/figures/phase07_baseline_3zones.png`
+- `results/figures/phase07_orthogonal_radar.png`
+- `results/logs/phase07_orthogonal_radar_diagnostic.md`
+
 ## 5. Data Flow
 
 当前项目主数据流如下：
@@ -536,6 +565,14 @@ resources/materials_master_db.json
     -> results/figures/phase06_dual_mode_delta_r_40nm_850_1100.png
     -> results/figures/phase06_dual_mode_radar_map.png
     -> results/logs/phase06_dual_mode_microcavity_sandbox.md
+
+resources/aligned_full_stack_nk.csv
+resources/materials_master_db.json
+    -> step07_orthogonal_radar_and_baseline.py (LM 友好前向接口 -> pristine 全谱基准图 -> front/back 正交雷达 -> 分区诊断)
+    -> data/processed/phase07/phase07_orthogonal_fingerprint_dictionary.csv
+    -> results/figures/phase07_baseline_3zones.png
+    -> results/figures/phase07_orthogonal_radar.png
+    -> results/logs/phase07_orthogonal_radar_diagnostic.md
 ```
 
 可按 SOP 理解为：
@@ -548,7 +585,8 @@ resources/materials_master_db.json
 6. `step04b_air_gap_localization.py` 则进一步把假设从“是否有空气隙”推进到“空气隙最可能位于哪个界面，以及材料参数是否也必须发生漂移”
 7. `step05` / `step05b` / `step05c` 进一步把材料报告解析、PDF 校验和全栈 `n-k` 对齐表建立为长期可复用的数据层
 8. `step06_dual_mode_microcavity_sandbox.py` 则在不再引入拟合自由度的前提下，把全栈材料表直接转为双模式微腔缺陷字典，用于后续缺陷定量和指纹匹配
-9. 当前脚本链已经具备“文献数字化 / 椭偏报告解析 -> 材料数据库 -> 全栈对齐 `n-k` 表 -> 全器件双模式 `ΔR` 指纹字典”的 Phase 06 闭环
+9. `step07_orthogonal_radar_and_baseline.py` 进一步把缺陷模式压缩为 `front/back` 两类宏观正交界面，并补上面向后续 LM 的标准前向接口与三分区基准可视化
+10. 当前脚本链已经具备“文献数字化 / 椭偏报告解析 -> 材料数据库 -> 全栈对齐 `n-k` 表 -> 宏观正交界面指纹字典 -> LM 接口预研”的 Phase 07 闭环
 
 ## 6. Key Physical / Numerical Assumptions
 
@@ -763,25 +801,37 @@ resources/materials_master_db.json
   - `Case A / Case B` 的绝对 `ΔR` 幅值对这些尾部处理仍敏感
 - 因此当前 `Phase 06` 更适合用于“模式区分和相位形态”而非直接输出高置信材料常数结论
 
+### 8.14 Phase 07 的前后正交判别依赖分区解释而非全谱同权
+
+- `Phase 07` 已验证 `front` 在 `Zone 1 (400-650 nm)` 远强于 `back`
+- 但 `Zone 2 (650-810 nm)` 对 `front/back` 都有显著响应，且该区本身包含更复杂的吸收/PL/混合机制
+- 因此后续若直接做全谱同权 LM，Zone 2 很可能主导残差并掩盖真正的界面判别与厚度相位信息
+- 当前建议是：
+  - `Zone 1` 先用于前界面退化布尔判定
+  - `Zone 2` 在 LM 中权重设为 `0`
+  - `Zone 3` 作为主拟合窗口
+- 这仍是架构预研结论，尚未在优化器里正式实现权重函数
+
 ## 9. Recent Update Summary
 
 - 更新时间：`2026-04-08`
-- 当前 Phase：`Phase 06`
+- 当前 Phase：`Phase 07`
 - 本次新增/修改：
-  - 新增 `src/core/full_stack_microcavity.py`，将 `Phase 05c` 的全栈对齐 `n-k` 表封装为可直接求解的全器件微腔模型
-  - 新增 `src/scripts/step06_dual_mode_microcavity_sandbox.py`，完成 `Case A / Case B` 在 `d_air = 0-50 nm` 下的全谱 `R / ΔR` 扫描
-  - 新增 `data/processed/phase06/phase06_dual_mode_fingerprint_dictionary.csv`
-  - 输出 `results/figures/phase06_dual_mode_delta_r_40nm_850_1100.png` 与 `results/figures/phase06_dual_mode_radar_map.png`
-  - 输出 `results/logs/phase06_dual_mode_microcavity_sandbox.md`
-  - 更新 `requirements.txt` 与 `PROJECT_STATE.md`
+  - 重构 `src/core/full_stack_microcavity.py`，新增 `front/back` 界面类型与 `forward_model_for_fitting()` 前向接口
+  - 新增 `src/scripts/step07_orthogonal_radar_and_baseline.py`
+  - 新增 `data/processed/phase07/phase07_orthogonal_fingerprint_dictionary.csv`
+  - 输出 `results/figures/phase07_baseline_3zones.png` 与 `results/figures/phase07_orthogonal_radar.png`
+  - 输出 `results/logs/phase07_orthogonal_radar_diagnostic.md`
+  - 更新 `PROJECT_STATE.md`
 - 已验证结论：
-  - `Case A / Case B` 在 `d_air = 0 nm` 时都能严格退化回 baseline
-  - 双模式指纹字典行数满足 `2 * 51 * 701 = 71502`
-  - `Phase 06` 已可直接输出 `850-1100 nm` 的双模式差分对比和 `400-1100 nm` 的全谱雷达图
+  - `forward_model_for_fitting()` 对任意一维波长数组返回同长度实数反射率数组
+  - `front/back` 在 `d_air = 0 nm` 时都能严格退化回 pristine baseline
+  - `Phase 07` 字典行数满足 `2 * 51 * 701 = 71502`
+  - `front` 在 `Zone 1` 的最大差分信号约 `28.16%`，显著高于 `back` 的约 `0.71%`
 - 仍待验证：
-  - `400-650 nm` 是否在实验上保持近零响应，还需要后续用真实缺陷样本做指纹对比
-  - `NiOx` 长波 `k` 与 `PVK 400-449 nm` 的工程外推仍可能影响 Phase 06 的绝对幅值判断
-  - 后续仍需结合真实缺陷谱验证 `Case A / Case B` 的形态可分性是否足以支持定量分类
+  - `Zone 2` 的零权重策略尚未真正接入 LM 优化器
+  - `NiOx` 长波 `k` 与 `PVK 400-449 nm` 的工程外推仍可能影响绝对幅值判断
+  - 仍需结合真实缺陷谱验证 `front/back` 正交判别是否足以支撑定量分类
 
 ## 10. Recommended Next Actions
 
@@ -790,8 +840,9 @@ resources/materials_master_db.json
 1. 建立 `data/raw/`，并把 `test_data/` 中实际原始测量 CSV 迁移到规范目录
 2. 创建结构化反演结果输出文件，记录 `d_bulk`、`d_rough`、`ito_alpha`、`chi-square` 与外推参数 `A/B`
 3. 继续将 `step01`/`step01b`/`step02`/`step04` 中可复用逻辑下沉到 `src/core/`
-4. 建立 `docs/RESOURCE_INDEX.md`，说明 ITO、银镜基准、论文资料与数字化资源的来源和格式
-5. 建立 `README.md`，补齐项目运行入口、依赖安装和 Phase 概览
+4. 基于 `forward_model_for_fitting()` 设计 `Zone 1/2/3` 分区加权残差函数，为后续 `scipy.optimize.least_squares` 做准备
+5. 建立 `docs/RESOURCE_INDEX.md`，说明 ITO、银镜基准、论文资料与数字化资源的来源和格式
+6. 建立 `README.md`，补齐项目运行入口、依赖安装和 Phase 概览
 
 ## 11. Update Rule
 
@@ -966,3 +1017,29 @@ resources/materials_master_db.json
   - `400-650 nm` 在模型中不会被人为清零，是否在实验上近似零响应仍需后续数据验证。
   - `NiOx` 长波 `k` 与 `PVK 400-449 nm` 的工程补齐风险会直接传递到 `Phase 06` 的绝对幅值判断。
   - 当前结果更适合作为缺陷模式指纹字典，而非直接当作已验证的材料真值结论。
+
+## Phase 07 Update (2026-04-08)
+
+- Current Phase: `Phase 07`
+- Update summary:
+  - 已重构 `src/core/full_stack_microcavity.py`，将 `front/back` 界面定义、厚度覆盖和任意波长插值统一封装到 `forward_model_for_fitting()`。
+  - 已新增 `src/scripts/step07_orthogonal_radar_and_baseline.py`，输出 pristine 三分区基准图与 `front/back` 正交雷达图。
+  - 已生成 `data/processed/phase07/phase07_orthogonal_fingerprint_dictionary.csv`、`results/figures/phase07_baseline_3zones.png`、`results/figures/phase07_orthogonal_radar.png` 与 `results/logs/phase07_orthogonal_radar_diagnostic.md`。
+- Data flow:
+  - `resources/aligned_full_stack_nk.csv`
+  - `resources/materials_master_db.json`
+  - `src/core/full_stack_microcavity.py`
+  - `src/scripts/step07_orthogonal_radar_and_baseline.py`
+  - `data/processed/phase07/phase07_orthogonal_fingerprint_dictionary.csv`
+  - `results/figures/phase07_baseline_3zones.png`
+  - `results/figures/phase07_orthogonal_radar.png`
+  - `results/logs/phase07_orthogonal_radar_diagnostic.md`
+- Verified results:
+  - `forward_model_for_fitting()` 的一维数组输入输出契约验证通过。
+  - `front/back` 在 `d_air = 0 nm` 时都能严格退化为 pristine baseline。
+  - `Phase 07` 指纹字典行数满足 `71502`。
+  - `front` 在 `Zone 1` 的 `max|ΔR| ≈ 28.16%`，`back` 仅约 `0.71%`，宏观正交特征明确成立。
+- Risks / pending checks:
+  - `Zone 2` 当前只在文档和图中标记为后续零权重区，尚未真正进入优化器实现。
+  - `NiOx` 长波 `k` 与 `PVK 400-449 nm` 的工程外推风险仍会影响 `Phase 07` 的绝对幅值。
+  - 当前结论适合作为前后界面宏观判别与 LM 架构设计依据，尚不能替代后续实验拟合验证。

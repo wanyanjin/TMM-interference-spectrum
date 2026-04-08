@@ -1,11 +1,13 @@
-"""Phase 06 full-stack microcavity sandbox utilities.
+"""Phase 06/07 full-stack microcavity forward-model utilities.
 
 This module consumes the Phase 05c engineered optical-constant table and builds
-three full-device reflection models:
+full-device reflection models on top of a shared thick-glass geometry:
 
 - Baseline: Glass / ITO / NiOx / PVK / C60 / Ag
-- Case A:   Glass / ITO / NiOx / PVK / C60 / Air_Gap / Ag
-- Case B:   Glass / ITO / NiOx / PVK / Air_Gap / C60 / Ag
+- Phase 06 Case A: Glass / ITO / NiOx / PVK / C60 / Air_Gap / Ag
+- Phase 06 Case B: Glass / ITO / NiOx / PVK / Air_Gap / C60 / Ag
+- Phase 07 Front:  Glass / ITO / NiOx / Air_Gap / PVK / C60 / Ag
+- Phase 07 Back:   Glass / ITO / NiOx / PVK / Air_Gap / C60 / Ag
 
 The PVK column in ``aligned_full_stack_nk.csv`` ultimately traces back to the
 Phase 05c stitching workflow, which uses [LIT-0001] for the 450-1000 nm source
@@ -16,12 +18,17 @@ from __future__ import annotations
 
 import json
 from dataclasses import dataclass
+from functools import lru_cache
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
 from tmm import coh_tmm
 
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+DEFAULT_NK_CSV_PATH = PROJECT_ROOT / "resources" / "aligned_full_stack_nk.csv"
+DEFAULT_MATERIAL_DB_PATH = PROJECT_ROOT / "resources" / "materials_master_db.json"
 
 WAVELENGTH_MIN_NM = 400
 WAVELENGTH_MAX_NM = 1100
@@ -43,7 +50,17 @@ THICKNESS_TOLERANCE_NM = 1e-6
 MODE_BASELINE = "baseline"
 MODE_CASE_A = "case_a"
 MODE_CASE_B = "case_b"
-SUPPORTED_MODES = (MODE_BASELINE, MODE_CASE_A, MODE_CASE_B)
+INTERFACE_FRONT = "front"
+INTERFACE_BACK = "back"
+
+SUPPORTED_STACK_MODES = (
+    MODE_BASELINE,
+    MODE_CASE_A,
+    MODE_CASE_B,
+    INTERFACE_FRONT,
+    INTERFACE_BACK,
+)
+SUPPORTED_FITTING_INTERFACES = (INTERFACE_FRONT, INTERFACE_BACK)
 
 REQUIRED_COLUMNS = (
     "Wavelength_nm",
@@ -68,6 +85,30 @@ class LayerThicknesses:
     niox_nm: float
     pvk_nm: float
     c60_nm: float
+
+    def with_overrides(self, **kwargs: float) -> "LayerThicknesses":
+        allowed_keys = {
+            "ito_thickness_nm": "ito_nm",
+            "niox_thickness_nm": "niox_nm",
+            "pvk_thickness_nm": "pvk_nm",
+            "c60_thickness_nm": "c60_nm",
+        }
+        unknown_keys = sorted(set(kwargs) - set(allowed_keys))
+        if unknown_keys:
+            raise ValueError(f"不支持的厚度覆盖键: {unknown_keys}")
+
+        override_values = {
+            field_name: float(getattr(self, field_name))
+            for field_name in ("ito_nm", "niox_nm", "pvk_nm", "c60_nm")
+        }
+        for external_key, field_name in allowed_keys.items():
+            if external_key in kwargs:
+                override_value = float(kwargs[external_key])
+                if override_value <= 0.0:
+                    raise ValueError(f"{external_key} 必须为正数，当前值 {override_value}")
+                override_values[field_name] = override_value
+
+        return LayerThicknesses(**override_values)
 
 
 @dataclass(frozen=True)
@@ -104,7 +145,7 @@ class OpticalStackTable:
 
         numeric_block = frame.loc[:, REQUIRED_COLUMNS[1:]].to_numpy(dtype=float)
         if not np.isfinite(numeric_block).all():
-            raise ValueError("aligned_full_stack_nk.csv 含有 NaN/Inf，无法用于 Phase 06 全栈求解。")
+            raise ValueError("aligned_full_stack_nk.csv 含有 NaN/Inf，无法用于全栈求解。")
 
         material_db = json.loads(material_db_path.read_text(encoding="utf-8"))
         cls._validate_material_db(material_db)
@@ -143,20 +184,45 @@ class OpticalStackTable:
             actual_value = float(material_db[material_name]["thickness_nm"])
             if abs(actual_value - expected_value) > THICKNESS_TOLERANCE_NM:
                 raise ValueError(
-                    f"{material_name} 厚度口径与 Phase 06 约定不一致: "
+                    f"{material_name} 厚度口径与当前 Phase 约定不一致: "
                     f"expected={expected_value:.6f} nm, actual={actual_value:.6f} nm"
                 )
+
+    def _normalize_stack_mode(self, mode: str) -> str:
+        normalized_mode = str(mode).strip().lower()
+        if normalized_mode not in SUPPORTED_STACK_MODES:
+            raise ValueError(f"不支持的模式: {mode}")
+        return normalized_mode
+
+    def _normalize_fitting_interface(self, interface_type: str) -> str:
+        normalized_type = str(interface_type).strip().lower()
+        if normalized_type not in SUPPORTED_FITTING_INTERFACES:
+            raise ValueError(
+                f"interface_type 必须是 {SUPPORTED_FITTING_INTERFACES} 之一，当前为 {interface_type}"
+            )
+        return normalized_type
+
+    def _resolve_thicknesses(self, **kwargs: float) -> LayerThicknesses:
+        if not kwargs:
+            return self.thicknesses
+        return self.thicknesses.with_overrides(**kwargs)
 
     def front_surface_reflectance(self) -> np.ndarray:
         reflection = (AIR_INDEX - self.n_glass) / (AIR_INDEX + self.n_glass)
         return np.abs(reflection) ** 2
 
-    def build_stack(self, mode: str, wavelength_index: int, d_air_nm: float) -> tuple[list[complex], list[float]]:
-        if mode not in SUPPORTED_MODES:
-            raise ValueError(f"不支持的模式: {mode}")
+    def build_stack(
+        self,
+        mode: str,
+        wavelength_index: int,
+        d_air_nm: float,
+        thicknesses: LayerThicknesses | None = None,
+    ) -> tuple[list[complex], list[float]]:
+        normalized_mode = self._normalize_stack_mode(mode)
         if d_air_nm < 0.0:
             raise ValueError(f"空气隙厚度必须非负，当前 d_air_nm={d_air_nm}")
 
+        thickness_state = thicknesses or self.thicknesses
         glass_nk = complex(self.n_glass[wavelength_index])
         ito_nk = complex(self.n_ito[wavelength_index])
         niox_nk = complex(self.n_niox[wavelength_index])
@@ -164,27 +230,40 @@ class OpticalStackTable:
         c60_nk = complex(self.n_c60[wavelength_index])
         ag_nk = complex(self.n_ag[wavelength_index])
 
-        if mode == MODE_BASELINE or np.isclose(d_air_nm, 0.0, atol=0.0, rtol=0.0):
+        if normalized_mode == MODE_BASELINE or np.isclose(d_air_nm, 0.0, atol=0.0, rtol=0.0):
             n_list = [glass_nk, ito_nk, niox_nk, pvk_nk, c60_nk, ag_nk]
             d_list = [
                 np.inf,
-                self.thicknesses.ito_nm,
-                self.thicknesses.niox_nm,
-                self.thicknesses.pvk_nm,
-                self.thicknesses.c60_nm,
+                thickness_state.ito_nm,
+                thickness_state.niox_nm,
+                thickness_state.pvk_nm,
+                thickness_state.c60_nm,
                 np.inf,
             ]
             return n_list, d_list
 
-        if mode == MODE_CASE_A:
+        if normalized_mode == MODE_CASE_A:
             n_list = [glass_nk, ito_nk, niox_nk, pvk_nk, c60_nk, AIR_INDEX, ag_nk]
             d_list = [
                 np.inf,
-                self.thicknesses.ito_nm,
-                self.thicknesses.niox_nm,
-                self.thicknesses.pvk_nm,
-                self.thicknesses.c60_nm,
+                thickness_state.ito_nm,
+                thickness_state.niox_nm,
+                thickness_state.pvk_nm,
+                thickness_state.c60_nm,
                 float(d_air_nm),
+                np.inf,
+            ]
+            return n_list, d_list
+
+        if normalized_mode == INTERFACE_FRONT:
+            n_list = [glass_nk, ito_nk, niox_nk, AIR_INDEX, pvk_nk, c60_nk, ag_nk]
+            d_list = [
+                np.inf,
+                thickness_state.ito_nm,
+                thickness_state.niox_nm,
+                float(d_air_nm),
+                thickness_state.pvk_nm,
+                thickness_state.c60_nm,
                 np.inf,
             ]
             return n_list, d_list
@@ -192,43 +271,137 @@ class OpticalStackTable:
         n_list = [glass_nk, ito_nk, niox_nk, pvk_nk, AIR_INDEX, c60_nk, ag_nk]
         d_list = [
             np.inf,
-            self.thicknesses.ito_nm,
-            self.thicknesses.niox_nm,
-            self.thicknesses.pvk_nm,
+            thickness_state.ito_nm,
+            thickness_state.niox_nm,
+            thickness_state.pvk_nm,
             float(d_air_nm),
-            self.thicknesses.c60_nm,
+            thickness_state.c60_nm,
             np.inf,
         ]
         return n_list, d_list
 
-    def calc_back_reflectance(self, mode: str, d_air_nm: float = 0.0) -> np.ndarray:
+    def calc_back_reflectance(
+        self,
+        mode: str,
+        d_air_nm: float = 0.0,
+        thicknesses: LayerThicknesses | None = None,
+    ) -> np.ndarray:
+        normalized_mode = self._normalize_stack_mode(mode)
         reflectance = np.empty_like(self.wavelength_nm, dtype=float)
         for index, wavelength_nm in enumerate(self.wavelength_nm):
-            n_list, d_list = self.build_stack(mode=mode, wavelength_index=index, d_air_nm=d_air_nm)
+            n_list, d_list = self.build_stack(
+                mode=normalized_mode,
+                wavelength_index=index,
+                d_air_nm=d_air_nm,
+                thicknesses=thicknesses,
+            )
             result = coh_tmm("s", n_list, d_list, th_0=0.0, lam_vac=float(wavelength_nm))
             reflectance[index] = float(result["R"])
         return reflectance
 
-    def calc_macro_reflectance(self, mode: str, d_air_nm: float = 0.0) -> np.ndarray:
+    def calc_macro_reflectance(
+        self,
+        mode: str,
+        d_air_nm: float = 0.0,
+        thicknesses: LayerThicknesses | None = None,
+    ) -> np.ndarray:
+        normalized_mode = self._normalize_stack_mode(mode)
         r_front = self.front_surface_reflectance()
-        r_back = self.calc_back_reflectance(mode=mode, d_air_nm=d_air_nm)
+        r_back = self.calc_back_reflectance(
+            mode=normalized_mode,
+            d_air_nm=d_air_nm,
+            thicknesses=thicknesses,
+        )
         denominator = 1.0 - r_front * r_back
         if np.any(np.isclose(denominator, 0.0)):
             raise ValueError("Air/Glass 与后侧薄膜的强度级联分母接近 0。")
         return r_front + (((1.0 - r_front) ** 2) * r_back) / denominator
 
-    def sweep_air_gap(self, mode: str, d_air_values_nm: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    def sweep_air_gap(
+        self,
+        mode: str,
+        d_air_values_nm: np.ndarray,
+        thicknesses: LayerThicknesses | None = None,
+    ) -> tuple[np.ndarray, np.ndarray]:
+        normalized_mode = self._normalize_stack_mode(mode)
         d_air_array = np.asarray(d_air_values_nm, dtype=float)
-        if mode == MODE_BASELINE:
+        if normalized_mode == MODE_BASELINE:
             raise ValueError("Baseline 模式不需要做空气隙扫描。")
 
-        baseline_reflectance = self.calc_macro_reflectance(mode=MODE_BASELINE, d_air_nm=0.0)
+        baseline_reflectance = self.calc_macro_reflectance(
+            mode=MODE_BASELINE,
+            d_air_nm=0.0,
+            thicknesses=thicknesses,
+        )
         reflectance_map = np.empty((d_air_array.size, self.wavelength_nm.size), dtype=float)
         delta_map = np.empty_like(reflectance_map)
 
         for row_index, d_air_nm in enumerate(d_air_array):
-            reflectance = self.calc_macro_reflectance(mode=mode, d_air_nm=float(d_air_nm))
+            reflectance = self.calc_macro_reflectance(
+                mode=normalized_mode,
+                d_air_nm=float(d_air_nm),
+                thicknesses=thicknesses,
+            )
             reflectance_map[row_index] = reflectance
             delta_map[row_index] = reflectance - baseline_reflectance
 
         return reflectance_map, delta_map
+
+    def _validate_query_wavelengths(self, wavelengths_nm: np.ndarray) -> np.ndarray:
+        query = np.asarray(wavelengths_nm, dtype=float)
+        if query.ndim != 1:
+            raise ValueError("wavelengths_nm 必须是一维数组。")
+        if query.size == 0:
+            raise ValueError("wavelengths_nm 不能为空。")
+        if not np.isfinite(query).all():
+            raise ValueError("wavelengths_nm 含有 NaN/Inf。")
+        if float(np.min(query)) < float(self.wavelength_nm.min()) or float(np.max(query)) > float(self.wavelength_nm.max()):
+            raise ValueError(
+                "wavelengths_nm 超出支持范围："
+                f"[{self.wavelength_nm.min():.1f}, {self.wavelength_nm.max():.1f}] nm"
+            )
+        return query
+
+    def forward_model_for_fitting(
+        self,
+        wavelengths_nm: np.ndarray,
+        d_air_nm: float,
+        interface_type: str = INTERFACE_BACK,
+        **kwargs: float,
+    ) -> np.ndarray:
+        query_wavelengths_nm = self._validate_query_wavelengths(wavelengths_nm)
+        normalized_interface = self._normalize_fitting_interface(interface_type)
+        thickness_state = self._resolve_thicknesses(**kwargs)
+
+        internal_reflectance = self.calc_macro_reflectance(
+            mode=normalized_interface,
+            d_air_nm=float(d_air_nm),
+            thicknesses=thickness_state,
+        )
+        if np.array_equal(query_wavelengths_nm, self.wavelength_nm):
+            return internal_reflectance.copy()
+        return np.interp(query_wavelengths_nm, self.wavelength_nm, internal_reflectance)
+
+
+@lru_cache(maxsize=1)
+def load_default_optical_stack_table() -> OpticalStackTable:
+    return OpticalStackTable.from_files(
+        nk_csv_path=DEFAULT_NK_CSV_PATH,
+        material_db_path=DEFAULT_MATERIAL_DB_PATH,
+    )
+
+
+def forward_model_for_fitting(
+    wavelengths_nm: np.ndarray,
+    d_air_nm: float,
+    interface_type: str = INTERFACE_BACK,
+    **kwargs: float,
+) -> np.ndarray:
+    """Standard real-valued forward interface for future nonlinear fitting."""
+    model = load_default_optical_stack_table()
+    return model.forward_model_for_fitting(
+        wavelengths_nm=wavelengths_nm,
+        d_air_nm=d_air_nm,
+        interface_type=interface_type,
+        **kwargs,
+    )
