@@ -1,0 +1,682 @@
+[
+    [
+        {
+            "type": "header",
+            "bbox": [
+                0.836,
+                0.042,
+                0.853,
+                0.056
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                1382,
+                98,
+                1410,
+                98,
+                1410,
+                130,
+                1382,
+                130
+            ]
+        },
+        {
+            "type": "header",
+            "bbox": [
+                0.858,
+                0.044,
+                0.909,
+                0.053
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                1419,
+                102,
+                1503,
+                102,
+                1503,
+                123,
+                1419,
+                123
+            ]
+        },
+        {
+            "type": "title",
+            "bbox": [
+                0.08,
+                0.084,
+                0.395,
+                0.101
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                132,
+                196,
+                653,
+                196,
+                653,
+                236,
+                132,
+                236
+            ]
+        },
+        {
+            "type": "title",
+            "bbox": [
+                0.154,
+                0.124,
+                0.248,
+                0.141
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                254,
+                290,
+                410,
+                290,
+                410,
+                329,
+                254,
+                329
+            ]
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.155,
+                0.144,
+                0.321,
+                0.159
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                256,
+                336,
+                530,
+                336,
+                530,
+                371,
+                256,
+                371
+            ]
+        },
+        {
+            "type": "table_caption",
+            "bbox": [
+                0.154,
+                0.188,
+                0.219,
+                0.202
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                254,
+                439,
+                362,
+                439,
+                362,
+                472,
+                254,
+                472
+            ]
+        },
+        {
+            "type": "table",
+            "bbox": [
+                0.15,
+                0.207,
+                0.868,
+                0.33
+            ],
+            "angle": 0,
+            "content": "<table><tr><td colspan=\"2\">Software and regression log</td></tr><tr><td>Software about</td><td>Semilab - Spectroscopic Ellipsometry Analyzer - SEA</td></tr><tr><td>Software version</td><td>1.8.0.4</td></tr><tr><td>Officially licensed to</td><td>Linyang Jiangsu</td></tr><tr><td>Operator</td><td>operator</td></tr><tr><td>Date and time of regression</td><td>07-04-2026 16:54</td></tr><tr><td>Comments</td><td></td></tr></table>"
+        },
+        {
+            "type": "title",
+            "bbox": [
+                0.154,
+                0.358,
+                0.293,
+                0.373
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                254,
+                837,
+                484,
+                837,
+                484,
+                872,
+                254,
+                872
+            ]
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.155,
+                0.377,
+                0.227,
+                0.39
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                256,
+                881,
+                375,
+                881,
+                375,
+                912,
+                256,
+                912
+            ]
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.315,
+                0.411,
+                0.702,
+                0.504
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "table_caption",
+            "bbox": [
+                0.155,
+                0.529,
+                0.259,
+                0.542
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                256,
+                1237,
+                428,
+                1237,
+                428,
+                1267,
+                256,
+                1267
+            ]
+        },
+        {
+            "type": "table",
+            "bbox": [
+                0.149,
+                0.544,
+                0.868,
+                0.616
+            ],
+            "angle": 0,
+            "content": "<table><tr><td>Phase 1</td><td>C60</td></tr><tr><td>Dispersion law</td><td>Tauc-Lorentz</td></tr><tr><td></td><td>Lorentz</td></tr><tr><td></td><td>Lorentz</td></tr></table>"
+        },
+        {
+            "type": "page_number",
+            "bbox": [
+                0.877,
+                0.939,
+                0.932,
+                0.953
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                1450,
+                2196,
+                1541,
+                2196,
+                1541,
+                2229,
+                1450,
+                2229
+            ]
+        }
+    ],
+    [
+        {
+            "type": "header",
+            "bbox": [
+                0.836,
+                0.042,
+                0.914,
+                0.056
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                1382,
+                98,
+                1511,
+                98,
+                1511,
+                130,
+                1382,
+                130
+            ]
+        },
+        {
+            "type": "title",
+            "bbox": [
+                0.081,
+                0.084,
+                0.267,
+                0.101
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                133,
+                196,
+                441,
+                196,
+                441,
+                236,
+                133,
+                236
+            ]
+        },
+        {
+            "type": "table",
+            "bbox": [
+                0.149,
+                0.12,
+                0.919,
+                0.805
+            ],
+            "angle": 0,
+            "content": "<table><tr><td colspan=\"5\">Measurement information</td></tr><tr><td>Measurement file path</td><td colspan=\"4\">C:\\Users\\jjun.zhang\\Desktop\\□□□□□\\ C60-20-glass-□□□-1.smdx</td></tr><tr><td>Angle of Incidence</td><td colspan=\"4\">64.6°</td></tr><tr><td colspan=\"5\">Regression details</td></tr><tr><td colspan=\"5\">Regression 1 (EllipsoReflectance)</td></tr><tr><td>Wavelength range</td><td colspan=\"4\">260.19 - 899.93 nm</td></tr><tr><td>Angle of Incidence</td><td colspan=\"4\">64.6°</td></tr><tr><td>Fit to</td><td colspan=\"4\">Ψ, Δ</td></tr><tr><td>Angular Aperture</td><td colspan=\"4\">0°</td></tr><tr><td>Fit algorithm</td><td colspan=\"4\">LMA</td></tr><tr><td colspan=\"5\">Results</td></tr><tr><td>Parameters</td><td>Value</td><td>Fitted</td><td>2 σ confidence limit</td><td>Unit</td></tr><tr><td colspan=\"5\">Model</td></tr><tr><td>AOI Shift</td><td>0</td><td></td><td></td><td>°</td></tr><tr><td>Angular Aperture</td><td>0</td><td></td><td></td><td>°</td></tr><tr><td colspan=\"5\">Phase 1 (C60)</td></tr><tr><td>Thickness</td><td>18.494</td><td>X</td><td>0.07288</td><td>nm</td></tr><tr><td>A (eV)</td><td>25.25319</td><td></td><td></td><td>eV</td></tr><tr><td>E0 (eV)</td><td>4.7205</td><td></td><td></td><td>eV</td></tr><tr><td>C (eV)</td><td>1.34603</td><td></td><td></td><td>eV</td></tr><tr><td>Eg (eV)</td><td>2.22511</td><td>X</td><td>0.0039054</td><td>eV</td></tr><tr><td>f</td><td>0.35695</td><td></td><td></td><td></td></tr><tr><td>E0 (eV)</td><td>3.55858</td><td></td><td></td><td>eV</td></tr><tr><td>Γ (eV)</td><td>0.43402</td><td>X</td><td>0.0030298</td><td>eV</td></tr><tr><td>f</td><td>0.26273</td><td></td><td></td><td></td></tr><tr><td>E0 (eV)</td><td>2.7432</td><td></td><td></td><td>eV</td></tr><tr><td>Γ (eV)</td><td>0.58411</td><td>X</td><td>0.006296</td><td>eV</td></tr><tr><td>Eps_inf</td><td>1.93708</td><td></td><td></td><td></td></tr><tr><td>Derived parameters</td><td colspan=\"4\">Value</td></tr><tr><td colspan=\"5\">Phase 1 (C60)</td></tr><tr><td>n @ 632.8 nm</td><td colspan=\"4\">2.107</td></tr><tr><td>k @ 632.8 nm</td><td colspan=\"4\">0.0476</td></tr><tr><td colspan=\"5\">Substrate (Glass_BK7)</td></tr><tr><td>n @ 632.8 nm</td><td colspan=\"4\">1.5151</td></tr><tr><td>k @ 632.8 nm</td><td colspan=\"4\">0</td></tr><tr><td colspan=\"5\">Fit quality</td></tr><tr><td>R^2</td><td colspan=\"4\">0.99551</td></tr><tr><td>RMSE</td><td colspan=\"4\">0.19526</td></tr></table>"
+        },
+        {
+            "type": "page_number",
+            "bbox": [
+                0.877,
+                0.939,
+                0.934,
+                0.953
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                1450,
+                2196,
+                1544,
+                2196,
+                1544,
+                2229,
+                1450,
+                2229
+            ]
+        }
+    ],
+    [
+        {
+            "type": "header",
+            "bbox": [
+                0.836,
+                0.042,
+                0.914,
+                0.055
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                1382,
+                98,
+                1511,
+                98,
+                1511,
+                128,
+                1382,
+                128
+            ]
+        },
+        {
+            "type": "image_caption",
+            "bbox": [
+                0.081,
+                0.084,
+                0.267,
+                0.101
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                133,
+                196,
+                441,
+                196,
+                441,
+                236,
+                133,
+                236
+            ]
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.113,
+                0.13,
+                0.925,
+                0.416
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "table",
+            "bbox": [
+                0.097,
+                0.448,
+                0.936,
+                0.47
+            ],
+            "angle": 0,
+            "content": "<table><tr><td>—</td><td>C60-20-glass-□□□- 1 Measured</td><td>—</td><td>C60-20-glass-□□□- 1 After Fit</td></tr></table>"
+        },
+        {
+            "type": "image_caption",
+            "bbox": [
+                0.081,
+                0.492,
+                0.267,
+                0.51
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                133,
+                1150,
+                441,
+                1150,
+                441,
+                1192,
+                133,
+                1192
+            ]
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.114,
+                0.533,
+                0.925,
+                0.825
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "table",
+            "bbox": [
+                0.097,
+                0.856,
+                0.935,
+                0.877
+            ],
+            "angle": 0,
+            "content": "<table><tr><td>—</td><td>C60-20-glass-□□□- 1 Measured</td><td>—</td><td>C60-20-glass-□□□- 1 After Fit</td></tr></table>"
+        },
+        {
+            "type": "page_number",
+            "bbox": [
+                0.877,
+                0.939,
+                0.933,
+                0.953
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                1450,
+                2196,
+                1543,
+                2196,
+                1543,
+                2229,
+                1450,
+                2229
+            ]
+        }
+    ],
+    [
+        {
+            "type": "header",
+            "bbox": [
+                0.836,
+                0.042,
+                0.914,
+                0.055
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                1382,
+                98,
+                1511,
+                98,
+                1511,
+                128,
+                1382,
+                128
+            ]
+        },
+        {
+            "type": "image_caption",
+            "bbox": [
+                0.081,
+                0.084,
+                0.411,
+                0.101
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                133,
+                196,
+                679,
+                196,
+                679,
+                236,
+                133,
+                236
+            ]
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.11,
+                0.125,
+                0.874,
+                0.399
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.111,
+                0.436,
+                0.874,
+                0.709
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "page_number",
+            "bbox": [
+                0.877,
+                0.939,
+                0.933,
+                0.953
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                1450,
+                2196,
+                1543,
+                2196,
+                1543,
+                2229,
+                1450,
+                2229
+            ]
+        }
+    ],
+    [
+        {
+            "type": "header",
+            "bbox": [
+                0.836,
+                0.042,
+                0.914,
+                0.055
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                1382,
+                98,
+                1511,
+                98,
+                1511,
+                128,
+                1382,
+                128
+            ]
+        },
+        {
+            "type": "image_caption",
+            "bbox": [
+                0.081,
+                0.084,
+                0.498,
+                0.101
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                133,
+                196,
+                823,
+                196,
+                823,
+                236,
+                133,
+                236
+            ]
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.11,
+                0.125,
+                0.874,
+                0.399
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.111,
+                0.436,
+                0.874,
+                0.709
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "page_number",
+            "bbox": [
+                0.877,
+                0.939,
+                0.933,
+                0.953
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                1450,
+                2196,
+                1543,
+                2196,
+                1543,
+                2229,
+                1450,
+                2229
+            ]
+        }
+    ],
+    [
+        {
+            "type": "header",
+            "bbox": [
+                0.836,
+                0.042,
+                0.914,
+                0.055
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                1382,
+                98,
+                1511,
+                98,
+                1511,
+                128,
+                1382,
+                128
+            ]
+        },
+        {
+            "type": "table",
+            "bbox": [
+                0.149,
+                0.083,
+                0.867,
+                0.239
+            ],
+            "angle": 0,
+            "content": "<table><tr><td colspan=\"5\">Correlation coefficients</td></tr><tr><td></td><td>Ph1 - C60 - Thickness</td><td>Ph1 - Tauc-Lorentz[1] - Eg (eV)</td><td>Ph1 - Lorentz[2] - Γ (eV)</td><td>Ph1 - Lorentz[3] - Γ (eV)</td></tr><tr><td>Ph1 - C60 - Thickness</td><td>1</td><td>0.6691</td><td>0.2204</td><td>0.1306</td></tr><tr><td>Ph1 - Tauc-Lorentz[1] - Eg (eV)</td><td></td><td>1</td><td>-0.0547</td><td>0.2206</td></tr><tr><td>Ph1 - Lorentz[2] - Γ (eV)</td><td></td><td></td><td>1</td><td>0.1771</td></tr><tr><td>Ph1 - Lorentz[3] - Γ (eV)</td><td></td><td></td><td></td><td>1</td></tr></table>"
+        },
+        {
+            "type": "page_number",
+            "bbox": [
+                0.877,
+                0.939,
+                0.933,
+                0.953
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                1450,
+                2196,
+                1543,
+                2196,
+                1543,
+                2229,
+                1450,
+                2229
+            ]
+        }
+    ]
+]

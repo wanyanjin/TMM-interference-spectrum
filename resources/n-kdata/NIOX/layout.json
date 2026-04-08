@@ -1,0 +1,1516 @@
+{
+    "pdf_info": [
+        {
+            "para_blocks": [
+                {
+                    "bbox": [
+                        47,
+                        70,
+                        235,
+                        84
+                    ],
+                    "type": "title",
+                    "angle": 0,
+                    "index": 1,
+                    "lines": [
+                        {
+                            "bbox": [
+                                47,
+                                68,
+                                235,
+                                86
+                            ],
+                            "spans": [
+                                {
+                                    "bbox": [
+                                        47,
+                                        68,
+                                        235,
+                                        86
+                                    ],
+                                    "type": "text",
+                                    "content": "SEA reg ression report su m mary",
+                                    "score": 1.0
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "bbox": [
+                        91,
+                        104,
+                        147,
+                        117
+                    ],
+                    "type": "title",
+                    "angle": 0,
+                    "index": 2,
+                    "lines": [
+                        {
+                            "bbox": [
+                                89,
+                                103,
+                                149,
+                                119
+                            ],
+                            "spans": [
+                                {
+                                    "bbox": [
+                                        89,
+                                        103,
+                                        149,
+                                        119
+                                    ],
+                                    "type": "text",
+                                    "content": "Sam ple I D",
+                                    "score": 1.0
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "bbox": [
+                        92,
+                        121,
+                        107,
+                        131
+                    ],
+                    "type": "text",
+                    "angle": 0,
+                    "index": 3,
+                    "lines": [
+                        {
+                            "bbox": [
+                                91,
+                                121,
+                                109,
+                                135
+                            ],
+                            "spans": [
+                                {
+                                    "bbox": [
+                                        91,
+                                        121,
+                                        109,
+                                        135
+                                    ],
+                                    "type": "text",
+                                    "content": "5 - 1",
+                                    "score": 1.0
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "table",
+                    "bbox": [
+                        89,
+                        174,
+                        516,
+                        278
+                    ],
+                    "blocks": [
+                        {
+                            "bbox": [
+                                91,
+                                158,
+                                130,
+                                169
+                            ],
+                            "lines": [
+                                {
+                                    "bbox": [
+                                        89,
+                                        155,
+                                        132,
+                                        172
+                                    ],
+                                    "spans": [
+                                        {
+                                            "bbox": [
+                                                89,
+                                                155,
+                                                132,
+                                                172
+                                            ],
+                                            "type": "text",
+                                            "content": "D eta i l s",
+                                            "score": 1.0
+                                        }
+                                    ]
+                                }
+                            ],
+                            "index": 4,
+                            "angle": 0,
+                            "type": "table_caption"
+                        },
+                        {
+                            "bbox": [
+                                89,
+                                174,
+                                516,
+                                278
+                            ],
+                            "lines": [
+                                {
+                                    "bbox": [
+                                        89,
+                                        174,
+                                        516,
+                                        278
+                                    ],
+                                    "spans": [
+                                        {
+                                            "bbox": [
+                                                89,
+                                                174,
+                                                516,
+                                                278
+                                            ],
+                                            "type": "table",
+                                            "html": "<table><tr><td colspan=\"2\">Software and regression log</td></tr><tr><td>Software about</td><td>Semilab - Spectroscopic Ellipsometry Analyzer - SEA</td></tr><tr><td>Software version</td><td>1.8.0.4</td></tr><tr><td>Officially licensed to</td><td>Linyang Jiangsu</td></tr><tr><td>Operator</td><td>operator</td></tr><tr><td>Date and time of regression</td><td>07-04-2026 16:59</td></tr><tr><td>Comments</td><td></td></tr></table>",
+                                            "image_path": "902f189440273b46c3a8b0447df0519a336a995e8d441337025774dade0f804f.jpg"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "index": 5,
+                            "angle": 0,
+                            "type": "table_body"
+                        },
+                        {
+                            "bbox": [
+                                91,
+                                301,
+                                174,
+                                313
+                            ],
+                            "lines": [
+                                {
+                                    "bbox": [
+                                        89,
+                                        299,
+                                        176,
+                                        315
+                                    ],
+                                    "spans": [
+                                        {
+                                            "bbox": [
+                                                89,
+                                                299,
+                                                176,
+                                                315
+                                            ],
+                                            "type": "text",
+                                            "content": "Layer structu re",
+                                            "score": 1.0
+                                        }
+                                    ]
+                                }
+                            ],
+                            "index": 6,
+                            "angle": 0,
+                            "type": "table_caption"
+                        }
+                    ],
+                    "index": 5
+                },
+                {
+                    "bbox": [
+                        92,
+                        317,
+                        135,
+                        327
+                    ],
+                    "type": "text",
+                    "angle": 0,
+                    "index": 7,
+                    "lines": [
+                        {
+                            "bbox": [
+                                90,
+                                315,
+                                136,
+                                328
+                            ],
+                            "spans": [
+                                {
+                                    "bbox": [
+                                        90,
+                                        315,
+                                        136,
+                                        328
+                                    ],
+                                    "type": "text",
+                                    "content": "Overview",
+                                    "score": 1.0
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "bbox": [
+                        265,
+                        360,
+                        338,
+                        372
+                    ],
+                    "type": "text",
+                    "angle": 0,
+                    "index": 8,
+                    "lines": [
+                        {
+                            "bbox": [
+                                264,
+                                359,
+                                340,
+                                374
+                            ],
+                            "spans": [
+                                {
+                                    "bbox": [
+                                        264,
+                                        359,
+                                        340,
+                                        374
+                                    ],
+                                    "type": "text",
+                                    "content": " NiOx (Phase 2)",
+                                    "score": 0.986
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "bbox": [
+                        253,
+                        373,
+                        351,
+                        383
+                    ],
+                    "type": "text",
+                    "angle": 0,
+                    "index": 9,
+                    "lines": [
+                        {
+                            "bbox": [
+                                251,
+                                370,
+                                352,
+                                385
+                            ],
+                            "spans": [
+                                {
+                                    "bbox": [
+                                        251,
+                                        370,
+                                        352,
+                                        385
+                                    ],
+                                    "type": "text",
+                                    "content": " Thickness = 22.4 nm",
+                                    "score": 0.986
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "bbox": [
+                        251,
+                        397,
+                        354,
+                        411
+                    ],
+                    "type": "text",
+                    "angle": 0,
+                    "index": 10,
+                    "lines": []
+                },
+                {
+                    "type": "table",
+                    "bbox": [
+                        88,
+                        457,
+                        516,
+                        518
+                    ],
+                    "blocks": [
+                        {
+                            "bbox": [
+                                92,
+                                444,
+                                154,
+                                455
+                            ],
+                            "lines": [
+                                {
+                                    "bbox": [
+                                        89,
+                                        443,
+                                        155,
+                                        456
+                                    ],
+                                    "spans": [
+                                        {
+                                            "bbox": [
+                                                89,
+                                                443,
+                                                155,
+                                                456
+                                            ],
+                                            "type": "text",
+                                            "content": "Optical model",
+                                            "score": 1.0
+                                        }
+                                    ]
+                                }
+                            ],
+                            "index": 11,
+                            "angle": 0,
+                            "type": "table_caption"
+                        },
+                        {
+                            "bbox": [
+                                88,
+                                457,
+                                516,
+                                518
+                            ],
+                            "lines": [
+                                {
+                                    "bbox": [
+                                        88,
+                                        457,
+                                        516,
+                                        518
+                                    ],
+                                    "spans": [
+                                        {
+                                            "bbox": [
+                                                88,
+                                                457,
+                                                516,
+                                                518
+                                            ],
+                                            "type": "table",
+                                            "html": "<table><tr><td>Phase 2</td><td>NiOx</td></tr><tr><td>Dispersion law</td><td>Tauc-Lorentz</td></tr><tr><td></td><td>Gauss</td></tr><tr><td></td><td>Lorentz</td></tr></table>",
+                                            "image_path": "c381da93ebd3eaf4e6f28bdec5abc5e0a7fbeea82f7872cf8e73eb05599ef5b7.jpg"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "index": 12,
+                            "angle": 0,
+                            "type": "table_body"
+                        }
+                    ],
+                    "index": 12
+                }
+            ],
+            "discarded_blocks": [
+                {
+                    "bbox": [
+                        497,
+                        35,
+                        543,
+                        47
+                    ],
+                    "type": "header",
+                    "angle": 0,
+                    "index": 0,
+                    "lines": [
+                        {
+                            "bbox": [
+                                497,
+                                34,
+                                543,
+                                47
+                            ],
+                            "spans": [
+                                {
+                                    "bbox": [
+                                        497,
+                                        34,
+                                        543,
+                                        47
+                                    ],
+                                    "type": "text",
+                                    "content": "SEMILAB",
+                                    "score": 0.968
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "bbox": [
+                        521,
+                        789,
+                        554,
+                        801
+                    ],
+                    "type": "page_number",
+                    "angle": 0,
+                    "index": 13,
+                    "lines": [
+                        {
+                            "bbox": [
+                                520,
+                                788,
+                                557,
+                                803
+                            ],
+                            "spans": [
+                                {
+                                    "bbox": [
+                                        520,
+                                        788,
+                                        557,
+                                        803
+                                    ],
+                                    "type": "text",
+                                    "content": "Page 1",
+                                    "score": 1.0
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ],
+            "page_size": [
+                595,
+                841
+            ],
+            "page_idx": 0
+        },
+        {
+            "para_blocks": [
+                {
+                    "bbox": [
+                        48,
+                        70,
+                        158,
+                        84
+                    ],
+                    "type": "title",
+                    "angle": 0,
+                    "index": 1,
+                    "lines": [
+                        {
+                            "bbox": [
+                                48,
+                                70,
+                                158,
+                                85
+                            ],
+                            "spans": [
+                                {
+                                    "bbox": [
+                                        48,
+                                        70,
+                                        158,
+                                        85
+                                    ],
+                                    "type": "text",
+                                    "content": "Reg ress ion resu lts",
+                                    "score": 1.0
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "table",
+                    "bbox": [
+                        88,
+                        101,
+                        546,
+                        677
+                    ],
+                    "blocks": [
+                        {
+                            "bbox": [
+                                88,
+                                101,
+                                546,
+                                677
+                            ],
+                            "lines": [
+                                {
+                                    "bbox": [
+                                        88,
+                                        101,
+                                        546,
+                                        677
+                                    ],
+                                    "spans": [
+                                        {
+                                            "bbox": [
+                                                88,
+                                                101,
+                                                546,
+                                                677
+                                            ],
+                                            "type": "table",
+                                            "html": "<table><tr><td colspan=\"5\">Measurement information</td></tr><tr><td>Measurement file path</td><td colspan=\"4\">C:\\Users\\jjun.zhang\\Desktop\\SE2000\\□□\\ 0813\\NIO\\MF-8KW-0.5-4.4-18\\5-1.smdx</td></tr><tr><td>Angle of Incidence</td><td colspan=\"4\">64.6°</td></tr><tr><td colspan=\"5\">Regression details</td></tr><tr><td colspan=\"5\">Regression 1 (EllipsoReflectance)</td></tr><tr><td>Wavelength range</td><td colspan=\"4\">290.61 - 899.93 nm</td></tr><tr><td>Angle of Incidence</td><td colspan=\"4\">64.6°</td></tr><tr><td>Fit to</td><td colspan=\"4\">Ψ, Δ</td></tr><tr><td>Angular Aperture</td><td colspan=\"4\">0°</td></tr><tr><td>Fit algorithm</td><td colspan=\"4\">LMA</td></tr><tr><td colspan=\"5\">Results</td></tr><tr><td>Parameters</td><td>Value</td><td>Fitted</td><td>2 σ confidence limit</td><td>Unit</td></tr><tr><td colspan=\"5\">Model</td></tr><tr><td>AOI Shift</td><td>0</td><td></td><td></td><td>°</td></tr><tr><td>Angular Aperture</td><td>0</td><td></td><td></td><td>°</td></tr><tr><td colspan=\"5\">Phase 2 (NiOx)</td></tr><tr><td>Thickness</td><td>22.443</td><td>X</td><td>0.030307</td><td>nm</td></tr><tr><td>A (eV)</td><td>61.48773</td><td></td><td></td><td>eV</td></tr><tr><td>E0 (eV)</td><td>7.1813</td><td></td><td></td><td>eV</td></tr><tr><td>C (eV)</td><td>1.0016E-15</td><td></td><td></td><td>eV</td></tr><tr><td>Eg (eV)</td><td>2.95995</td><td></td><td></td><td>eV</td></tr><tr><td>Amp</td><td>1.68799</td><td>X</td><td>0.007089</td><td></td></tr><tr><td>E0 (eV)</td><td>4.61996</td><td>X</td><td>0.019915</td><td>eV</td></tr><tr><td>Br (eV)</td><td>2.12908</td><td>X</td><td>0.036164</td><td>eV</td></tr><tr><td>f</td><td>1.71587</td><td></td><td></td><td></td></tr><tr><td>E0 (eV)</td><td>2.42066</td><td></td><td></td><td>eV</td></tr><tr><td>Γ (eV)</td><td>5</td><td></td><td></td><td>eV</td></tr><tr><td>Eps_inf</td><td>1.4488E-05</td><td></td><td></td><td></td></tr><tr><td>Derived parameters</td><td colspan=\"4\">Value</td></tr><tr><td colspan=\"5\">Phase 2 (NiOx)</td></tr><tr><td>n @ 632.8 nm</td><td colspan=\"4\">2.0476</td></tr><tr><td>k @ 632.8 nm</td><td colspan=\"4\">0.2458</td></tr><tr><td colspan=\"5\">Substrate (□□□9.8)</td></tr><tr><td>n @ 632.8 nm</td><td colspan=\"4\">1.4817</td></tr><tr><td>k @ 632.8 nm</td><td colspan=\"4\">0.0043</td></tr><tr><td colspan=\"5\">Fit quality</td></tr><tr><td>R^2</td><td colspan=\"4\">0.99432</td></tr><tr><td>RMSE</td><td colspan=\"4\">0.07966</td></tr></table>",
+                                            "image_path": "c77d1d4b5723b2ec9e9328a1be6ca5e69d92a7d08a8e5ab03cb83530ff943f05.jpg"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "index": 2,
+                            "angle": 0,
+                            "type": "table_body"
+                        }
+                    ],
+                    "index": 2
+                }
+            ],
+            "discarded_blocks": [
+                {
+                    "bbox": [
+                        497,
+                        35,
+                        543,
+                        47
+                    ],
+                    "type": "header",
+                    "angle": 0,
+                    "index": 0,
+                    "lines": [
+                        {
+                            "bbox": [
+                                497,
+                                34,
+                                543,
+                                47
+                            ],
+                            "spans": [
+                                {
+                                    "bbox": [
+                                        497,
+                                        34,
+                                        543,
+                                        47
+                                    ],
+                                    "type": "text",
+                                    "content": "SEMILAB",
+                                    "score": 0.968
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "bbox": [
+                        521,
+                        789,
+                        555,
+                        801
+                    ],
+                    "type": "page_number",
+                    "angle": 0,
+                    "index": 3,
+                    "lines": [
+                        {
+                            "bbox": [
+                                520,
+                                788,
+                                558,
+                                802
+                            ],
+                            "spans": [
+                                {
+                                    "bbox": [
+                                        520,
+                                        788,
+                                        558,
+                                        802
+                                    ],
+                                    "type": "text",
+                                    "content": "Page 2",
+                                    "score": 1.0
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ],
+            "page_size": [
+                595,
+                841
+            ],
+            "page_idx": 1
+        },
+        {
+            "para_blocks": [
+                {
+                    "type": "image",
+                    "bbox": [
+                        67,
+                        105,
+                        550,
+                        349
+                    ],
+                    "blocks": [
+                        {
+                            "bbox": [
+                                48,
+                                70,
+                                158,
+                                84
+                            ],
+                            "lines": [
+                                {
+                                    "bbox": [
+                                        48,
+                                        69,
+                                        160,
+                                        86
+                                    ],
+                                    "spans": [
+                                        {
+                                            "bbox": [
+                                                48,
+                                                69,
+                                                160,
+                                                86
+                                            ],
+                                            "type": "text",
+                                            "content": "Reg ression g raphs",
+                                            "score": 1.0
+                                        }
+                                    ]
+                                }
+                            ],
+                            "index": 1,
+                            "angle": 0,
+                            "type": "image_caption"
+                        },
+                        {
+                            "bbox": [
+                                67,
+                                105,
+                                550,
+                                349
+                            ],
+                            "lines": [
+                                {
+                                    "bbox": [
+                                        67,
+                                        105,
+                                        550,
+                                        349
+                                    ],
+                                    "spans": [
+                                        {
+                                            "bbox": [
+                                                67,
+                                                105,
+                                                550,
+                                                349
+                                            ],
+                                            "type": "image",
+                                            "image_path": "2b7f154e4d1efb8eeca84443ebd3831a6b79b5ccf55761f568b0c7e9377b0ce9.jpg"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "index": 2,
+                            "angle": 0,
+                            "type": "image_body"
+                        }
+                    ],
+                    "index": 2
+                },
+                {
+                    "type": "table",
+                    "bbox": [
+                        57,
+                        376,
+                        556,
+                        394
+                    ],
+                    "blocks": [
+                        {
+                            "bbox": [
+                                57,
+                                376,
+                                556,
+                                394
+                            ],
+                            "lines": [
+                                {
+                                    "bbox": [
+                                        57,
+                                        376,
+                                        556,
+                                        394
+                                    ],
+                                    "spans": [
+                                        {
+                                            "bbox": [
+                                                57,
+                                                376,
+                                                556,
+                                                394
+                                            ],
+                                            "type": "table",
+                                            "html": "<table><tr><td>—</td><td>5-1 Measured</td><td>—</td><td>5-1 Fit</td></tr></table>",
+                                            "image_path": "2e722ec7219fbb7bddf454a5a215a3cf70c1f790912b08cbc5ed06a6f9e15a54.jpg"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "index": 3,
+                            "angle": 0,
+                            "type": "table_body"
+                        }
+                    ],
+                    "index": 3
+                },
+                {
+                    "type": "image",
+                    "bbox": [
+                        67,
+                        451,
+                        550,
+                        693
+                    ],
+                    "blocks": [
+                        {
+                            "bbox": [
+                                48,
+                                413,
+                                158,
+                                428
+                            ],
+                            "lines": [
+                                {
+                                    "bbox": [
+                                        48,
+                                        413,
+                                        160,
+                                        429
+                                    ],
+                                    "spans": [
+                                        {
+                                            "bbox": [
+                                                48,
+                                                413,
+                                                160,
+                                                429
+                                            ],
+                                            "type": "text",
+                                            "content": "Reg ression g raphs",
+                                            "score": 1.0
+                                        }
+                                    ]
+                                }
+                            ],
+                            "index": 4,
+                            "angle": 0,
+                            "type": "image_caption"
+                        },
+                        {
+                            "bbox": [
+                                67,
+                                451,
+                                550,
+                                693
+                            ],
+                            "lines": [
+                                {
+                                    "bbox": [
+                                        67,
+                                        451,
+                                        550,
+                                        693
+                                    ],
+                                    "spans": [
+                                        {
+                                            "bbox": [
+                                                67,
+                                                451,
+                                                550,
+                                                693
+                                            ],
+                                            "type": "image",
+                                            "image_path": "b34800baf90ab70baeeae2736c804bf0f6a293d8d42f7576d47a491c00752ebe.jpg"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "index": 5,
+                            "angle": 0,
+                            "type": "image_body"
+                        }
+                    ],
+                    "index": 5
+                },
+                {
+                    "type": "table",
+                    "bbox": [
+                        57,
+                        719,
+                        556,
+                        737
+                    ],
+                    "blocks": [
+                        {
+                            "bbox": [
+                                57,
+                                719,
+                                556,
+                                737
+                            ],
+                            "lines": [
+                                {
+                                    "bbox": [
+                                        57,
+                                        719,
+                                        556,
+                                        737
+                                    ],
+                                    "spans": [
+                                        {
+                                            "bbox": [
+                                                57,
+                                                719,
+                                                556,
+                                                737
+                                            ],
+                                            "type": "table",
+                                            "html": "<table><tr><td>—</td><td>5-1 Measured</td><td>—</td><td>5-1 Fit</td></tr></table>",
+                                            "image_path": "a811403770088e92166019e897e19eb0fbba07d383589b628fe9423c24aa46a3.jpg"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "index": 6,
+                            "angle": 0,
+                            "type": "table_body"
+                        }
+                    ],
+                    "index": 6
+                }
+            ],
+            "discarded_blocks": [
+                {
+                    "bbox": [
+                        497,
+                        35,
+                        543,
+                        46
+                    ],
+                    "type": "header",
+                    "angle": 0,
+                    "index": 0,
+                    "lines": [
+                        {
+                            "bbox": [
+                                497,
+                                34,
+                                543,
+                                46
+                            ],
+                            "spans": [
+                                {
+                                    "bbox": [
+                                        497,
+                                        34,
+                                        543,
+                                        46
+                                    ],
+                                    "type": "text",
+                                    "content": "SEMILAB",
+                                    "score": 0.959
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "bbox": [
+                        521,
+                        789,
+                        555,
+                        801
+                    ],
+                    "type": "page_number",
+                    "angle": 0,
+                    "index": 7,
+                    "lines": [
+                        {
+                            "bbox": [
+                                520,
+                                788,
+                                557,
+                                802
+                            ],
+                            "spans": [
+                                {
+                                    "bbox": [
+                                        520,
+                                        788,
+                                        557,
+                                        802
+                                    ],
+                                    "type": "text",
+                                    "content": "Page 3",
+                                    "score": 1.0
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ],
+            "page_size": [
+                595,
+                841
+            ],
+            "page_idx": 2
+        },
+        {
+            "para_blocks": [
+                {
+                    "type": "image",
+                    "bbox": [
+                        65,
+                        107,
+                        520,
+                        335
+                    ],
+                    "blocks": [
+                        {
+                            "bbox": [
+                                48,
+                                70,
+                                251,
+                                84
+                            ],
+                            "lines": [
+                                {
+                                    "bbox": [
+                                        48,
+                                        68,
+                                        251,
+                                        86
+                                    ],
+                                    "spans": [
+                                        {
+                                            "bbox": [
+                                                48,
+                                                68,
+                                                251,
+                                                86
+                                            ],
+                                            "type": "text",
+                                            "content": "Phase 2 (N iOx) - D ispers ion g raphs",
+                                            "score": 1.0
+                                        }
+                                    ]
+                                }
+                            ],
+                            "index": 1,
+                            "angle": 0,
+                            "type": "image_caption"
+                        },
+                        {
+                            "bbox": [
+                                65,
+                                107,
+                                520,
+                                335
+                            ],
+                            "lines": [
+                                {
+                                    "bbox": [
+                                        65,
+                                        107,
+                                        520,
+                                        335
+                                    ],
+                                    "spans": [
+                                        {
+                                            "bbox": [
+                                                65,
+                                                107,
+                                                520,
+                                                335
+                                            ],
+                                            "type": "image",
+                                            "image_path": "4099aaf215fcbe36fa8475cffc1dbfcfb328d5fc16073bfa039cd8b7f3ca28e0.jpg"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "index": 2,
+                            "angle": 0,
+                            "type": "image_body"
+                        }
+                    ],
+                    "index": 2
+                },
+                {
+                    "type": "image",
+                    "bbox": [
+                        66,
+                        366,
+                        520,
+                        596
+                    ],
+                    "blocks": [
+                        {
+                            "bbox": [
+                                66,
+                                366,
+                                520,
+                                596
+                            ],
+                            "lines": [
+                                {
+                                    "bbox": [
+                                        66,
+                                        366,
+                                        520,
+                                        596
+                                    ],
+                                    "spans": [
+                                        {
+                                            "bbox": [
+                                                66,
+                                                366,
+                                                520,
+                                                596
+                                            ],
+                                            "type": "image",
+                                            "image_path": "d2a3cb0d09ce13ce595d38dc1eca2ae3db31c3acfa0a81df4e39989d5e3b6c85.jpg"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "index": 3,
+                            "angle": 0,
+                            "type": "image_body"
+                        }
+                    ],
+                    "index": 3
+                }
+            ],
+            "discarded_blocks": [
+                {
+                    "bbox": [
+                        497,
+                        35,
+                        543,
+                        46
+                    ],
+                    "type": "header",
+                    "angle": 0,
+                    "index": 0,
+                    "lines": [
+                        {
+                            "bbox": [
+                                497,
+                                34,
+                                543,
+                                46
+                            ],
+                            "spans": [
+                                {
+                                    "bbox": [
+                                        497,
+                                        34,
+                                        543,
+                                        46
+                                    ],
+                                    "type": "text",
+                                    "content": "SEMILAB",
+                                    "score": 0.959
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "bbox": [
+                        521,
+                        789,
+                        555,
+                        801
+                    ],
+                    "type": "page_number",
+                    "angle": 0,
+                    "index": 4,
+                    "lines": [
+                        {
+                            "bbox": [
+                                520,
+                                788,
+                                557,
+                                802
+                            ],
+                            "spans": [
+                                {
+                                    "bbox": [
+                                        520,
+                                        788,
+                                        557,
+                                        802
+                                    ],
+                                    "type": "text",
+                                    "content": "Page 4",
+                                    "score": 1.0
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ],
+            "page_size": [
+                595,
+                841
+            ],
+            "page_idx": 3
+        },
+        {
+            "para_blocks": [
+                {
+                    "type": "image",
+                    "bbox": [
+                        65,
+                        105,
+                        520,
+                        335
+                    ],
+                    "blocks": [
+                        {
+                            "bbox": [
+                                48,
+                                70,
+                                289,
+                                84
+                            ],
+                            "lines": [
+                                {
+                                    "bbox": [
+                                        47,
+                                        68,
+                                        290,
+                                        86
+                                    ],
+                                    "spans": [
+                                        {
+                                            "bbox": [
+                                                47,
+                                                68,
+                                                290,
+                                                86
+                                            ],
+                                            "type": "text",
+                                            "content": "Su bstrate ( 璃 璃 璃 9.8) - D ispers ion g raphs",
+                                            "score": 1.0
+                                        }
+                                    ]
+                                }
+                            ],
+                            "index": 1,
+                            "angle": 0,
+                            "type": "image_caption"
+                        },
+                        {
+                            "bbox": [
+                                65,
+                                105,
+                                520,
+                                335
+                            ],
+                            "lines": [
+                                {
+                                    "bbox": [
+                                        65,
+                                        105,
+                                        520,
+                                        335
+                                    ],
+                                    "spans": [
+                                        {
+                                            "bbox": [
+                                                65,
+                                                105,
+                                                520,
+                                                335
+                                            ],
+                                            "type": "image",
+                                            "image_path": "0820d6cf3a15bea31862f4d03903efafae2c43896444e4f836dd6b30d371ad91.jpg"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "index": 2,
+                            "angle": 0,
+                            "type": "image_body"
+                        }
+                    ],
+                    "index": 2
+                },
+                {
+                    "type": "image",
+                    "bbox": [
+                        66,
+                        366,
+                        520,
+                        596
+                    ],
+                    "blocks": [
+                        {
+                            "bbox": [
+                                66,
+                                366,
+                                520,
+                                596
+                            ],
+                            "lines": [
+                                {
+                                    "bbox": [
+                                        66,
+                                        366,
+                                        520,
+                                        596
+                                    ],
+                                    "spans": [
+                                        {
+                                            "bbox": [
+                                                66,
+                                                366,
+                                                520,
+                                                596
+                                            ],
+                                            "type": "image",
+                                            "image_path": "b9bbca066fb29174b3ab94b7b65e45ddf6de6b218900d3be08d6256befcc1841.jpg"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "index": 3,
+                            "angle": 0,
+                            "type": "image_body"
+                        }
+                    ],
+                    "index": 3
+                }
+            ],
+            "discarded_blocks": [
+                {
+                    "bbox": [
+                        497,
+                        35,
+                        543,
+                        46
+                    ],
+                    "type": "header",
+                    "angle": 0,
+                    "index": 0,
+                    "lines": [
+                        {
+                            "bbox": [
+                                497,
+                                34,
+                                543,
+                                46
+                            ],
+                            "spans": [
+                                {
+                                    "bbox": [
+                                        497,
+                                        34,
+                                        543,
+                                        46
+                                    ],
+                                    "type": "text",
+                                    "content": "SEMILAB",
+                                    "score": 0.959
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "bbox": [
+                        521,
+                        789,
+                        555,
+                        801
+                    ],
+                    "type": "page_number",
+                    "angle": 0,
+                    "index": 4,
+                    "lines": [
+                        {
+                            "bbox": [
+                                520,
+                                788,
+                                557,
+                                801
+                            ],
+                            "spans": [
+                                {
+                                    "bbox": [
+                                        520,
+                                        788,
+                                        557,
+                                        801
+                                    ],
+                                    "type": "text",
+                                    "content": "Page 5",
+                                    "score": 1.0
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ],
+            "page_size": [
+                595,
+                841
+            ],
+            "page_idx": 4
+        },
+        {
+            "para_blocks": [
+                {
+                    "type": "table",
+                    "bbox": [
+                        88,
+                        69,
+                        515,
+                        191
+                    ],
+                    "blocks": [
+                        {
+                            "bbox": [
+                                88,
+                                69,
+                                515,
+                                191
+                            ],
+                            "lines": [
+                                {
+                                    "bbox": [
+                                        88,
+                                        69,
+                                        515,
+                                        191
+                                    ],
+                                    "spans": [
+                                        {
+                                            "bbox": [
+                                                88,
+                                                69,
+                                                515,
+                                                191
+                                            ],
+                                            "type": "table",
+                                            "html": "<table><tr><td colspan=\"5\">Correlation coefficients</td></tr><tr><td></td><td>Ph2 - NiOx - Thickness</td><td>Ph2 - Gauss[2] - Amp</td><td>Ph2 - Gauss[2] - E0 (eV)</td><td>Ph2 - Gauss[2] - Br (eV)</td></tr><tr><td>Ph2 - NiOx - Thickness</td><td>1</td><td>0.1309</td><td>-0.3962</td><td>-0.4884</td></tr><tr><td>Ph2 - Gauss[2] - Amp</td><td></td><td>1</td><td>-0.7865</td><td>-0.4433</td></tr><tr><td>Ph2 - Gauss[2] - E0 (eV)</td><td></td><td></td><td>1</td><td>0.7807</td></tr><tr><td>Ph2 - Gauss[2] - Br (eV)</td><td></td><td></td><td></td><td>1</td></tr></table>",
+                                            "image_path": "5d6f348c0d8f63c21d290196c4f45b13e001064df5222a0350a64f3897a3cc11.jpg"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "index": 1,
+                            "angle": 0,
+                            "type": "table_body"
+                        }
+                    ],
+                    "index": 1
+                }
+            ],
+            "discarded_blocks": [
+                {
+                    "bbox": [
+                        497,
+                        35,
+                        543,
+                        46
+                    ],
+                    "type": "header",
+                    "angle": 0,
+                    "index": 0,
+                    "lines": [
+                        {
+                            "bbox": [
+                                497,
+                                34,
+                                543,
+                                46
+                            ],
+                            "spans": [
+                                {
+                                    "bbox": [
+                                        497,
+                                        34,
+                                        543,
+                                        46
+                                    ],
+                                    "type": "text",
+                                    "content": "SEMILAB",
+                                    "score": 0.959
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "bbox": [
+                        521,
+                        789,
+                        555,
+                        801
+                    ],
+                    "type": "page_number",
+                    "angle": 0,
+                    "index": 2,
+                    "lines": [
+                        {
+                            "bbox": [
+                                520,
+                                789,
+                                557,
+                                801
+                            ],
+                            "spans": [
+                                {
+                                    "bbox": [
+                                        520,
+                                        789,
+                                        557,
+                                        801
+                                    ],
+                                    "type": "text",
+                                    "content": "Page 6",
+                                    "score": 1.0
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ],
+            "page_size": [
+                595,
+                841
+            ],
+            "page_idx": 5
+        }
+    ],
+    "_backend": "hybrid",
+    "_ocr_enable": false,
+    "_vlm_ocr_enable": false,
+    "_version_name": "2.7.6"
+}

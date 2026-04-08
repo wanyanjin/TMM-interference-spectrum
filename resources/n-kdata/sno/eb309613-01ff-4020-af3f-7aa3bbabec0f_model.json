@@ -1,0 +1,734 @@
+[
+    [
+        {
+            "type": "header",
+            "bbox": [
+                0.836,
+                0.042,
+                0.853,
+                0.056
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                1382,
+                98,
+                1410,
+                98,
+                1410,
+                130,
+                1382,
+                130
+            ]
+        },
+        {
+            "type": "header",
+            "bbox": [
+                0.858,
+                0.044,
+                0.909,
+                0.053
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                1419,
+                102,
+                1503,
+                102,
+                1503,
+                123,
+                1419,
+                123
+            ]
+        },
+        {
+            "type": "title",
+            "bbox": [
+                0.08,
+                0.084,
+                0.395,
+                0.101
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                132,
+                196,
+                653,
+                196,
+                653,
+                236,
+                132,
+                236
+            ]
+        },
+        {
+            "type": "title",
+            "bbox": [
+                0.154,
+                0.124,
+                0.248,
+                0.14
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                254,
+                290,
+                410,
+                290,
+                410,
+                327,
+                254,
+                327
+            ]
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.156,
+                0.145,
+                0.18,
+                0.156
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                258,
+                339,
+                297,
+                339,
+                297,
+                364,
+                258,
+                364
+            ]
+        },
+        {
+            "type": "table_caption",
+            "bbox": [
+                0.154,
+                0.188,
+                0.219,
+                0.202
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                254,
+                439,
+                362,
+                439,
+                362,
+                472,
+                254,
+                472
+            ]
+        },
+        {
+            "type": "table",
+            "bbox": [
+                0.15,
+                0.207,
+                0.868,
+                0.331
+            ],
+            "angle": 0,
+            "content": "<table><tr><td colspan=\"2\">Software and regression log</td></tr><tr><td>Software about</td><td>Semilab - Spectroscopic Ellipsometry Analyzer - SEA</td></tr><tr><td>Software version</td><td>1.8.0.4</td></tr><tr><td>Officially licensed to</td><td>Linyang Jiangsu</td></tr><tr><td>Operator</td><td>operator</td></tr><tr><td>Date and time of regression</td><td>07-04-2026 16:48</td></tr><tr><td>Comments</td><td></td></tr></table>"
+        },
+        {
+            "type": "title",
+            "bbox": [
+                0.154,
+                0.358,
+                0.293,
+                0.373
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                254,
+                837,
+                484,
+                837,
+                484,
+                872,
+                254,
+                872
+            ]
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.156,
+                0.378,
+                0.227,
+                0.389
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                258,
+                884,
+                375,
+                884,
+                375,
+                909,
+                258,
+                909
+            ]
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.445,
+                0.429,
+                0.571,
+                0.443
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                736,
+                1003,
+                944,
+                1003,
+                944,
+                1036,
+                736,
+                1036
+            ]
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.426,
+                0.444,
+                0.59,
+                0.456
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                704,
+                1038,
+                975,
+                1038,
+                975,
+                1066,
+                704,
+                1066
+            ]
+        },
+        {
+            "type": "text",
+            "bbox": [
+                0.422,
+                0.473,
+                0.596,
+                0.489
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                697,
+                1106,
+                985,
+                1106,
+                985,
+                1143,
+                697,
+                1143
+            ]
+        },
+        {
+            "type": "table_caption",
+            "bbox": [
+                0.155,
+                0.529,
+                0.258,
+                0.542
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                256,
+                1237,
+                426,
+                1237,
+                426,
+                1267,
+                256,
+                1267
+            ]
+        },
+        {
+            "type": "table",
+            "bbox": [
+                0.149,
+                0.544,
+                0.868,
+                0.598
+            ],
+            "angle": 0,
+            "content": "<table><tr><td>Phase 1</td><td>SnOx</td></tr><tr><td>Dispersion law</td><td>Lorentz</td></tr><tr><td></td><td>Tauc-Lorentz</td></tr></table>"
+        },
+        {
+            "type": "page_number",
+            "bbox": [
+                0.877,
+                0.939,
+                0.932,
+                0.953
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                1450,
+                2196,
+                1541,
+                2196,
+                1541,
+                2229,
+                1450,
+                2229
+            ]
+        }
+    ],
+    [
+        {
+            "type": "header",
+            "bbox": [
+                0.836,
+                0.042,
+                0.914,
+                0.056
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                1382,
+                98,
+                1511,
+                98,
+                1511,
+                130,
+                1382,
+                130
+            ]
+        },
+        {
+            "type": "title",
+            "bbox": [
+                0.081,
+                0.084,
+                0.267,
+                0.101
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                133,
+                196,
+                441,
+                196,
+                441,
+                236,
+                133,
+                236
+            ]
+        },
+        {
+            "type": "table",
+            "bbox": [
+                0.149,
+                0.12,
+                0.919,
+                0.741
+            ],
+            "angle": 0,
+            "content": "<table><tr><td colspan=\"5\">Measurement information</td></tr><tr><td>Measurement file path</td><td colspan=\"4\">C:\\Result\\2026\\2~3\\20260327\\SnOx\\1-3.smdx</td></tr><tr><td>Angle of Incidence</td><td colspan=\"4\">64.6°</td></tr><tr><td colspan=\"5\">Regression details</td></tr><tr><td colspan=\"5\">Regression 1 (EllipsoReflectance)</td></tr><tr><td>Wavelength range</td><td colspan=\"4\">280.47 - 899.93 nm</td></tr><tr><td>Angle of Incidence</td><td colspan=\"4\">64.6°</td></tr><tr><td>Fit to</td><td colspan=\"4\">Ψ, Δ</td></tr><tr><td>Angular Aperture</td><td colspan=\"4\">0°</td></tr><tr><td>Fit algorithm</td><td colspan=\"4\">LMA</td></tr><tr><td colspan=\"5\">Results</td></tr><tr><td>Parameters</td><td>Value</td><td>Fitted</td><td>2 σ confidence limit</td><td>Unit</td></tr><tr><td colspan=\"5\">Model</td></tr><tr><td>AOI Shift</td><td>0</td><td></td><td></td><td>°</td></tr><tr><td>Angular Aperture</td><td>0</td><td></td><td></td><td>°</td></tr><tr><td colspan=\"5\">Phase 1 (SnOx)</td></tr><tr><td>Thickness</td><td>20.156</td><td>X</td><td>0.31921</td><td>nm</td></tr><tr><td>f</td><td>1.04429</td><td></td><td></td><td></td></tr><tr><td>E0 (eV)</td><td>9.91314</td><td>X</td><td>0.57219</td><td>eV</td></tr><tr><td>Γ (eV)</td><td>5</td><td>X</td><td>0.75072</td><td>eV</td></tr><tr><td>A (eV)</td><td>0</td><td></td><td></td><td>eV</td></tr><tr><td>E0 (eV)</td><td>10</td><td></td><td></td><td>eV</td></tr><tr><td>C (eV)</td><td>5</td><td></td><td></td><td>eV</td></tr><tr><td>Eg (eV)</td><td>0</td><td></td><td></td><td>eV</td></tr><tr><td>Eps_inf</td><td>2.45093</td><td></td><td></td><td></td></tr><tr><td>Derived parameters</td><td colspan=\"4\">Value</td></tr><tr><td colspan=\"5\">Phase 1 (SnOx)</td></tr><tr><td>n @ 632.8 nm</td><td colspan=\"4\">1.878</td></tr><tr><td>k @ 632.8 nm</td><td colspan=\"4\">0.0297</td></tr><tr><td colspan=\"5\">Substrate (□□□9.8)</td></tr><tr><td>n @ 632.8 nm</td><td colspan=\"4\">1.4817</td></tr><tr><td>k @ 632.8 nm</td><td colspan=\"4\">0.0043</td></tr><tr><td colspan=\"5\">Fit quality</td></tr><tr><td>R^2</td><td colspan=\"4\">0.98323</td></tr><tr><td>RMSE</td><td colspan=\"4\">0.28621</td></tr></table>"
+        },
+        {
+            "type": "page_number",
+            "bbox": [
+                0.877,
+                0.939,
+                0.934,
+                0.953
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                1450,
+                2196,
+                1544,
+                2196,
+                1544,
+                2229,
+                1450,
+                2229
+            ]
+        }
+    ],
+    [
+        {
+            "type": "header",
+            "bbox": [
+                0.836,
+                0.042,
+                0.914,
+                0.055
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                1382,
+                98,
+                1511,
+                98,
+                1511,
+                128,
+                1382,
+                128
+            ]
+        },
+        {
+            "type": "image_caption",
+            "bbox": [
+                0.081,
+                0.084,
+                0.267,
+                0.101
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                133,
+                196,
+                441,
+                196,
+                441,
+                236,
+                133,
+                236
+            ]
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.113,
+                0.125,
+                0.925,
+                0.416
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "table",
+            "bbox": [
+                0.097,
+                0.448,
+                0.936,
+                0.469
+            ],
+            "angle": 0,
+            "content": "<table><tr><td>—</td><td>1-3 Measured</td><td>—</td><td>1-3 Fit</td></tr></table>"
+        },
+        {
+            "type": "image_caption",
+            "bbox": [
+                0.081,
+                0.492,
+                0.267,
+                0.51
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                133,
+                1150,
+                441,
+                1150,
+                441,
+                1192,
+                133,
+                1192
+            ]
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.116,
+                0.533,
+                0.925,
+                0.825
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "table",
+            "bbox": [
+                0.097,
+                0.856,
+                0.935,
+                0.877
+            ],
+            "angle": 0,
+            "content": "<table><tr><td>—</td><td>1-3 Measured</td><td>—</td><td>1-3 Fit</td></tr></table>"
+        },
+        {
+            "type": "page_number",
+            "bbox": [
+                0.877,
+                0.939,
+                0.933,
+                0.953
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                1450,
+                2196,
+                1543,
+                2196,
+                1543,
+                2229,
+                1450,
+                2229
+            ]
+        }
+    ],
+    [
+        {
+            "type": "header",
+            "bbox": [
+                0.836,
+                0.042,
+                0.914,
+                0.055
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                1382,
+                98,
+                1511,
+                98,
+                1511,
+                128,
+                1382,
+                128
+            ]
+        },
+        {
+            "type": "image_caption",
+            "bbox": [
+                0.081,
+                0.084,
+                0.427,
+                0.101
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                133,
+                196,
+                706,
+                196,
+                706,
+                236,
+                133,
+                236
+            ]
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.11,
+                0.125,
+                0.874,
+                0.399
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.111,
+                0.436,
+                0.874,
+                0.709
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "page_number",
+            "bbox": [
+                0.877,
+                0.939,
+                0.933,
+                0.953
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                1450,
+                2196,
+                1543,
+                2196,
+                1543,
+                2229,
+                1450,
+                2229
+            ]
+        }
+    ],
+    [
+        {
+            "type": "header",
+            "bbox": [
+                0.836,
+                0.042,
+                0.914,
+                0.055
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                1382,
+                98,
+                1511,
+                98,
+                1511,
+                128,
+                1382,
+                128
+            ]
+        },
+        {
+            "type": "image_caption",
+            "bbox": [
+                0.081,
+                0.084,
+                0.486,
+                0.101
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                133,
+                196,
+                803,
+                196,
+                803,
+                236,
+                133,
+                236
+            ]
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.11,
+                0.125,
+                0.874,
+                0.399
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "image",
+            "bbox": [
+                0.111,
+                0.436,
+                0.874,
+                0.709
+            ],
+            "angle": 0,
+            "content": null
+        },
+        {
+            "type": "page_number",
+            "bbox": [
+                0.877,
+                0.939,
+                0.933,
+                0.953
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                1450,
+                2196,
+                1543,
+                2196,
+                1543,
+                2229,
+                1450,
+                2229
+            ]
+        }
+    ],
+    [
+        {
+            "type": "header",
+            "bbox": [
+                0.836,
+                0.042,
+                0.914,
+                0.056
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                1382,
+                98,
+                1511,
+                98,
+                1511,
+                130,
+                1382,
+                130
+            ]
+        },
+        {
+            "type": "table",
+            "bbox": [
+                0.149,
+                0.083,
+                0.868,
+                0.169
+            ],
+            "angle": 0,
+            "content": "<table><tr><td colspan=\"4\">Correlation coefficients</td></tr><tr><td></td><td>Ph1 - SnOx - Thickness</td><td>Ph1 - Lorentz[1] - E0 (eV)</td><td>Ph1 - Lorentz[1] - Γ (eV)</td></tr><tr><td>Ph1 - SnOx - Thickness</td><td>1</td><td>0.2944</td><td>-0.1539</td></tr><tr><td>Ph1 - Lorentz[1] - E0 (eV)</td><td></td><td>1</td><td>0.8886</td></tr><tr><td>Ph1 - Lorentz[1] - Γ (eV)</td><td></td><td></td><td>1</td></tr></table>"
+        },
+        {
+            "type": "page_number",
+            "bbox": [
+                0.877,
+                0.939,
+                0.933,
+                0.953
+            ],
+            "angle": 0,
+            "content": null,
+            "poly": [
+                1450,
+                2196,
+                1543,
+                2196,
+                1543,
+                2229,
+                1450,
+                2229
+            ]
+        }
+    ]
+]
