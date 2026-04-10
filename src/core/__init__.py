@@ -1,1 +1,1 @@
-"""Core physics modules for TMM-interference-spectrum."""
+"""核心复用模块包。"""

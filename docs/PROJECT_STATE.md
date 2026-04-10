@@ -4,9 +4,9 @@
 
 ## 1. Current Snapshot
 
-- 更新时间：2026-04-08
-- 当前判断 Phase：`Phase 07`
-- 阶段定义：`构建全谱三分区基准、前后界面宏观正交雷达，并为后续 LM 反演预研标准前向接口`
+- 更新时间：2026-04-10
+- 当前判断 Phase：`Phase 06`
+- 阶段定义：`单样本 Bit-Agnostic HDR 拼接与银镜绝对反射率校准 Dry Run，验证重复求均值 + HDR 融合 + 厂家银镜校准链路`
 - 当前可用能力：
   - 已有 `step01_absolute_calibration.py`，可将样品与银镜原始计数转换为绝对反射率
   - 已有 `step01b_cauchy_extrapolation.py`，可基于 [LIT-0001] 的 `ITO/CsFAPI` 数字化折射率曲线生成 `750-1100 nm` 的 CsFAPI 扩展 `n-k` 中间件
@@ -15,6 +15,8 @@
   - 已有 `step03_forward_simulation.py`，可固化 Phase 03 六参数最优基线，在 `850-1500 nm` 波段前向预测 `SAM/PVK` 界面空气隙对绝对反射率 `R` 与差分反射率 `ΔR` 的影响
   - 已有 `step04a_air_gap_diagnostic.py`，可基于 `test_data/good-21.csv` 与 `test_data/bad-23.csv` 完成绝对反射率标定、6 参数/7 参数对比拟合、差分指纹比对与空气隙收敛诊断
   - 已有 `step04b_air_gap_localization.py`，可基于 `test_data/good-21.csv` 与 `test_data/bad-20-2.csv` 完成空气隙空间定位对比与材料参数弛豫诊断
+  - 已新增 `src/core/hdr_absolute_calibration.py`，可扫描 OneDrive 测试目录、从 `.spe` 元数据提取曝光时间、对重复采集做均值提纯、执行 Bit-Agnostic Cross-fade HDR 融合，并导出绝对反射率 QA 图/表
+  - 已新增 `step06_single_sample_hdr_absolute_calibration.py`，可对 `DEVICE-1-withAg` 与对应 `Ag_mirro` 组执行单样本 HDR Dry Run，输出到系统临时目录
   - 已有 `diagnostics_shape_mismatch.py`，可在独立沙盒中对 ITO 近红外吸收、厚度不均匀性和 PVK 色散斜率做形状畸变诊断
   - 已有 `step02_digitize_fapi_optical_constants.py`，可从 `LIT-0001` 的 Fig. 2 原图数字化提取 FAPI 的 `n/κ` 曲线并输出 QA 图
   - 已有 `step02_digitize_csfapi_optical_constants.py`，可从 `LIT-0001` 的 Fig. 3 原图数字化提取 CsFAPI 的 `n/κ` 曲线并输出 QA 图
@@ -29,13 +31,14 @@
   - 已完成 Phase 04 空气隙前向预测，当前基线下 `d_air = 2 nm` 与 `5 nm` 的 `max(|ΔR|)` 分别约为 `0.538%` 与 `1.347%`，均高于 `0.2%` 典型噪声线
   - 已完成 Phase 04a 空气隙诊断沙盒：在 `bad-23` 上加入 `d_air` 后，`chi-square` 由 `0.03197` 降至 `0.01619`，`d_air` 收敛到约 `39.9 nm`，但仍未低于 `0.01`
   - 已完成 Phase 04b 空气隙空间定位：对 `bad-20-2` 的 L1/L2/L3 三个 7 参数模型中，L3 (`SAM/PVK`) 的 `chi-square` 最低，但材料参数锁死时仍未优于 6 参数基线；释放材料参数后 `chi-square` 可进一步降至 `0.01932`
-  - 已完成 Phase 05c 全栈对齐 `n-k` 表构建：`aligned_full_stack_nk.csv` 共 `701` 行，无 `NaN/Inf`
-  - 已完成 Phase 06 全器件微腔探伤沙盒：成功生成 `Case A / Case B` 双模式 `ΔR` 理论指纹字典与雷达图
-  - 已完成 Phase 07 正交界面探伤预研：`front` 在 `Zone 1 (400-650 nm)` 的最大差分信号约 `28.16%`，显著强于 `back` 的约 `0.71%`
+  - 已完成 Phase 06 单样本 HDR Dry Run：对 `DEVICE-1-withAg` 的 `150 ms / 2000 ms` 三重复和 `Ag_mirro` 的 `500 us / 10 ms` 单重复完成均值提纯、HDR 融合和绝对校准
+  - 已确认当前实测窗口仅覆盖 `498.934-1055.460 nm`，未外推到 `400-498.934 nm` 或 `1055.460-1100 nm`
+  - 已确认 `850-1055 nm` 区间的样品与银镜都几乎完全信任长曝光，因此近红外区并非本次 HDR 拼接主战场
+  - 已明确暴露银镜短曝光异常：按 `.spe` 元数据的真实曝光时间归一化后，`Ag_mirro-500us` 相对 `Ag_mirro-10ms` 的 `Counts/ms` 比值中位数约为 `12.28`
 - 当前未完成内容：
   - 尚未把历史目录完全迁移到 `AGENTS.md` 规定的新结构
   - 尚未形成规范化的 Phase 日志、资源索引和结构化结果台账
-  - 尚缺自动化回归测试，用于锁定 `Phase 05c/06/07` 的全栈读表与 TMM 输出
+  - 尚未把 Phase 06 的单样本 HDR 逻辑扩展到批量样品或规范化 `data/raw/` 目录
 
 ## 2. Current Directory Tree
 
@@ -50,8 +53,7 @@ TMM-interference-spectrum/
 │   └── PROJECT_STATE.md
 ├── src/
 │   ├── core/
-│   │   ├── __init__.py
-│   │   └── full_stack_microcavity.py
+│   │   └── hdr_absolute_calibration.py
 │   └── scripts/
 │       ├── diagnostics_shape_mismatch.py
 │       ├── step01_absolute_calibration.py
@@ -63,12 +65,7 @@ TMM-interference-spectrum/
 │       ├── step03_forward_simulation.py
 │       ├── step04a_air_gap_diagnostic.py
 │       ├── step04b_air_gap_localization.py
-│       ├── step04c_fingerprint_mapping.py
-│       ├── step05_parse_ellipsometry_markdown.py
-│       ├── step05b_verify_against_pdf.py
-│       ├── step05c_build_aligned_nk_stack.py
-│       ├── step06_dual_mode_microcavity_sandbox.py
-│       └── step07_orthogonal_radar_and_baseline.py
+│       └── step06_single_sample_hdr_absolute_calibration.py
 ├── data/
 │   └── processed/
 │       ├── CsFAPI_nk_extended.csv
@@ -394,7 +391,44 @@ TMM-interference-spectrum/
 - `results/figures/phase04b_localization.png`
 - `results/logs/phase04b_localization.md`
 
-### 4.10 `diagnostics_shape_mismatch.py`
+### 4.10 `src/core/hdr_absolute_calibration.py`
+
+- 文件位置：`src/core/hdr_absolute_calibration.py`
+- 主要职责：为 Phase 06 提供可复用的 HDR 绝对校准公共逻辑，避免将路径扫描、`.spe` 曝光时间解析、重复求均值和 HDR 拼接散落在脚本层
+
+输入：
+- OneDrive 原始目录中的 `-cor.csv / -cor.spe`
+- `resources/GCC-1022系列xlsx.xlsx`
+
+核心处理流程：
+- 按前缀和曝光标签扫描目标组，禁止硬编码包含中文时间戳的完整文件名
+- 从 `.spe` XML 元数据优先读取 `ExposureTime`、背景参考路径和 `FramesToStore`
+- 将同曝光重复采集在 `Counts` 级别求算术平均，形成 `Mean_Counts`
+- 按 `Counts / ms` 归一化得到 `N_long` 与 `N_short`
+- 基于长曝光 `Cmax` 构造 `TH_lower = 0.75 * Cmax` 与 `TH_upper = 0.90 * Cmax`
+- 对长曝光计数执行线性 `W_long` 权重融合，生成 `HDR(Counts/ms)`
+- 读取银镜理论反射率表并插值到目标波长网格
+- 输出绝对反射率曲线、HDR QA 图、最大相邻点跳变和一致性统计
+
+### 4.11 `step06_single_sample_hdr_absolute_calibration.py`
+
+- 文件位置：`src/scripts/step06_single_sample_hdr_absolute_calibration.py`
+- 主要职责：对 `DEVICE-1-withAg` 的单样本组执行 Bit-Agnostic HDR Dry Run，并将图表与摘要输出到系统临时目录
+
+输入：
+- `D:\onedrive\Data\PL\2026\0409\cor\DEVICE-1-withAg-150ms-{1,2,3}*.csv`
+- `D:\onedrive\Data\PL\2026\0409\cor\DEVICE-1-withAg-2000ms-{1,2,3}*.csv`
+- `D:\onedrive\Data\PL\2026\0409\cor\Ag_mirro-500us-1*.csv`
+- `D:\onedrive\Data\PL\2026\0409\cor\Ag_mirro-10ms-1*.csv`
+- `resources/GCC-1022系列xlsx.xlsx`
+
+输出：
+- `%TEMP%/tmm_phase06_dry_run_*/phase06_device1_withag_hdr_diagnostic.png`
+- `%TEMP%/tmm_phase06_dry_run_*/phase06_device1_withag_absolute_reflectance.png`
+- `%TEMP%/tmm_phase06_dry_run_*/phase06_device1_withag_curve_table.csv`
+- `%TEMP%/tmm_phase06_dry_run_*/phase06_device1_withag_summary.md`
+
+### 4.12 `diagnostics_shape_mismatch.py`
 
 - 文件位置：`src/scripts/diagnostics_shape_mismatch.py`
 - 主要职责：在不修改主流程的前提下，复用 `step02` 的数据读取和 BEMA 基线模型，对条纹形状畸变的物理来源做诊断
@@ -477,6 +511,17 @@ resources/digitized/phase02_fig3_csfapi_optical_constants_digitized.csv
     -> step01b_cauchy_extrapolation.py
     -> data/processed/CsFAPI_nk_extended.csv
     -> results/figures/cauchy_extrapolation_check.png
+
+D:\onedrive\Data\PL\2026\0409\cor\DEVICE-1-withAg-150ms-{1,2,3}*.csv
+D:\onedrive\Data\PL\2026\0409\cor\DEVICE-1-withAg-2000ms-{1,2,3}*.csv
+D:\onedrive\Data\PL\2026\0409\cor\Ag_mirro-500us-1*.csv
+D:\onedrive\Data\PL\2026\0409\cor\Ag_mirro-10ms-1*.csv
+resources/GCC-1022系列xlsx.xlsx
+    -> step06_single_sample_hdr_absolute_calibration.py
+    -> src/core/hdr_absolute_calibration.py (扫描文件 -> 读取 .spe 曝光元数据 -> 同曝光重复求均值 -> Bit-Agnostic HDR 融合 -> 银镜理论反射率插值 -> 绝对反射率 QA)
+    -> %TEMP%/tmm_phase06_dry_run_*/phase06_device1_withag_*.png
+    -> %TEMP%/tmm_phase06_dry_run_*/phase06_device1_withag_curve_table.csv
+    -> %TEMP%/tmm_phase06_dry_run_*/phase06_device1_withag_summary.md
 
 data/processed/target_reflectance.csv
 data/processed/CsFAPI_nk_extended.csv
@@ -694,18 +739,25 @@ resources/materials_master_db.json
   - 当前主流程已能把长波端托平明显拉回实测曲线附近
   - 本轮继续加入 `sigma_thickness`，用于吸收光斑尺度内的峰谷钝化与条纹展宽
 
+### 7.8 银镜短曝光归一化与长曝光严重不一致
+
+- 表现：
+  - 对 `Ag_mirro-500us-1` 与 `Ag_mirro-10ms-1` 按 `.spe` 元数据中的真实曝光时间做 `Counts/ms` 归一化后，`N_short / N_long` 全波段中位数约为 `12.28`
+  - 该失配在 `500-600 nm`、`650-710 nm` 与 `850-1055 nm` 都持续存在，而不是只发生在局部饱和峰附近
+- 影响：
+  - 银镜 HDR 的短曝光部分不能被视为与长曝光同一线性响应链路
+  - `500-710 nm` 波段的绝对反射率解释需要把该失配当作首要 QA 风险
+- 当前状态：
+  - 已在 Phase 06 Dry Run 中显式暴露，不做经验缩放或非物理修补
+  - 后续需回查仪器门控、导出流程或实际曝光标签
+
 ## 8. Architecture Risks
 
-### 8.1 复用逻辑仍未模块化
+### 8.1 复用逻辑模块化刚启动，但尚未覆盖旧流程
 
-- 当前已新增 `src/core/full_stack_microcavity.py`，但 `src/scripts/` 内部仍包含大量可复用函数
-- 若继续扩展更多步骤脚本，重复代码风险会快速上升
-- 建议后续将以下逻辑下沉到 `src/core/`：
-  - 列名识别与 CSV 读取
-  - 波段裁剪与插值域校验
-  - ITO 数据解析
-  - Cauchy 外推
-  - 厚玻璃非相干/后侧堆栈相干的通用 TMM 级联
+- 已新增 `src/core/hdr_absolute_calibration.py`，用于收敛 Phase 06 的文件扫描、曝光解析和 HDR 拼接逻辑
+- 但 `step01` 至 `step05` 的复用逻辑仍大量滞留在 `src/scripts/`
+- 后续若继续扩展批量 HDR、批量反演或更多仪器输入格式，仍需继续把旧流程下沉到 `src/core/`
 
 ### 8.2 资源文件格式存在隐式脆弱性
 
@@ -791,58 +843,45 @@ resources/materials_master_db.json
   - `NiOx k` 触及 `-15%` 下边界
 - 这说明 `bad-20-2` 的异常不能仅靠“空气隙位置正确”解释，还伴随着明显的材料吸收/色散漂移需求
 
-### 8.13 Phase 06 直接依赖工程化全栈 n-k 表
+### 8.13 Phase 06 仍依赖仓库外 OneDrive 目录
 
-- `step06_dual_mode_microcavity_sandbox.py` 直接读取 `aligned_full_stack_nk.csv` 做全栈前向仿真
-- 这提升了全器件指纹生成的一致性，但也把 `Phase 05c` 的工程外推风险直接传递到了 `Phase 06`
-- 当前最重要的继承风险包括：
-  - `NiOx` 长波 `k` 尾部仍是启发式保守延伸
-  - `PVK 400-449 nm` 属于边界补齐，不是原始测量真值
-  - `Case A / Case B` 的绝对 `ΔR` 幅值对这些尾部处理仍敏感
-- 因此当前 `Phase 06` 更适合用于“模式区分和相位形态”而非直接输出高置信材料常数结论
+- 当前 `step06_single_sample_hdr_absolute_calibration.py` 直接依赖 `D:\onedrive\Data\PL\2026\0409\cor\`
+- 这能满足 Dry Run，但不满足长期可移植性
+- 后续应尽快建立 `data/raw/phase06/` 或稳定的数据索引文档，避免脚本只能在当前机器路径上运行
 
-### 8.14 Phase 07 的前后正交判别依赖分区解释而非全谱同权
+### 8.14 当前实测窗口不足以覆盖完整 1100 nm 上边界
 
-- `Phase 07` 已验证 `front` 在 `Zone 1 (400-650 nm)` 远强于 `back`
-- 但 `Zone 2 (650-810 nm)` 对 `front/back` 都有显著响应，且该区本身包含更复杂的吸收/PL/混合机制
-- 因此后续若直接做全谱同权 LM，Zone 2 很可能主导残差并掩盖真正的界面判别与厚度相位信息
-- 当前建议是：
-  - `Zone 1` 先用于前界面退化布尔判定
-  - `Zone 2` 在 LM 中权重设为 `0`
-  - `Zone 3` 作为主拟合窗口
-- 这仍是架构预研结论，尚未在优化器里正式实现权重函数
+- 本次实测数据只覆盖 `498.934-1055.460 nm`
+- 因此 `850-1100 nm` 口径在当前数据上只能落实为 `850-1055.460 nm`
+- 本轮已明确选择“不外推补齐窗口”，但后续比较不同批次样品时需要统一说明这一窗口截断
 
 ## 9. Recent Update Summary
 
-- 更新时间：`2026-04-08`
-- 当前 Phase：`Phase 07`
+- 更新时间：`2026-04-10`
+- 当前 Phase：`Phase 06`
 - 本次新增/修改：
-  - 重构 `src/core/full_stack_microcavity.py`，新增 `front/back` 界面类型与 `forward_model_for_fitting()` 前向接口
-  - 新增 `src/scripts/step07_orthogonal_radar_and_baseline.py`
-  - 新增 `data/processed/phase07/phase07_orthogonal_fingerprint_dictionary.csv`
-  - 输出 `results/figures/phase07_baseline_3zones.png` 与 `results/figures/phase07_orthogonal_radar.png`
-  - 输出 `results/logs/phase07_orthogonal_radar_diagnostic.md`
-  - 更新 `PROJECT_STATE.md`
+  - 新增 `src/core/hdr_absolute_calibration.py`，建立 Phase 06 的单样本 HDR 绝对校准公共模块
+  - 新增 `src/scripts/step06_single_sample_hdr_absolute_calibration.py`，对 `DEVICE-1-withAg` 与 `Ag_mirro` 执行 Dry Run
+  - 输出系统临时目录下的 HDR QA 图、绝对反射率图、曲线表与摘要
+  - 更新 `PROJECT_STATE.md`，记录 Phase 06 的 I/O 合约、波段口径与 Ag 曝光失配风险
 - 已验证结论：
-  - `forward_model_for_fitting()` 对任意一维波长数组返回同长度实数反射率数组
-  - `front/back` 在 `d_air = 0 nm` 时都能严格退化回 pristine baseline
-  - `Phase 07` 字典行数满足 `2 * 51 * 701 = 71502`
-  - `front` 在 `Zone 1` 的最大差分信号约 `28.16%`，显著高于 `back` 的约 `0.71%`
+  - 当前实测窗口确认为 `498.934-1055.460 nm`
+  - 样品 HDR 交接点主要落在 `695.699-697.792 nm`
+  - 银镜 HDR 交接点主要落在 `524.347-681.878 nm`
+  - `850-1055 nm` 波段内样品与银镜基本完全信任长曝光
 - 仍待验证：
-  - `Zone 2` 的零权重策略尚未真正接入 LM 优化器
-  - `NiOx` 长波 `k` 与 `PVK 400-449 nm` 的工程外推仍可能影响绝对幅值判断
-  - 仍需结合真实缺陷谱验证 `front/back` 正交判别是否足以支撑定量分类
+  - `Ag_mirro-500us` 与 `Ag_mirro-10ms` 的归一化失配根因仍未确认
+  - 当前 HDR 逻辑尚未扩展到批量样品和标准 `data/raw/` 目录
 
 ## 10. Recommended Next Actions
 
 建议后续优先处理以下事项：
 
-1. 建立 `data/raw/`，并把 `test_data/` 中实际原始测量 CSV 迁移到规范目录
-2. 创建结构化反演结果输出文件，记录 `d_bulk`、`d_rough`、`ito_alpha`、`chi-square` 与外推参数 `A/B`
-3. 继续将 `step01`/`step01b`/`step02`/`step04` 中可复用逻辑下沉到 `src/core/`
-4. 基于 `forward_model_for_fitting()` 设计 `Zone 1/2/3` 分区加权残差函数，为后续 `scipy.optimize.least_squares` 做准备
+1. 回查 `Ag_mirro-500us` 与 `Ag_mirro-10ms` 的归一化失配来源，优先检查仪器门控、导出流程与实际曝光标签
+2. 建立 `data/raw/phase06/` 或稳定数据索引，把 OneDrive 外部路径纳入规范化入口
+3. 将 Phase 06 的单样本 HDR 逻辑扩展到批量样品
+4. 继续把 `step01`/`step01b`/`step02` 中可复用逻辑下沉到 `src/core/`
 5. 建立 `docs/RESOURCE_INDEX.md`，说明 ITO、银镜基准、论文资料与数字化资源的来源和格式
-6. 建立 `README.md`，补齐项目运行入口、依赖安装和 Phase 概览
 
 ## 11. Update Rule
 
