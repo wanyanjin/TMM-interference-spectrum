@@ -5,8 +5,8 @@
 ## 1. Current Snapshot
 
 - 更新时间：2026-04-10
-- 当前判断 Phase：`Phase 06`
-- 阶段定义：`单样本 Bit-Agnostic HDR 拼接与银镜绝对反射率校准 Dry Run，验证重复求均值 + HDR 融合 + 厂家银镜校准链路`
+- 当前判断 Phase：`Phase 07`
+- 阶段定义：`双窗联合反演架构落地：HDR / HDR 中间件双入口 -> 标准化 R_abs -> 全栈 TMM -> 双窗加权优化 -> 诊断图表与结果台账`
 - 当前可用能力：
   - 已有 `step01_absolute_calibration.py`，可将样品与银镜原始计数转换为绝对反射率
   - 已有 `step01b_cauchy_extrapolation.py`，可基于 [LIT-0001] 的 `ITO/CsFAPI` 数字化折射率曲线生成 `750-1100 nm` 的 CsFAPI 扩展 `n-k` 中间件
@@ -27,6 +27,8 @@
   - 已有 `src/core/full_stack_microcavity.py`，可基于 `aligned_full_stack_nk.csv` 构建 `Baseline / Case A / Case B / Front / Back` 五类全器件微腔堆栈，并暴露 `forward_model_for_fitting()` 作为后续 LM 目标函数入口
   - 已有 `step06_dual_mode_microcavity_sandbox.py`，可扫描 `d_air = 0-50 nm`，输出双模式 `R / ΔR` 指纹字典、40 nm 对比图和 2D 雷达热力图
   - 已有 `step07_orthogonal_radar_and_baseline.py`，可输出 pristine 全谱三分区基准图、Front/Back 正交雷达图与 `Phase 07` 指纹字典
+  - 已新增 `src/core/phase07_dual_window.py`，可基于 `aligned_full_stack_nk.csv` 构建 `Glass / ITO / NiOx / SAM / PVK / PVK-C60 Roughness / C60 / Ag(or Air)` Phase 07 堆栈，执行 C60 守恒约束、双窗加权残差、`d_bulk` 后窗 basin 扫描、DE 全局搜索、局部 least-squares 精修与 Phase 07 诊断出图
+  - 已新增 `step07_dual_window_inversion.py`，可优先读取原始多曝光目录并复用 Phase 06 HDR 逻辑，或直接消费 `*_hdr_curves.csv`，统一落盘为 `fit_input -> fit_summary / fit_curve / optimizer_log / 4 张诊断图`
   - 已产出标准中间文件 `data/processed/target_reflectance.csv` 与 `data/processed/CsFAPI_nk_extended.csv`
   - 已完成 Phase 02 形状畸变诊断，当前证据指向：ITO 近红外吸收失真是长波端托平与整体形状失配的主导因素
   - 已完成 Phase 04 空气隙前向预测，当前基线下 `d_air = 2 nm` 与 `5 nm` 的 `max(|ΔR|)` 分别约为 `0.538%` 与 `1.347%`，均高于 `0.2%` 典型噪声线
@@ -34,6 +36,7 @@
   - 已完成 Phase 04b 空气隙空间定位：对 `bad-20-2` 的 L1/L2/L3 三个 7 参数模型中，L3 (`SAM/PVK`) 的 `chi-square` 最低，但材料参数锁死时仍未优于 6 参数基线；释放材料参数后 `chi-square` 可进一步降至 `0.01932`
   - 已完成 Phase 06 单样本 HDR Dry Run：对 `DEVICE-1-withAg` 的 `150 ms / 2000 ms` 三重复和 `Ag_mirro` 的 `500 us / 10 ms` 单重复完成均值提纯、HDR 融合和绝对校准
   - 已完成 Phase 06c 全量批处理：`DEVICE-1-withAg`、`DEVICE-1-withoutAg`、`DEVICE-2-withAg`、`DEVICE-2-withoutAg` 共 `4` 个样本全部成功落盘，无异常抛出
+  - 已完成 Phase 07 双窗反演首轮冒烟：`DEVICE-1-withAg-P1` 与 `DEVICE-1-withoutAg-P1` 均可从 `hdr_curves` 入口完成拟合、写出 `fit_input / fit_summary / fit_curve / optimizer_log / full_spectrum / dual_window_zoom / residual_diagnostics / rear_basin_scan`
   - 已确认当前实测窗口仅覆盖 `498.934-1055.460 nm`，未外推到 `400-498.934 nm` 或 `1055.460-1100 nm`
   - 已确认 `850-1055 nm` 区间的样品与银镜都几乎完全信任长曝光，因此近红外区并非本次 HDR 拼接主战场
   - 已明确暴露银镜短曝光异常：按 `.spe` 元数据的真实曝光时间归一化后，`Ag_mirro-500us` 相对 `Ag_mirro-10ms` 的 `Counts/ms` 比值中位数约为 `12.28`
@@ -41,6 +44,7 @@
   - 尚未把历史目录完全迁移到 `AGENTS.md` 规定的新结构
   - 尚未形成规范化的 Phase 日志、资源索引和结构化结果台账
   - 尚未将 Phase 06 批量 HDR 输入规范化迁移到 `data/raw/phase06/`
+  - Phase 07 当前两例真实样本都存在参数贴边，说明双窗架构已跑通，但材料先验与边界设定仍需继续收敛
 
 ## 2. Current Directory Tree
 
@@ -55,7 +59,9 @@ TMM-interference-spectrum/
 │   └── PROJECT_STATE.md
 ├── src/
 │   ├── core/
-│   │   └── hdr_absolute_calibration.py
+│   │   ├── full_stack_microcavity.py
+│   │   ├── hdr_absolute_calibration.py
+│   │   └── phase07_dual_window.py
 │   └── scripts/
 │       ├── diagnostics_shape_mismatch.py
 │       ├── step01_absolute_calibration.py
@@ -68,7 +74,9 @@ TMM-interference-spectrum/
 │       ├── step04a_air_gap_diagnostic.py
 │       ├── step04b_air_gap_localization.py
 │       ├── step06_batch_hdr_calibration.py
-│       └── step06_single_sample_hdr_absolute_calibration.py
+│       ├── step06_single_sample_hdr_absolute_calibration.py
+│       ├── step07_dual_window_inversion.py
+│       └── step07_orthogonal_radar_and_baseline.py
 ├── data/
 │   └── processed/
 │       ├── CsFAPI_nk_extended.csv
@@ -92,6 +100,7 @@ TMM-interference-spectrum/
 │   └── MinerU-0.13.1-arm64.dmg
 ├── results/
 │   ├── figures/
+│   │   ├── phase07/
 │   │   ├── absolute_reflectance_interference.png
 │   │   ├── cauchy_extrapolation_check.png
 │   │   ├── diagnostic_shape_analysis.png
@@ -112,6 +121,7 @@ TMM-interference-spectrum/
 │   │   └── tmm_inversion_result.png
 │   └── logs/
 │       ├── phase03_batch_fit/
+│       ├── phase07/
 │       ├── phase04c_fingerprint_mapping.md
 │       ├── phase04a_air_gap_diagnostic.md
 │       ├── phase04b_localization.md
@@ -518,6 +528,45 @@ TMM-interference-spectrum/
 - `results/figures/phase07_orthogonal_radar.png`
 - `results/logs/phase07_orthogonal_radar_diagnostic.md`
 
+### 4.13 `step07_dual_window_inversion.py`
+
+- 文件位置：`src/scripts/step07_dual_window_inversion.py`
+- 核心依赖：`src/core/phase07_dual_window.py`、`src/core/hdr_absolute_calibration.py`
+- 主要职责：将 `Phase 06` HDR 绝对标定与 `Phase 07` 双窗联合反演接成标准流水线，并显式输出反演台账、图表和告警
+
+输入：
+- `test_data/phase7_data/*_hdr_curves.csv`
+  - 当前仓库内已验证的直接入口
+- 或 `test_data/phase7_data/*-cor.csv + *.spe`
+  - 若存在原始多曝光数据，则优先复用 `Phase 06` HDR 公共模块现场重建 `R_abs`
+- `resources/aligned_full_stack_nk.csv`
+- `resources/GCC-1022系列xlsx.xlsx`
+
+核心处理流程：
+- 扫描输入目录，优先识别原始多曝光组；若缺少原始文件，则回退到 `*_hdr_curves.csv`
+- 统一改写为 `data/processed/phase07/fit_inputs/*_fit_input.csv`，字段至少包含：
+  - `Wavelength_nm`
+  - `Absolute_Reflectance`
+  - `window_label`
+  - `with_ag`
+- 使用 `src/core/phase07_dual_window.py` 构建 `Glass / ITO / NiOx / SAM / PVK / PVK-C60 Roughness / C60 / Ag(or Air)` 全栈模型
+- 在运行时对 `d_rough` 执行 C60 守恒剥离：
+  - `d_C60_bulk = max(0, 15 - 0.5 * d_rough)`
+- 仅对 `500-650 nm` 与 `860-1055 nm` 执行加权优化，`650-860 nm` 仅保留为 PL/失配诊断区
+- 先对 `d_bulk` 做后窗 basin 扫描，再执行 DE 全局搜索和局部 least-squares 精修
+- 输出逐波长拟合表、单样本汇总表、优化日志及 4 张图
+
+输出：
+- `data/processed/phase07/phase07_source_manifest.csv`
+- `data/processed/phase07/phase07_fit_summary.csv`
+- `data/processed/phase07/fit_results/*_fit_curve.csv`
+- `data/processed/phase07/fit_results/*_fit_summary.csv`
+- `results/figures/phase07/*_full_spectrum.png`
+- `results/figures/phase07/*_dual_window_zoom.png`
+- `results/figures/phase07/*_residual_diagnostics.png`
+- `results/figures/phase07/*_rear_basin_scan.png`
+- `results/logs/phase07/*_optimizer_log.md`
+
 ## 5. Data Flow
 
 当前项目主数据流如下：
@@ -651,6 +700,22 @@ resources/materials_master_db.json
     -> results/figures/phase07_baseline_3zones.png
     -> results/figures/phase07_orthogonal_radar.png
     -> results/logs/phase07_orthogonal_radar_diagnostic.md
+
+test_data/phase7_data/*_hdr_curves.csv
+or test_data/phase7_data/*-cor.csv + *.spe
+resources/GCC-1022系列xlsx.xlsx
+resources/aligned_full_stack_nk.csv
+    -> step07_dual_window_inversion.py (原始多曝光/HDR 中间件双入口 -> 标准化 fit_input -> 双窗加权 TMM -> basin 扫描 -> DE + least-squares -> 图表 / 日志 / 台账)
+    -> data/processed/phase07/phase07_source_manifest.csv
+    -> data/processed/phase07/phase07_fit_summary.csv
+    -> data/processed/phase07/fit_inputs/*_fit_input.csv
+    -> data/processed/phase07/fit_results/*_fit_curve.csv
+    -> data/processed/phase07/fit_results/*_fit_summary.csv
+    -> results/figures/phase07/*_full_spectrum.png
+    -> results/figures/phase07/*_dual_window_zoom.png
+    -> results/figures/phase07/*_residual_diagnostics.png
+    -> results/figures/phase07/*_rear_basin_scan.png
+    -> results/logs/phase07/*_optimizer_log.md
 ```
 
 可按 SOP 理解为：
@@ -664,7 +729,8 @@ resources/materials_master_db.json
 7. `step05` / `step05b` / `step05c` 进一步把材料报告解析、PDF 校验和全栈 `n-k` 对齐表建立为长期可复用的数据层
 8. `step06_dual_mode_microcavity_sandbox.py` 则在不再引入拟合自由度的前提下，把全栈材料表直接转为双模式微腔缺陷字典，用于后续缺陷定量和指纹匹配
 9. `step07_orthogonal_radar_and_baseline.py` 进一步把缺陷模式压缩为 `front/back` 两类宏观正交界面，并补上面向后续 LM 的标准前向接口与三分区基准可视化
-10. 当前脚本链已经具备“文献数字化 / 椭偏报告解析 -> 材料数据库 -> 全栈对齐 `n-k` 表 -> 宏观正交界面指纹字典 -> LM 接口预研”的 Phase 07 闭环
+10. `step07_dual_window_inversion.py` 则把 `Phase 06 HDR`、`Phase 05c 对齐 n-k` 和 `Phase 07 双窗反演` 接成当前主干闭环，能够直接把 `hdr_curves` 样本转为标准化拟合输入、参数表、逐波长拟合表、优化日志和诊断图
+11. 当前脚本链已经具备“文献数字化 / 椭偏报告解析 -> 材料数据库 -> 全栈对齐 `n-k` 表 -> 宏观正交界面指纹字典 -> 双窗联合反演”的 Phase 07 闭环
 
 ## 6. Key Physical / Numerical Assumptions
 
@@ -687,6 +753,23 @@ resources/materials_master_db.json
 - Phase 04a 的 7 参数诊断中，`ito_alpha`、`pvk_b_scale` 与 `niox_k` 锁定为 `good-21` 六参数最佳拟合值，只放开 `d_bulk`、`d_rough`、`sigma_thickness` 与 `d_air`
 - Phase 04b 的空间定位阶段分别测试 `Glass/ITO`、`ITO/NiOx` 与 `SAM/PVK` 三个候选空气隙界面
 - Phase 04b 的材料弛豫阶段允许 `ito_alpha`、`pvk_b_scale` 与 `niox_k` 在 `good-21` 基准值的 `±15%` 范围内漂移
+- Phase 07 的拟合窗口固定为：
+  - `500-650 nm` 前窗
+  - `650-860 nm` 屏蔽区
+  - `860-1055 nm` 后窗
+- Phase 07 的粗糙层已改为 `50% PVK + 50% C60` 的 BEMA，而非旧 Phase 的 `PVK + Air`
+- Phase 07 强制执行 C60 守恒：
+  - `d_C60_bulk = max(0, 15 - 0.5 * d_rough)`
+- Phase 07 中 `d_rough` 的物理上限固定为 `30 nm`
+- Phase 07 的窗口归一化尺度采用：
+  - `scale_w = max(median(R_meas_w), 1.4826 * MAD(R_meas_w), 0.005)`
+- Phase 07 的厚玻璃总反射率采用：
+  - `R_total = R_front + (T_front^2 * R_stack) / (1 - R_front * R_stack)`
+- Phase 07 的优化策略为：
+  - `d_bulk` 后窗 basin 扫描
+  - basin 内 DE 全局搜索
+  - 稀疏双窗 least-squares 精修
+  - 全分辨率回投与打分
 
 这些假设是理解结果与后续扩展的关键锚点；若后续有改动，必须同步更新本文件。
 
@@ -894,23 +977,36 @@ resources/materials_master_db.json
 - 这能满足实验侧浏览需求，但也会带来“哪一份是权威结果”的维护风险
 - 后续应在文档中明确：项目目录为标准分析产物，OneDrive 目录为实验侧镜像存档
 
+### 8.16 Phase 07 首轮真实样本出现多参数贴边
+
+- 当前 `DEVICE-1-withAg-P1` 与 `DEVICE-1-withoutAg-P1` 都已完整跑通 `step07_dual_window_inversion.py`
+- 但首轮结果显示：
+  - `ito_alpha` 与 `pvk_b_scale` 多次贴近上/下边界
+  - `withAg` 样本的 `d_bulk` 更靠近下边界
+  - `650-860 nm` 的 masked 残差仍明显偏大
+- 这说明当前 Phase 07 已经解决“链路能否跑通”的工程问题，但还没有解决“真实样本是否已被充分约束”的物理问题
+- 后续优先检查方向：
+  - `ITO / NiOx / PVK` 长波先验是否过紧
+  - `withAg / withoutAg` 是否应采用不同的参数边界
+  - 是否需要把后窗 fringe 形状约束从 tie-break 提升为正式辅助残差
+
 ## 9. Recent Update Summary
 
 - 更新时间：`2026-04-10`
-- 当前 Phase：`Phase 06`
+- 当前 Phase：`Phase 07`
 - 本次新增/修改：
-  - 新增 `src/core/hdr_absolute_calibration.py`，建立 Phase 06 的单样本 HDR 绝对校准公共模块
-  - 新增 `src/scripts/step06_single_sample_hdr_absolute_calibration.py`，对 `DEVICE-1-withAg` 与 `Ag_mirro` 执行 Dry Run
-  - 新增 `src/scripts/step06_batch_hdr_calibration.py`，完成全量样本 HDR 批量处理和 OneDrive 原址存档
-  - 输出项目目录下的 `phase06_batch` 曲线表 / QA 图 / 总台账，并同步复制到 `hdr_results`
-  - 更新 `PROJECT_STATE.md`，记录 Phase 06 / 06c 的 I/O 合约、波段口径与双轨存档规则
+  - 新增 `src/core/phase07_dual_window.py`，建立 Phase 07 双窗反演核心模块
+  - 新增 `src/scripts/step07_dual_window_inversion.py`，建立原始多曝光 / `hdr_curves` 双入口拟合脚本
+  - 新增 `data/processed/phase07/fit_inputs/` 与 `data/processed/phase07/fit_results/` 标准中间件落盘规则
+  - 新增 `results/figures/phase07/` 与 `results/logs/phase07/`，输出单样本 4 图 + 优化日志
+  - 更新 `PROJECT_STATE.md`，记录 Phase 07 的 C60 守恒、双窗窗口口径、优化器结构和当前边界风险
 - 已验证结论：
-  - 当前实测窗口确认为 `498.934-1055.460 nm`
-  - 样品 HDR 交接点主要落在 `695.699-697.792 nm`
-  - 银镜 HDR 交接点主要落在 `524.347-681.878 nm`
-  - `850-1055 nm` 波段内样品与银镜基本完全信任长曝光
-  - Phase 06c 已批量处理 `4` 个样本，全部成功，无异常抛出
+  - 当前 `DEVICE-1-withAg-P1` 与 `DEVICE-1-withoutAg-P1` 已成功完成双窗拟合并落盘
+  - C60 守恒检查通过：`d_rough = 0/10/20/30 nm` 对应 `d_C60_bulk = 15/10/5/0 nm`
+  - `withAg / withoutAg` 两类终端边界都可返回有限且 `0-1` 范围内的反射率
+  - 前窗 / 后窗的 `scale_w` 均大于 `0.005` 下限，未出现权重爆炸
 - 仍待验证：
+  - 当前真实样本的多参数贴边仍需通过更强先验或更合理边界进一步收敛
   - `Ag_mirro-500us` 与 `Ag_mirro-10ms` 的归一化失配根因仍未确认
   - 当前 HDR 逻辑虽已扩展到批量样品，但仍未纳入标准 `data/raw/` 目录
 
@@ -919,10 +1015,10 @@ resources/materials_master_db.json
 建议后续优先处理以下事项：
 
 1. 回查 `Ag_mirro-500us` 与 `Ag_mirro-10ms` 的归一化失配来源，优先检查仪器门控、导出流程与实际曝光标签
-2. 建立 `data/raw/phase06/` 或稳定数据索引，把 OneDrive 外部路径纳入规范化入口
-3. 明确项目目录与 OneDrive 存档之间的主从关系，避免后续人工修改镜像副本
-4. 继续把 `step01`/`step01b`/`step02` 中可复用逻辑下沉到 `src/core/`
-5. 建立 `docs/RESOURCE_INDEX.md`，说明 ITO、银镜基准、论文资料与数字化资源的来源和格式
+2. 基于 `phase07_fit_summary.csv` 的贴边结果，重新评估 `ito_alpha`、`pvk_b_scale` 与 `niox_k` 的边界和先验
+3. 判断 `withAg / withoutAg` 是否应拆分为两套参数边界或固定参数策略
+4. 建立 `data/raw/phase06/` 或稳定数据索引，把 OneDrive 外部路径纳入规范化入口
+5. 继续把 `step01`/`step01b`/`step02` 中可复用逻辑下沉到 `src/core/`
 
 ## 11. Update Rule
 
@@ -1123,3 +1219,54 @@ resources/materials_master_db.json
   - `Zone 2` 当前只在文档和图中标记为后续零权重区，尚未真正进入优化器实现。
   - `NiOx` 长波 `k` 与 `PVK 400-449 nm` 的工程外推风险仍会影响 `Phase 07` 的绝对幅值。
   - 当前结论适合作为前后界面宏观判别与 LM 架构设计依据，尚不能替代后续实验拟合验证。
+
+## Phase 07 Implementation Update (2026-04-10)
+
+- Current Phase: `Phase 07`
+- Update summary:
+  - 已新增 `src/core/phase07_dual_window.py`，将 Phase 07 的全栈 forward model、双窗残差、C60 守恒、后窗 basin 扫描、DE 全局搜索、least-squares 精修和四类图表输出统一封装。
+  - 已新增 `src/scripts/step07_dual_window_inversion.py`，支持“原始多曝光优先，`*_hdr_curves.csv` 回退”的双入口数据管线。
+  - 已建立 `data/processed/phase07/fit_inputs/`、`data/processed/phase07/fit_results/`、`results/figures/phase07/` 与 `results/logs/phase07/` 的标准输出目录。
+  - 已生成 `phase07_source_manifest.csv`、`phase07_fit_summary.csv`、两例样本的逐波长拟合表、优化日志和 8 张诊断图。
+- Data flow:
+  - `test_data/phase7_data/*_hdr_curves.csv`
+  - `src/scripts/step07_dual_window_inversion.py`
+  - `src/core/phase07_dual_window.py`
+  - `data/processed/phase07/fit_inputs/*_fit_input.csv`
+  - `data/processed/phase07/fit_results/*_fit_curve.csv`
+  - `data/processed/phase07/fit_results/*_fit_summary.csv`
+  - `results/figures/phase07/*`
+  - `results/logs/phase07/*_optimizer_log.md`
+- Verified results:
+  - `C60` 守恒检查通过：`d_rough = 0/10/20/30 nm` 时，`d_C60_bulk = 15/10/5/0 nm`。
+  - `withAg / withoutAg` 两种终端边界下，前向模型均返回有限且 `0-1` 范围内的反射率。
+  - 两个现有 `Phase 07` 样本都已完整跑通拟合与落盘流程。
+  - 前窗与后窗的窗口尺度均未触发小于 `0.005` 的权重爆炸。
+- Risks / pending checks:
+  - `DEVICE-1-withAg-P1` 与 `DEVICE-1-withoutAg-P1` 当前都出现不同程度的贴边解，说明真实样本的参数空间仍未被充分约束。
+  - `650-860 nm` 的 masked 残差仍然较大，当前只被解释为 PL/模型失配形态，还未进入更强的背景建模。
+  - 需要进一步判断 `withAg / withoutAg` 是否必须采用不同边界或更强先验。
+
+## Phase 07 Z-Score Rear-Window Update (2026-04-11)
+
+- Current Phase: `Phase 07`
+- Update summary:
+  - 已将 `src/core/phase07_dual_window.py` 的后窗残差从“绝对反射率加权差”切换为“Z-Score 形态差”，前窗 `500-650 nm` 仍保持绝对值残差。
+  - 已恢复 `ito_alpha` 的默认边界到 `[0.0, 5.0]`，避免后窗极弱信号下由绝对强度误差把 ITO 长波吸收强行挤到非物理区域。
+  - 已新增 `src/scripts/step07_zscore_sanity_check.py`，用于对 `DEVICE-1-withAg-P1` 执行后窗峰谷物理自证、输出平滑对比图，并直接跑通 Z-Score 版本拟合。
+- Data flow:
+  - `test_data/phase7_data/DEVICE-1-withAg-P1_hdr_curves.csv`
+  - `src/scripts/step07_zscore_sanity_check.py`
+  - `src/core/phase07_dual_window.py`
+  - `results/figures/phase07/phase07_device_1_withag_p1_rear_sanity_check.png`
+  - `results/figures/phase07/phase07_device_1_withag_p1_dual_window_zoom.png`
+  - `data/processed/phase07/fit_results/phase07_device_1_withag_p1_fit_summary.csv`
+- Verified results:
+  - 后窗 `860-1055 nm` 经强平滑后识别到一组主极值：`lambda_peak = 870.774 nm`，`lambda_valley = 1034.331 nm`。
+  - 基于 `aligned_full_stack_nk.csv` 中 `PVK` 折射率插值得到 `n_avg = 2.4289`，相邻峰谷公式给出 `d_estimate = 566.8 nm`。
+  - 该值略低于原先预期的 `600-800 nm`，但仍处在同一量级，说明后窗仍保留可解释的干涉形态信息，适合继续用于相位/形态学约束。
+  - Z-Score 拟合后，`DEVICE-1-withAg-P1` 的最佳解落在 `d_bulk = 810.3 nm`，后窗残差成本降为 `0.0238`，右侧双窗图已改为 `z_meas / z_model` 直接对比。
+- Risks / pending checks:
+  - 当前峰谷推算厚度 `566.8 nm` 与 Z-Score 拟合最优 `d_bulk = 810.3 nm` 仍存在显著偏差，提示“单一峰谷公式”与“多层完整 TMM 相位”之间仍有系统差。
+  - `rear_derivative_correlation` 仍偏低，说明后窗虽有形态信息，但噪声、长波色散与多层耦合仍在削弱相位锁定能力。
+  - `pvk_b_scale` 继续贴在下界，后续仍需评估是否应进一步收紧 PVK 长波色散先验，或为后窗增加更稳定的包络/频域约束。
