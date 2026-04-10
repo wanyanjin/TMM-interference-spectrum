@@ -76,6 +76,7 @@ class HdrBlendResult:
     short_mean: MeanSpectrum
     n_long: np.ndarray
     n_short: np.ndarray
+    scale_factor: float
     hdr_counts_per_ms: np.ndarray
     w_long: np.ndarray
     c_max: float
@@ -302,12 +303,22 @@ def blend_hdr_spectra(group_name: str, long_mean: MeanSpectrum, short_mean: Mean
         raise ValueError(f"{group_name} 的 HDR 阈值异常: th_lower={th_lower}, th_upper={th_upper}")
 
     n_long = c_long / long_mean.exposure_ms
-    n_short = c_short / short_mean.exposure_ms
+    n_short_raw = c_short / short_mean.exposure_ms
+
+    mask_long_safe = (c_long > 10000.0) & (c_long < th_lower)
+    mask_short_safe = c_short > 1000.0
+    overlap_mask = mask_long_safe & mask_short_safe
+    if np.any(overlap_mask):
+        scale_factor = float(np.nanmedian(n_long[overlap_mask] / n_short_raw[overlap_mask]))
+    else:
+        scale_factor = 1.0
+    n_short_aligned = n_short_raw * scale_factor
+
     w_long = np.ones_like(c_long, dtype=float)
     transition_mask = (c_long > th_lower) & (c_long < th_upper)
     w_long[c_long >= th_upper] = 0.0
     w_long[transition_mask] = (th_upper - c_long[transition_mask]) / (th_upper - th_lower)
-    hdr_counts_per_ms = w_long * n_long + (1.0 - w_long) * n_short
+    hdr_counts_per_ms = w_long * n_long + (1.0 - w_long) * n_short_aligned
     if np.any(~np.isfinite(hdr_counts_per_ms)):
         raise ValueError(f"{group_name} 的 HDR 曲线存在非有限值。")
 
@@ -318,7 +329,8 @@ def blend_hdr_spectra(group_name: str, long_mean: MeanSpectrum, short_mean: Mean
         long_mean=long_mean,
         short_mean=short_mean,
         n_long=n_long,
-        n_short=n_short,
+        n_short=n_short_aligned,
+        scale_factor=scale_factor,
         hdr_counts_per_ms=hdr_counts_per_ms,
         w_long=w_long,
         c_max=c_max,
@@ -327,10 +339,10 @@ def blend_hdr_spectra(group_name: str, long_mean: MeanSpectrum, short_mean: Mean
         transition_start_nm=float(long_mean.wavelength_nm[transition_indices[0]]) if transition_indices.size else None,
         transition_end_nm=float(long_mean.wavelength_nm[transition_indices[-1]]) if transition_indices.size else None,
         transition_point_count=int(transition_indices.size),
-        ratio_stats=compute_ratio_stats(n_short=n_short, n_long=n_long),
+        ratio_stats=compute_ratio_stats(n_short=n_short_aligned, n_long=n_long),
         band_stats=compute_band_stats(
             wavelength_nm=long_mean.wavelength_nm,
-            n_short=n_short,
+            n_short=n_short_aligned,
             n_long=n_long,
             w_long=w_long,
         ),
@@ -677,10 +689,10 @@ def write_summary_markdown(
             "",
             "## 3. HDR 阈值与交接点",
             f"- Sample: `Cmax = {sample_hdr.c_max:.2f}`, `TH_lower = {sample_hdr.th_lower:.2f}`, "
-            f"`TH_upper = {sample_hdr.th_upper:.2f}`, 交接跨度 `{sample_transition}`, "
+            f"`TH_upper = {sample_hdr.th_upper:.2f}`, `Scale Factor = {sample_hdr.scale_factor:.4f}`, 交接跨度 `{sample_transition}`, "
             f"交接点数 `{sample_hdr.transition_point_count}`",
             f"- Ag: `Cmax = {ag_hdr.c_max:.2f}`, `TH_lower = {ag_hdr.th_lower:.2f}`, "
-            f"`TH_upper = {ag_hdr.th_upper:.2f}`, 交接跨度 `{ag_transition}`, "
+            f"`TH_upper = {ag_hdr.th_upper:.2f}`, `Scale Factor = {ag_hdr.scale_factor:.4f}`, 交接跨度 `{ag_transition}`, "
             f"交接点数 `{ag_hdr.transition_point_count}`",
             "",
             "## 4. `N_short / N_long` 一致性统计",

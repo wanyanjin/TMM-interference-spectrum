@@ -17,6 +17,7 @@
   - 已有 `step04b_air_gap_localization.py`，可基于 `test_data/good-21.csv` 与 `test_data/bad-20-2.csv` 完成空气隙空间定位对比与材料参数弛豫诊断
   - 已新增 `src/core/hdr_absolute_calibration.py`，可扫描 OneDrive 测试目录、从 `.spe` 元数据提取曝光时间、对重复采集做均值提纯、执行 Bit-Agnostic Cross-fade HDR 融合，并导出绝对反射率 QA 图/表
   - 已新增 `step06_single_sample_hdr_absolute_calibration.py`，可对 `DEVICE-1-withAg` 与对应 `Ag_mirro` 组执行单样本 HDR Dry Run，输出到系统临时目录
+  - 已新增 `step06_batch_hdr_calibration.py`，可对 `0409/cor` 目录下全部样本执行 HDR 绝对校准批处理，并同步写出项目目录与 OneDrive 原址存档
   - 已有 `diagnostics_shape_mismatch.py`，可在独立沙盒中对 ITO 近红外吸收、厚度不均匀性和 PVK 色散斜率做形状畸变诊断
   - 已有 `step02_digitize_fapi_optical_constants.py`，可从 `LIT-0001` 的 Fig. 2 原图数字化提取 FAPI 的 `n/κ` 曲线并输出 QA 图
   - 已有 `step02_digitize_csfapi_optical_constants.py`，可从 `LIT-0001` 的 Fig. 3 原图数字化提取 CsFAPI 的 `n/κ` 曲线并输出 QA 图
@@ -32,13 +33,14 @@
   - 已完成 Phase 04a 空气隙诊断沙盒：在 `bad-23` 上加入 `d_air` 后，`chi-square` 由 `0.03197` 降至 `0.01619`，`d_air` 收敛到约 `39.9 nm`，但仍未低于 `0.01`
   - 已完成 Phase 04b 空气隙空间定位：对 `bad-20-2` 的 L1/L2/L3 三个 7 参数模型中，L3 (`SAM/PVK`) 的 `chi-square` 最低，但材料参数锁死时仍未优于 6 参数基线；释放材料参数后 `chi-square` 可进一步降至 `0.01932`
   - 已完成 Phase 06 单样本 HDR Dry Run：对 `DEVICE-1-withAg` 的 `150 ms / 2000 ms` 三重复和 `Ag_mirro` 的 `500 us / 10 ms` 单重复完成均值提纯、HDR 融合和绝对校准
+  - 已完成 Phase 06c 全量批处理：`DEVICE-1-withAg`、`DEVICE-1-withoutAg`、`DEVICE-2-withAg`、`DEVICE-2-withoutAg` 共 `4` 个样本全部成功落盘，无异常抛出
   - 已确认当前实测窗口仅覆盖 `498.934-1055.460 nm`，未外推到 `400-498.934 nm` 或 `1055.460-1100 nm`
   - 已确认 `850-1055 nm` 区间的样品与银镜都几乎完全信任长曝光，因此近红外区并非本次 HDR 拼接主战场
   - 已明确暴露银镜短曝光异常：按 `.spe` 元数据的真实曝光时间归一化后，`Ag_mirro-500us` 相对 `Ag_mirro-10ms` 的 `Counts/ms` 比值中位数约为 `12.28`
 - 当前未完成内容：
   - 尚未把历史目录完全迁移到 `AGENTS.md` 规定的新结构
   - 尚未形成规范化的 Phase 日志、资源索引和结构化结果台账
-  - 尚未把 Phase 06 的单样本 HDR 逻辑扩展到批量样品或规范化 `data/raw/` 目录
+  - 尚未将 Phase 06 批量 HDR 输入规范化迁移到 `data/raw/phase06/`
 
 ## 2. Current Directory Tree
 
@@ -65,6 +67,7 @@ TMM-interference-spectrum/
 │       ├── step03_forward_simulation.py
 │       ├── step04a_air_gap_diagnostic.py
 │       ├── step04b_air_gap_localization.py
+│       ├── step06_batch_hdr_calibration.py
 │       └── step06_single_sample_hdr_absolute_calibration.py
 ├── data/
 │   └── processed/
@@ -133,6 +136,8 @@ TMM-interference-spectrum/
 - `reference/` 目前存放论文拆解结果，按新规范更适合逐步并入 `resources/references/`
 - `src/core/` 已开始建立，但 `step01/step02/step04` 的大量复用逻辑仍散落在 `src/scripts/`
 - 项目根已有 `requirements.txt`，但仍缺正式 `README.md`
+- `src/core/` 已开始建立，但目前只承载 Phase 06 的 HDR 逻辑；更早阶段的大量复用代码仍散落在 `src/scripts/`
+- 项目根尚无 `README.md`
 
 这些偏差当前不会阻断现有流程，但属于后续需要收敛的结构债务。
 
@@ -428,7 +433,24 @@ TMM-interference-spectrum/
 - `%TEMP%/tmm_phase06_dry_run_*/phase06_device1_withag_curve_table.csv`
 - `%TEMP%/tmm_phase06_dry_run_*/phase06_device1_withag_summary.md`
 
-### 4.12 `diagnostics_shape_mismatch.py`
+### 4.12 `step06_batch_hdr_calibration.py`
+
+- 文件位置：`src/scripts/step06_batch_hdr_calibration.py`
+- 主要职责：批量扫描 OneDrive `0409/cor` 目录中的所有样本前缀，统一复用 `Ag_mirro` HDR 参考，输出项目内标准结果和 OneDrive 原址存档
+
+输入：
+- `D:\onedrive\Data\PL\2026\0409\cor\*-cor.csv`
+- `resources/GCC-1022系列xlsx.xlsx`
+
+输出：
+- `data/processed/phase06_batch/[Sample_Prefix]_curve_table.csv`
+- `data/processed/phase06_batch/phase06_batch_summary.csv`
+- `results/figures/phase06_batch/[Sample_Prefix]_QA_plot.png`
+- `D:\onedrive\Data\PL\2026\0409\cor\hdr_results\[Sample_Prefix]_hdr_curves.csv`
+- `D:\onedrive\Data\PL\2026\0409\cor\hdr_results\[Sample_Prefix]_hdr_qa.png`
+- `D:\onedrive\Data\PL\2026\0409\cor\hdr_results\00_batch_summary_0409.csv`
+
+### 4.13 `diagnostics_shape_mismatch.py`
 
 - 文件位置：`src/scripts/diagnostics_shape_mismatch.py`
 - 主要职责：在不修改主流程的前提下，复用 `step02` 的数据读取和 BEMA 基线模型，对条纹形状畸变的物理来源做诊断
@@ -522,6 +544,17 @@ resources/GCC-1022系列xlsx.xlsx
     -> %TEMP%/tmm_phase06_dry_run_*/phase06_device1_withag_*.png
     -> %TEMP%/tmm_phase06_dry_run_*/phase06_device1_withag_curve_table.csv
     -> %TEMP%/tmm_phase06_dry_run_*/phase06_device1_withag_summary.md
+
+D:\onedrive\Data\PL\2026\0409\cor\*-cor.csv
+resources/GCC-1022系列xlsx.xlsx
+    -> step06_batch_hdr_calibration.py
+    -> src/core/hdr_absolute_calibration.py (公共 Ag HDR 参考 -> 逐样本 HDR 拼接 -> 绝对反射率 -> 汇总台账)
+    -> data/processed/phase06_batch/*_curve_table.csv
+    -> data/processed/phase06_batch/phase06_batch_summary.csv
+    -> results/figures/phase06_batch/*_QA_plot.png
+    -> D:\onedrive\Data\PL\2026\0409\cor\hdr_results\*_hdr_curves.csv
+    -> D:\onedrive\Data\PL\2026\0409\cor\hdr_results\*_hdr_qa.png
+    -> D:\onedrive\Data\PL\2026\0409\cor\hdr_results\00_batch_summary_0409.csv
 
 data/processed/target_reflectance.csv
 data/processed/CsFAPI_nk_extended.csv
@@ -855,6 +888,12 @@ resources/materials_master_db.json
 - 因此 `850-1100 nm` 口径在当前数据上只能落实为 `850-1055.460 nm`
 - 本轮已明确选择“不外推补齐窗口”，但后续比较不同批次样品时需要统一说明这一窗口截断
 
+### 8.15 Phase 06c 的 OneDrive 原址存档会引入双份结果副本
+
+- 当前 `step06_batch_hdr_calibration.py` 同时向项目目录和 `D:\onedrive\Data\PL\2026\0409\cor\hdr_results\` 写出结果
+- 这能满足实验侧浏览需求，但也会带来“哪一份是权威结果”的维护风险
+- 后续应在文档中明确：项目目录为标准分析产物，OneDrive 目录为实验侧镜像存档
+
 ## 9. Recent Update Summary
 
 - 更新时间：`2026-04-10`
@@ -862,16 +901,18 @@ resources/materials_master_db.json
 - 本次新增/修改：
   - 新增 `src/core/hdr_absolute_calibration.py`，建立 Phase 06 的单样本 HDR 绝对校准公共模块
   - 新增 `src/scripts/step06_single_sample_hdr_absolute_calibration.py`，对 `DEVICE-1-withAg` 与 `Ag_mirro` 执行 Dry Run
-  - 输出系统临时目录下的 HDR QA 图、绝对反射率图、曲线表与摘要
-  - 更新 `PROJECT_STATE.md`，记录 Phase 06 的 I/O 合约、波段口径与 Ag 曝光失配风险
+  - 新增 `src/scripts/step06_batch_hdr_calibration.py`，完成全量样本 HDR 批量处理和 OneDrive 原址存档
+  - 输出项目目录下的 `phase06_batch` 曲线表 / QA 图 / 总台账，并同步复制到 `hdr_results`
+  - 更新 `PROJECT_STATE.md`，记录 Phase 06 / 06c 的 I/O 合约、波段口径与双轨存档规则
 - 已验证结论：
   - 当前实测窗口确认为 `498.934-1055.460 nm`
   - 样品 HDR 交接点主要落在 `695.699-697.792 nm`
   - 银镜 HDR 交接点主要落在 `524.347-681.878 nm`
   - `850-1055 nm` 波段内样品与银镜基本完全信任长曝光
+  - Phase 06c 已批量处理 `4` 个样本，全部成功，无异常抛出
 - 仍待验证：
   - `Ag_mirro-500us` 与 `Ag_mirro-10ms` 的归一化失配根因仍未确认
-  - 当前 HDR 逻辑尚未扩展到批量样品和标准 `data/raw/` 目录
+  - 当前 HDR 逻辑虽已扩展到批量样品，但仍未纳入标准 `data/raw/` 目录
 
 ## 10. Recommended Next Actions
 
@@ -879,7 +920,7 @@ resources/materials_master_db.json
 
 1. 回查 `Ag_mirro-500us` 与 `Ag_mirro-10ms` 的归一化失配来源，优先检查仪器门控、导出流程与实际曝光标签
 2. 建立 `data/raw/phase06/` 或稳定数据索引，把 OneDrive 外部路径纳入规范化入口
-3. 将 Phase 06 的单样本 HDR 逻辑扩展到批量样品
+3. 明确项目目录与 OneDrive 存档之间的主从关系，避免后续人工修改镜像副本
 4. 继续把 `step01`/`step01b`/`step02` 中可复用逻辑下沉到 `src/core/`
 5. 建立 `docs/RESOURCE_INDEX.md`，说明 ITO、银镜基准、论文资料与数字化资源的来源和格式
 
