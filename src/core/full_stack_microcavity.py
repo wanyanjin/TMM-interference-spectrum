@@ -3,11 +3,11 @@
 This module consumes the Phase 05c engineered optical-constant table and builds
 full-device reflection models on top of a shared thick-glass geometry:
 
-- Baseline: Glass / ITO / NiOx / PVK / C60 / Ag
-- Phase 06 Case A: Glass / ITO / NiOx / PVK / C60 / Air_Gap / Ag
-- Phase 06 Case B: Glass / ITO / NiOx / PVK / Air_Gap / C60 / Ag
-- Phase 07 Front:  Glass / ITO / NiOx / Air_Gap / PVK / C60 / Ag
-- Phase 07 Back:   Glass / ITO / NiOx / PVK / Air_Gap / C60 / Ag
+- Baseline: Glass / ITO / NiOx / SAM / PVK / C60 / Ag(100 nm) / Air
+- Phase 06 Case A: Glass / ITO / NiOx / SAM / PVK / C60 / Air_Gap / Ag(100 nm) / Air
+- Phase 06 Case B: Glass / ITO / NiOx / SAM / PVK / Air_Gap / C60 / Ag(100 nm) / Air
+- Phase 07 Front:  Glass / ITO / NiOx / Air_Gap / SAM / PVK / C60 / Ag(100 nm) / Air
+- Phase 07 Back:   Glass / ITO / NiOx / SAM / PVK / Air_Gap / C60 / Ag(100 nm) / Air
 
 The PVK column in ``aligned_full_stack_nk.csv`` ultimately traces back to the
 Phase 05c stitching workflow, which uses [LIT-0001] for the 450-1000 nm source
@@ -41,10 +41,13 @@ EXPECTED_WAVELENGTHS_NM = np.arange(
 )
 
 AIR_INDEX = 1.0 + 0.0j
-PVK_THICKNESS_NM = 500.0
-ITO_THICKNESS_NM = 19.595
-NIOX_THICKNESS_NM = 22.443
-C60_THICKNESS_NM = 18.494
+SAM_INDEX = 1.5 + 0.0j
+ITO_THICKNESS_NM = 100.0
+NIOX_THICKNESS_NM = 45.0
+SAM_THICKNESS_NM = 5.0
+PVK_THICKNESS_NM = 700.0
+C60_THICKNESS_NM = 15.0
+AG_THICKNESS_NM = 100.0
 THICKNESS_TOLERANCE_NM = 1e-6
 
 MODE_BASELINE = "baseline"
@@ -83,15 +86,19 @@ REQUIRED_COLUMNS = (
 class LayerThicknesses:
     ito_nm: float
     niox_nm: float
+    sam_nm: float
     pvk_nm: float
     c60_nm: float
+    ag_nm: float
 
     def with_overrides(self, **kwargs: float) -> "LayerThicknesses":
         allowed_keys = {
             "ito_thickness_nm": "ito_nm",
             "niox_thickness_nm": "niox_nm",
+            "sam_thickness_nm": "sam_nm",
             "pvk_thickness_nm": "pvk_nm",
             "c60_thickness_nm": "c60_nm",
+            "ag_thickness_nm": "ag_nm",
         }
         unknown_keys = sorted(set(kwargs) - set(allowed_keys))
         if unknown_keys:
@@ -99,7 +106,7 @@ class LayerThicknesses:
 
         override_values = {
             field_name: float(getattr(self, field_name))
-            for field_name in ("ito_nm", "niox_nm", "pvk_nm", "c60_nm")
+            for field_name in ("ito_nm", "niox_nm", "sam_nm", "pvk_nm", "c60_nm", "ag_nm")
         }
         for external_key, field_name in allowed_keys.items():
             if external_key in kwargs:
@@ -151,10 +158,12 @@ class OpticalStackTable:
         cls._validate_material_db(material_db)
 
         thicknesses = LayerThicknesses(
-            ito_nm=float(material_db["ITO"]["thickness_nm"]),
-            niox_nm=float(material_db["NIOX"]["thickness_nm"]),
+            ito_nm=ITO_THICKNESS_NM,
+            niox_nm=NIOX_THICKNESS_NM,
+            sam_nm=SAM_THICKNESS_NM,
             pvk_nm=float(pvk_thickness_nm),
-            c60_nm=float(material_db["C60"]["thickness_nm"]),
+            c60_nm=C60_THICKNESS_NM,
+            ag_nm=AG_THICKNESS_NM,
         )
 
         return cls(
@@ -175,18 +184,8 @@ class OpticalStackTable:
             if material not in material_db:
                 raise ValueError(f"materials_master_db.json 缺少 {material} 条目。")
 
-        expected_thickness_map = {
-            "ITO": ITO_THICKNESS_NM,
-            "NIOX": NIOX_THICKNESS_NM,
-            "C60": C60_THICKNESS_NM,
-        }
-        for material_name, expected_value in expected_thickness_map.items():
-            actual_value = float(material_db[material_name]["thickness_nm"])
-            if abs(actual_value - expected_value) > THICKNESS_TOLERANCE_NM:
-                raise ValueError(
-                    f"{material_name} 厚度口径与当前 Phase 约定不一致: "
-                    f"expected={expected_value:.6f} nm, actual={actual_value:.6f} nm"
-                )
+        # Geometry now follows the Phase 07 stack contract rather than the older
+        # materials DB thickness defaults. Keep only presence validation here.
 
     def _normalize_stack_mode(self, mode: str) -> str:
         normalized_mode = str(mode).strip().lower()
@@ -231,51 +230,59 @@ class OpticalStackTable:
         ag_nk = complex(self.n_ag[wavelength_index])
 
         if normalized_mode == MODE_BASELINE or np.isclose(d_air_nm, 0.0, atol=0.0, rtol=0.0):
-            n_list = [glass_nk, ito_nk, niox_nk, pvk_nk, c60_nk, ag_nk]
+            n_list = [glass_nk, ito_nk, niox_nk, SAM_INDEX, pvk_nk, c60_nk, ag_nk, AIR_INDEX]
             d_list = [
                 np.inf,
                 thickness_state.ito_nm,
                 thickness_state.niox_nm,
+                thickness_state.sam_nm,
                 thickness_state.pvk_nm,
                 thickness_state.c60_nm,
+                thickness_state.ag_nm,
                 np.inf,
             ]
             return n_list, d_list
 
         if normalized_mode == MODE_CASE_A:
-            n_list = [glass_nk, ito_nk, niox_nk, pvk_nk, c60_nk, AIR_INDEX, ag_nk]
+            n_list = [glass_nk, ito_nk, niox_nk, SAM_INDEX, pvk_nk, c60_nk, AIR_INDEX, ag_nk, AIR_INDEX]
             d_list = [
                 np.inf,
                 thickness_state.ito_nm,
                 thickness_state.niox_nm,
+                thickness_state.sam_nm,
                 thickness_state.pvk_nm,
                 thickness_state.c60_nm,
                 float(d_air_nm),
+                thickness_state.ag_nm,
                 np.inf,
             ]
             return n_list, d_list
 
         if normalized_mode == INTERFACE_FRONT:
-            n_list = [glass_nk, ito_nk, niox_nk, AIR_INDEX, pvk_nk, c60_nk, ag_nk]
+            n_list = [glass_nk, ito_nk, niox_nk, AIR_INDEX, SAM_INDEX, pvk_nk, c60_nk, ag_nk, AIR_INDEX]
             d_list = [
                 np.inf,
                 thickness_state.ito_nm,
                 thickness_state.niox_nm,
                 float(d_air_nm),
+                thickness_state.sam_nm,
                 thickness_state.pvk_nm,
                 thickness_state.c60_nm,
+                thickness_state.ag_nm,
                 np.inf,
             ]
             return n_list, d_list
 
-        n_list = [glass_nk, ito_nk, niox_nk, pvk_nk, AIR_INDEX, c60_nk, ag_nk]
+        n_list = [glass_nk, ito_nk, niox_nk, SAM_INDEX, pvk_nk, AIR_INDEX, c60_nk, ag_nk, AIR_INDEX]
         d_list = [
             np.inf,
             thickness_state.ito_nm,
             thickness_state.niox_nm,
+            thickness_state.sam_nm,
             thickness_state.pvk_nm,
             float(d_air_nm),
             thickness_state.c60_nm,
+            thickness_state.ag_nm,
             np.inf,
         ]
         return n_list, d_list

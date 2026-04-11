@@ -13,23 +13,24 @@
 
 ## Best Parameters
 
-- d_bulk: `810.305767`
-- d_rough: `0.000000`
-- sigma_thickness: `56.132510`
-- ito_alpha: `4.407106`
+- d_bulk: `815.348576`
+- d_rough: `0.006690`
+- sigma_thickness: `70.565227`
+- front_scale: `0.217180`
+- ito_alpha: `4.999999`
 - pvk_b_scale: `0.800000`
-- niox_k: `0.000000`
-- d_C60_bulk_best: `15.000000` nm
-- window_cost_front: `5.360842`
-- window_cost_rear: `0.023758`
-- total_cost: `5.384599`
-- rear_derivative_correlation: `0.052690`
+- niox_k: `0.120000`
+- d_C60_bulk_best: `14.996655` nm
+- window_cost_front: `0.012189`
+- window_cost_rear: `0.014232`
+- total_cost: `0.026421`
+- rear_derivative_correlation: `0.057747`
 
 ## Masked Band Residual
 
-- mean: `3.225684e-01`
-- std: `2.371808e-01`
-- max_abs: `6.346106e-01`
+- mean: `2.835315e-01`
+- std: `2.020025e-01`
+- max_abs: `6.052529e-01`
 
 ## Coarse Basin Candidates
 
@@ -37,8 +38,8 @@
 
 ## Boundary Checks
 
-- bound_hit_flags: `{"d_bulk": false, "d_rough": true, "ito_alpha": false, "niox_k": true, "pvk_b_scale": true, "sigma_thickness": false}`
-- warnings: `["d_rough 接近边界", "pvk_b_scale 接近边界", "niox_k 接近边界"]`
+- bound_hit_flags: `{"d_bulk": false, "d_rough": true, "front_scale": false, "ito_alpha": true, "niox_k": true, "pvk_b_scale": true, "sigma_thickness": false}`
+- warnings: `["d_rough 接近边界", "ito_alpha 接近边界", "pvk_b_scale 接近边界", "niox_k 接近边界"]`
 
 ## Optimizer Stages
 
@@ -46,38 +47,40 @@
 [
   {
     "basin_center_nm": 635.0,
-    "de_fun": 5.3765897110451135,
+    "de_fun": 0.03469862110233715,
     "de_nit": 6,
-    "de_nfev": 210,
+    "de_nfev": 245,
     "lmfit_nfev": 80,
     "lmfit_success": false,
-    "total_cost": 5.280104509628027,
-    "rear_derivative_correlation": 0.05216547327217215,
+    "total_cost": 0.028649727723914477,
+    "rear_derivative_correlation": 0.05301815855459433,
     "params": {
-      "d_bulk": 622.100646792503,
-      "d_rough": 14.726628069960231,
-      "sigma_thickness": 0.2762740864316287,
-      "ito_alpha": 3.252629473243966,
-      "pvk_b_scale": 0.8000000149011613,
-      "niox_k": 5.327309393319701e-27
+      "d_bulk": 603.6929614397329,
+      "d_rough": 29.99899376693536,
+      "sigma_thickness": 57.265390738522164,
+      "front_scale": 0.20268745631562743,
+      "ito_alpha": 3.131992224382694,
+      "pvk_b_scale": 1.2499999999927862,
+      "niox_k": 0.11999999999998208
     }
   },
   {
     "basin_center_nm": 838.0,
-    "de_fun": 5.522889680086068,
+    "de_fun": 0.06400534728797236,
     "de_nit": 6,
-    "de_nfev": 210,
+    "de_nfev": 245,
     "lmfit_nfev": 80,
     "lmfit_success": false,
-    "total_cost": 5.384599264197111,
-    "rear_derivative_correlation": 0.052690225789244156,
+    "total_cost": 0.02642063670177512,
+    "rear_derivative_correlation": 0.057747296988607685,
     "params": {
-      "d_bulk": 810.3057666031594,
-      "d_rough": 1.0596280946695395e-07,
-      "sigma_thickness": 56.13251009831351,
-      "ito_alpha": 4.407106011670192,
-      "pvk_b_scale": 0.8000000000000002,
-      "niox_k": 2.52990769332436e-35
+      "d_bulk": 815.3485761865301,
+      "d_rough": 0.006689507040073474,
+      "sigma_thickness": 70.56522729632174,
+      "front_scale": 0.21717984113938368,
+      "ito_alpha": 4.9999988779485705,
+      "pvk_b_scale": 0.8000000088534238,
+      "niox_k": 0.11999999996160601
     }
   }
 ]

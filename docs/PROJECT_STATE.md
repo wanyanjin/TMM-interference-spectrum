@@ -1270,3 +1270,20 @@ resources/aligned_full_stack_nk.csv
   - 当前峰谷推算厚度 `566.8 nm` 与 Z-Score 拟合最优 `d_bulk = 810.3 nm` 仍存在显著偏差，提示“单一峰谷公式”与“多层完整 TMM 相位”之间仍有系统差。
   - `rear_derivative_correlation` 仍偏低，说明后窗虽有形态信息，但噪声、长波色散与多层耦合仍在削弱相位锁定能力。
   - `pvk_b_scale` 继续贴在下界，后续仍需评估是否应进一步收紧 PVK 长波色散先验，或为后窗增加更稳定的包络/频域约束。
+
+## Phase 07 Baseline Finalization Update (2026-04-11)
+
+- Current Phase: `Phase 07`
+- Update summary:
+  - 已将 `src/core/full_stack_microcavity.py` 的默认几何口径同步为 `Glass / ITO(100) / NiOx(45) / SAM(5) / PVK(700) / C60(15) / Ag(100) / Air`，终止旧 `19.595/22.443/500/18.494` 默认值与 Phase 07 主链路并存的混乱。
+  - 已在 `src/core/phase07_dual_window.py` 中新增 `front_scale` 参数，仅作用于前窗 `500-650 nm` 的观测层反射率，用于吸收积分球/探头未完整收集镜面反射所导致的宏观几何漏光。
+  - 已将全谱诊断图的 `650-860 nm` masked 区改为仅视觉用途的平滑桥接，不参与 cost 计算。
+- Verified results:
+  - 使用真实样本 `DEVICE-1-withAg-P1` 重新拟合后，前窗 cost 从旧版的数量级显著压低至 `0.0122`，后窗 Z-Score cost 为 `0.0142`，总 cost 为 `0.0264`。
+  - 最优前窗几何缩放为 `front_scale = 0.2172`，与前期独立探测得到的 `~0.22` 一致，支持“前端几何收集效率损失”而非“材料吸收缺失”的解释。
+  - 后窗最佳解仍落在 `d_bulk = 815.3 nm`，说明 `front_scale` 未破坏后窗形态学锁相。
+  - `full_stack_microcavity.py` 几何同步后已通过前向冒烟，默认厚度输出为 `100/45/5/700/15/100 nm`。
+- Risks / pending checks:
+  - `front_scale` 是观测几何修正，不是材料参数；其存在意味着当前绝对反射率链路仍未完全闭合到“无几何损失”的实验口径。
+  - `ito_alpha`、`niox_k`、`pvk_b_scale` 仍贴边，说明前后窗之间仍有结构-色散退化，需要在 Phase 08 前向探伤沙盒中继续拆分。
+  - masked 区平滑桥接仅用于视觉连续性，不能被解释为真实 PL 背景模型。

@@ -16,6 +16,7 @@ import matplotlib
 import numpy as np
 import pandas as pd
 from lmfit import Parameters, minimize
+from scipy.interpolate import PchipInterpolator
 from scipy.optimize import differential_evolution
 from tmm import coh_tmm
 
@@ -109,6 +110,7 @@ class Phase07Config:
                 ParameterSpec("d_bulk", 700.0, 580.0, 900.0),
                 ParameterSpec("d_rough", 12.0, 0.0, 30.0),
                 ParameterSpec("sigma_thickness", 12.0, 0.0, 80.0),
+                ParameterSpec("front_scale", 0.25, 0.15, 1.00),
                 ParameterSpec("ito_alpha", 1.0, 0.0, 5.0),
                 ParameterSpec("pvk_b_scale", 1.0, 0.80, 1.25),
                 ParameterSpec("niox_k", 0.0, 0.0, 0.12),
@@ -555,6 +557,16 @@ def compute_zscore(values: np.ndarray) -> np.ndarray:
     return (array - float(np.mean(array))) / (float(np.std(array)) + 1e-9)
 
 
+def apply_front_scale_to_reflectance(
+    sample_input: Phase07SampleInput,
+    modeled_reflectance: np.ndarray,
+    front_scale: float,
+) -> np.ndarray:
+    adjusted = np.asarray(modeled_reflectance, dtype=float).copy()
+    adjusted[sample_input.front_mask] *= float(front_scale)
+    return adjusted
+
+
 def build_normalized_residual(
     sample_input: Phase07SampleInput,
     modeled_reflectance: np.ndarray,
@@ -685,7 +697,7 @@ def evaluate_model_and_cost(
     window_scales: tuple[WindowScale, ...],
     use_rear_only: bool = False,
 ) -> tuple[np.ndarray, np.ndarray, float, float]:
-    modeled_reflectance = calc_macro_reflectance(
+    physical_reflectance = calc_macro_reflectance(
         model=model,
         wavelengths_nm=sample_input.wavelength_nm,
         with_ag=sample_input.with_ag,
@@ -695,6 +707,11 @@ def evaluate_model_and_cost(
         ito_alpha=params_dict["ito_alpha"],
         pvk_b_scale=params_dict["pvk_b_scale"],
         niox_k=params_dict["niox_k"],
+    )
+    modeled_reflectance = apply_front_scale_to_reflectance(
+        sample_input=sample_input,
+        modeled_reflectance=physical_reflectance,
+        front_scale=params_dict["front_scale"],
     )
     normalized_residual = build_normalized_residual(sample_input, modeled_reflectance, window_scales)
     if use_rear_only:
@@ -977,8 +994,8 @@ def export_fit_summary_table(result: Phase07FitResult, output_path: Path) -> Non
     for key, value in result.best_params.items():
         payload[key] = value
     for scale in result.window_scales:
-        payload[f"{scale.label}_scale"] = scale.scale_value
-        payload[f"{scale.label}_point_count"] = scale.point_count
+        payload[f"window_{scale.label}_scale"] = scale.scale_value
+        payload[f"window_{scale.label}_point_count"] = scale.point_count
     pd.DataFrame([payload]).to_csv(output_path, index=False, encoding="utf-8-sig")
 
 
@@ -1051,6 +1068,38 @@ def _apply_window_background(axis: plt.Axes) -> None:
 def plot_measured_vs_fitted_full_spectrum(result: Phase07FitResult, output_path: Path) -> None:
     fig, ax = plt.subplots(figsize=(11.0, 5.6), dpi=320)
     _apply_window_background(ax)
+    fitted_visual = result.fitted_reflectance.copy()
+    front_indices = np.flatnonzero(result.sample_input.front_mask)
+    rear_indices = np.flatnonzero(result.sample_input.rear_mask)
+    masked_indices = np.flatnonzero(result.sample_input.masked_mask)
+    if front_indices.size > 0 and rear_indices.size > 0 and masked_indices.size > 1:
+        anchor_x = np.array(
+            [
+                result.sample_input.wavelength_nm[front_indices[-1]],
+                result.sample_input.wavelength_nm[rear_indices[0]],
+            ],
+            dtype=float,
+        )
+        anchor_y = np.array(
+            [
+                result.fitted_reflectance[front_indices[-1]],
+                result.fitted_reflectance[rear_indices[0]],
+            ],
+            dtype=float,
+        )
+        control_x = np.array(
+            [
+                max(FRONT_WINDOW_NM[0], anchor_x[0] - 40.0),
+                anchor_x[0],
+                anchor_x[1],
+                min(REAR_WINDOW_NM[1], anchor_x[1] + 40.0),
+            ],
+            dtype=float,
+        )
+        control_y = np.array([anchor_y[0], anchor_y[0], anchor_y[1], anchor_y[1]], dtype=float)
+        fitted_visual[masked_indices] = PchipInterpolator(control_x, control_y)(
+            result.sample_input.wavelength_nm[masked_indices]
+        )
     ax.plot(
         result.sample_input.wavelength_nm,
         result.sample_input.reflectance * 100.0,
@@ -1060,12 +1109,22 @@ def plot_measured_vs_fitted_full_spectrum(result: Phase07FitResult, output_path:
     )
     ax.plot(
         result.sample_input.wavelength_nm,
-        result.fitted_reflectance * 100.0,
+        fitted_visual * 100.0,
         color="#005b96",
         linewidth=1.8,
         linestyle="--",
         label="Fitted",
     )
+    if masked_indices.size > 1:
+        ax.plot(
+            result.sample_input.wavelength_nm[masked_indices],
+            fitted_visual[masked_indices] * 100.0,
+            color="#5dade2",
+            linewidth=2.1,
+            linestyle=":",
+            alpha=0.95,
+            label="Masked visual guide",
+        )
     ax.set_xlabel("Wavelength (nm)")
     ax.set_ylabel("Absolute Reflectance (%)")
     ax.set_title(f"Phase 07 Dual-Window Fit: {result.sample_input.sample_name}")
