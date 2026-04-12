@@ -8,6 +8,7 @@
 - 当前判断 Phase：`Phase 07`
 - 阶段定义：`双窗联合反演架构落地：HDR / HDR 中间件双入口 -> 标准化 R_abs -> 全栈 TMM -> 双窗加权优化 -> 诊断图表与结果台账`
 - 当前可用能力：
+  - 已新增 `step07_plot_raw_received_spectra.py`，可直接从 `DEVICE-1-withAg-P1_hdr_curves.csv` 提取 `Ag` 与同位置样品的长/短曝光原始 mean counts，在对数坐标上绘制“光谱仪实际收到的光谱”，不做曝光归一化、不做 HDR 权重、也不乘任何校准系数
   - 已有 `step01_absolute_calibration.py`，可将样品与银镜原始计数转换为绝对反射率
   - 已有 `step01b_cauchy_extrapolation.py`，可基于 [LIT-0001] 的 `ITO/CsFAPI` 数字化折射率曲线生成 `750-1100 nm` 的 CsFAPI 扩展 `n-k` 中间件
   - 已有 `step02_tmm_inversion.py`，可读取目标反射率、ITO 色散和 CsFAPI 扩展 `n-k` 中间件，执行包含 50/50 BEMA 粗糙度、ITO 色散吸收补偿、宏观厚度不均匀性高斯平均、PVK 色散斜率扰动与 NiOx 寄生吸收的六参数 `d_bulk + d_rough + ito_alpha + sigma_thickness + pvk_b_scale + niox_k` 联合反演
@@ -76,6 +77,7 @@ TMM-interference-spectrum/
 │       ├── step06_batch_hdr_calibration.py
 │       ├── step06_single_sample_hdr_absolute_calibration.py
 │       ├── step07_dual_window_inversion.py
+│       ├── step07_plot_raw_received_spectra.py
 │       └── step07_orthogonal_radar_and_baseline.py
 ├── data/
 │   └── processed/
@@ -101,6 +103,7 @@ TMM-interference-spectrum/
 ├── results/
 │   ├── figures/
 │   │   ├── phase07/
+│   │   │   └── phase07_raw_received_spectra_log.png
 │   │   ├── absolute_reflectance_interference.png
 │   │   ├── cauchy_extrapolation_check.png
 │   │   ├── diagnostic_shape_analysis.png
@@ -122,6 +125,7 @@ TMM-interference-spectrum/
 │   └── logs/
 │       ├── phase03_batch_fit/
 │       ├── phase07/
+│       │   └── phase07_raw_received_spectra_log.md
 │       ├── phase04c_fingerprint_mapping.md
 │       ├── phase04a_air_gap_diagnostic.md
 │       ├── phase04b_localization.md
