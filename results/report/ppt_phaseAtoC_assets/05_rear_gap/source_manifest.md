@@ -16,5 +16,5 @@
 - phase 物理对应：
   - 高亮后界面真实空气隙，表示 rear-interface real separation
 - 代表参数：
-  - rear-gap: `0 / 1 / 2 / 5 / 10 nm`
+  - rear-gap: `0 / 1 / 2 / 3 / 5 / 10 / 20 / 30 / 50 nm`
   - observable: `R_total`

@@ -685,8 +685,8 @@ Structure cue: five mechanisms are compared on the same full-device layer stack,
   - thickness: `650 / 750 / 850 nm`
   - rear-BEMA: `10 / 20 / 30 nm`
   - front-BEMA: `10 / 20 nm`
-  - rear-gap: `1 / 2 / 5 / 10 nm`
-  - front-gap: `1 / 2 / 5 / 10 / 20 nm`
+  - rear-gap: `0 / 1 / 2 / 3 / 5 / 10 / 20 / 30 / 50 nm`
+  - front-gap: `0 / 1 / 2 / 3 / 5 / 10 / 20 / 30 / 50 nm`
         """,
     )
 
@@ -1025,7 +1025,7 @@ Structure cue: a front-side transition-layer proxy is inserted near the SAM/PVK 
         frame=rear_gap_frame,
         param_column="d_gap_rear_nm",
         delta_column="Delta_R_total_vs_pristine",
-        selected_values=[0.0, 1.0, 2.0, 5.0, 10.0],
+        selected_values=[0.0, 1.0, 2.0, 3.0, 5.0, 10.0, 20.0, 30.0, 50.0],
         main_name="rear_gap_deltaRtotal_heatmap.png",
         secondary_name="rear_gap_selected_rtotal_curves.png",
         main_title="Rear air-gap fingerprint on R_total",
@@ -1072,7 +1072,7 @@ Structure cue: a real air separation layer is inserted at the PVK/C60 rear inter
 - phase 物理对应：
   - 高亮后界面真实空气隙，表示 rear-interface real separation
 - 代表参数：
-  - rear-gap: `0 / 1 / 2 / 5 / 10 nm`
+  - rear-gap: `0 / 1 / 2 / 3 / 5 / 10 / 20 / 30 / 50 nm`
   - observable: `R_total`
         """,
     )
@@ -1083,7 +1083,7 @@ Structure cue: a real air separation layer is inserted at the PVK/C60 rear inter
         frame=front_gap_frame,
         param_column="d_gap_front_nm",
         delta_column="Delta_R_total_vs_pristine",
-        selected_values=[0.0, 1.0, 2.0, 5.0, 10.0, 20.0],
+        selected_values=[0.0, 1.0, 2.0, 3.0, 5.0, 10.0, 20.0, 30.0, 50.0],
         main_name="front_gap_deltaRtotal_heatmap.png",
         secondary_name="front_gap_selected_rtotal_curves.png",
         main_title="Front air-gap fingerprint on R_total",
@@ -1130,7 +1130,7 @@ front-gap 和 front-BEMA 都主要影响前窗到过渡区，但两者不能混�
 - phase 物理对应：
   - 高亮前界面真实空气隙，表示 front-interface real separation
 - 代表参数：
-  - front-gap: `0 / 1 / 2 / 5 / 10 / 20 nm`
+  - front-gap: `0 / 1 / 2 / 3 / 5 / 10 / 20 / 30 / 50 nm`
   - observable: `R_total`
         """,
     )

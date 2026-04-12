@@ -22,5 +22,5 @@
   - thickness: `650 / 750 / 850 nm`
   - rear-BEMA: `10 / 20 / 30 nm`
   - front-BEMA: `10 / 20 nm`
-  - rear-gap: `1 / 2 / 5 / 10 nm`
-  - front-gap: `1 / 2 / 5 / 10 / 20 nm`
+  - rear-gap: `0 / 1 / 2 / 3 / 5 / 10 / 20 / 30 / 50 nm`
+  - front-gap: `0 / 1 / 2 / 3 / 5 / 10 / 20 / 30 / 50 nm`

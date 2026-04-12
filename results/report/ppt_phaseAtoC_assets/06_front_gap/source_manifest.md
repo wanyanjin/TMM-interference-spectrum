@@ -16,5 +16,5 @@
 - phase 物理对应：
   - 高亮前界面真实空气隙，表示 front-interface real separation
 - 代表参数：
-  - front-gap: `0 / 1 / 2 / 5 / 10 / 20 nm`
+  - front-gap: `0 / 1 / 2 / 3 / 5 / 10 / 20 / 30 / 50 nm`
   - observable: `R_total`
