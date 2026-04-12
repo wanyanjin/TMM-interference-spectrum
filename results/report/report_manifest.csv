@@ -4,3 +4,4 @@ phaseA2_pvk_thickness_scan,Phase A-2,d_PVK thickness scan,phaseA2_pvk_thickness_
 phaseB1_rear_bema_sandbox,Phase B-1,rear-only PVK/C60 BEMA sandbox,phaseB1_rear_bema_sandbox/PHASE_B1_REPORT.md
 phaseA2_1_pvk_uncertainty_ensemble,Phase A-2.1,PVK band-edge uncertainty ensemble,phaseA2_1_pvk_uncertainty_ensemble/PHASE_A2_1_REPORT.md
 phaseB2_front_bema_sandbox,Phase B-2,front-only NiOx/PVK proxy BEMA sandbox,phaseB2_front_bema_sandbox/PHASE_B2_REPORT.md
+phaseC1a_rear_air_gap_sandbox,Phase C-1a,rear air-gap only sandbox,phaseC1a_rear_air_gap_sandbox/PHASE_C1A_REPORT.md

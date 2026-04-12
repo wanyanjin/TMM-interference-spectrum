@@ -59,3 +59,11 @@
   - 前窗/过渡区重点图、热力图与代表曲线
   - front vs rear vs thickness 的正交对照图
   - uncertainty spot-check 与阶段总结文档 `PHASE_B2_REPORT.md`
+
+### `phaseC1a_rear_air_gap_sandbox/`
+
+- 主题：rear air-gap only 前向模拟
+- 主要内容：
+  - rear-gap 主扫描、LOD 粗评估与 branch-aware tracking
+  - rear-gap 与 thickness / rear-BEMA / front-BEMA 的机制对照
+  - uncertainty spot-check 与阶段总结文档 `PHASE_C1A_REPORT.md`

@@ -5,8 +5,8 @@
 ## 1. Current Snapshot
 
 - 更新时间：2026-04-12
-- 当前判断 Phase：`Phase B-2`
-- 阶段定义：`建立 front-only NiOx/PVK proxy BEMA 指纹字典，并对代表性 front-BEMA 厚度执行 lightweight uncertainty spot-check`
+- 当前判断 Phase：`Phase C-1a`
+- 阶段定义：`建立 rear air-gap only 指纹字典，完成 LOD 粗评估、uncertainty spot-check 与四机制对照`
 - 当前可用能力：
   - 已有 `step01_absolute_calibration.py`，可将样品与银镜原始计数转换为绝对反射率
   - 已有 `step01b_cauchy_extrapolation.py`，可基于 [LIT-0001] 的 `ITO/CsFAPI` 数字化折射率曲线生成 `750-1100 nm` 的 CsFAPI 扩展 `n-k` 中间件
@@ -39,6 +39,7 @@
   - 已新增 `stepB1_rear_bema_sandbox.py`，可在 `PVK/C60` 后界面插入固定 `50/50` Bruggeman BEMA 层、执行厚度守恒扫描并与 `d_PVK` 指纹做对照
   - 已新增 `stepA2_1_pvk_uncertainty_ensemble.py`，可构建 `nominal / more_absorptive / less_absorptive` 三成员 PVK ensemble，重跑代表性 thickness / rear-BEMA 子集并输出 robustness summary
   - 已新增 `stepB2_front_bema_sandbox.py`，可在固定 `SAM` 厚度前提下引入 `NiOx/PVK` front-side BEMA proxy，输出 front-only roughness 主扫描、与 thickness/rear-BEMA 的正交对照，以及 uncertainty spot-check
+  - 已新增 `stepC1a_rear_air_gap_sandbox.py`，可在 `PVK/C60` 后界面插入真实 air gap，输出 low-gap 高分辨主扫描、LOD 粗评估、branch-aware tracking 和与 thickness / rear-BEMA / front-BEMA 的四机制对照
   - 已产出标准中间文件 `data/processed/target_reflectance.csv` 与 `data/processed/CsFAPI_nk_extended.csv`
   - 已完成 Phase 02 形状畸变诊断，当前证据指向：ITO 近红外吸收失真是长波端托平与整体形状失配的主导因素
   - 已完成 Phase 04 空气隙前向预测，当前基线下 `d_air = 2 nm` 与 `5 nm` 的 `max(|ΔR|)` 分别约为 `0.538%` 与 `1.347%`，均高于 `0.2%` 典型噪声线
@@ -58,6 +59,7 @@
   - Phase 08 目前仅建立“固定参数前向重建”链路，尚未引入新的物理先验、层结构变体扫描或跨样本共享参数约束
   - `Phase A-2.1` 已完成 first-pass uncertainty propagation，但尚未扩展到更高维的 surrogate family 或参数化介电函数不确定性
   - `Phase B-2` 当前仍是 front-side optical proxy，而不是完整化学界面模型
+  - `Phase C-1a` 当前仍是 rear-gap only 的 specular TMM 模型，不含散射、dual-gap 或 gap+BEMA 耦合
   - `constant-glass vs dispersive-glass` 与参数化 band-edge dielectric model 仍未展开
 
 ## 2. Current Directory Tree
@@ -99,7 +101,8 @@ TMM-interference-spectrum/
 │       ├── stepA2_pvk_thickness_scan.py
 │       ├── stepA2_1_pvk_uncertainty_ensemble.py
 │       ├── stepB1_rear_bema_sandbox.py
-│       └── stepB2_front_bema_sandbox.py
+│       ├── stepB2_front_bema_sandbox.py
+│       └── stepC1a_rear_air_gap_sandbox.py
 ├── data/
 │   └── processed/
 │       ├── CsFAPI_nk_extended.csv
@@ -116,6 +119,7 @@ TMM-interference-spectrum/
 │       ├── phaseA2_1/
 │       ├── phaseB1/
 │       ├── phaseB2/
+│       ├── phaseC1a/
 │       ├── phaseA1_seam_audit/
 │       └── target_reflectance.csv
 ├── resources/
@@ -137,6 +141,7 @@ TMM-interference-spectrum/
 │   │   ├── phaseA2_1/
 │   │   ├── phaseB1/
 │   │   ├── phaseB2/
+│   │   ├── phaseC1a/
 │   │   ├── phaseA1_2/
 │   │   ├── phaseA1_seam_audit/
 │   │   ├── phaseA1/
@@ -166,6 +171,7 @@ TMM-interference-spectrum/
 │       ├── phaseA2_1/
 │       ├── phaseB1/
 │       ├── phaseB2/
+│       ├── phaseC1a/
 │       ├── phaseA1_2/
 │       ├── phaseA1_seam_audit/
 │       ├── phaseA1/
@@ -186,7 +192,8 @@ TMM-interference-spectrum/
 │       ├── phaseA2_1_pvk_uncertainty_ensemble/
 │       ├── phaseA2_pvk_thickness_scan/
 │       ├── phaseB1_rear_bema_sandbox/
-│       └── phaseB2_front_bema_sandbox/
+│       ├── phaseB2_front_bema_sandbox/
+│       └── phaseC1a_rear_air_gap_sandbox/
 ├── test_data/
 │   ├── sample.csv
 │   ├── glass-1mm.csv
@@ -884,6 +891,40 @@ TMM-interference-spectrum/
 - `results/figures/phaseB2/*.png`
 - `results/logs/phaseB2/phaseB2_front_bema_sandbox.md`
 
+### 4.23 `stepC1a_rear_air_gap_sandbox.py`
+
+- 文件位置：`src/scripts/stepC1a_rear_air_gap_sandbox.py`
+- 主要职责：仅在 `PVK/C60` 后界面引入真实 rear air gap，建立 low-gap 高分辨指纹字典，并完成 LOD 粗评估与 uncertainty spot-check
+
+输入：
+- `resources/aligned_full_stack_nk_pvk_v2.csv`
+- `resources/pvk_ensemble/aligned_full_stack_nk_pvk_ens_{nominal,more_absorptive,less_absorptive}.csv`
+- `data/processed/phaseA2/phaseA2_pvk_thickness_scan.csv`
+- `data/processed/phaseB1/phaseB1_rear_bema_scan.csv`
+- `data/processed/phaseB2/phaseB2_front_bema_scan.csv`
+
+核心处理流程：
+- 构建层序：
+  - `Glass / ITO / NiOx / SAM / PVK / Air_gap_rear / C60 / Ag / Air`
+- rear-gap 被视为真实分离层，不做厚度守恒扣减：
+  - `d_PVK = 700 nm` fixed
+  - `d_C60 = 15 nm` fixed
+- 采用低 gap 高分辨扫描：
+  - `0-20 nm`，步长 `0.5 nm`
+  - 额外补 `25 / 30 / 40 / 50 nm`
+- 输出 `R_stack / R_total / ΔR` 热力图、transition/rear 响应图、branch-aware peak/valley tracking、波数轴对照和四机制比较图
+- 对 `1 / 2 / 3 / 5 / 10 nm` 给出基于 `ΔR_noise ≈ 0.2%` 的理论 LOD 粗评估
+- 对 `0 / 2 / 5 / 10 nm` 做三成员 ensemble spot-check，判断哪些结论稳健、哪些绝对量敏感
+
+输出：
+- `data/processed/phaseC1a/phaseC1a_rear_air_gap_scan.csv`
+- `data/processed/phaseC1a/phaseC1a_rear_air_gap_feature_summary.csv`
+- `data/processed/phaseC1a/phaseC1a_rear_air_gap_lod_summary.csv`
+- `data/processed/phaseC1a/phaseC1a_rear_air_gap_ensemble_spotcheck.csv`
+- `data/processed/phaseC1a/phaseC1a_rear_air_gap_robustness_summary.csv`
+- `results/figures/phaseC1a/*.png`
+- `results/logs/phaseC1a/phaseC1a_rear_air_gap_sandbox.md`
+
 ## 5. Data Flow
 
 当前项目主数据流如下：
@@ -1113,6 +1154,16 @@ data/processed/phaseB1/phaseB1_rear_bema_scan.csv
     -> results/figures/phaseB2/*.png
     -> results/logs/phaseB2/phaseB2_front_bema_sandbox.md
 
+resources/aligned_full_stack_nk_pvk_v2.csv
+resources/pvk_ensemble/aligned_full_stack_nk_pvk_ens_*.csv
+data/processed/phaseA2/phaseA2_pvk_thickness_scan.csv
+data/processed/phaseB1/phaseB1_rear_bema_scan.csv
+data/processed/phaseB2/phaseB2_front_bema_scan.csv
+    -> stepC1a_rear_air_gap_sandbox.py (rear air-gap only -> low-gap high-resolution scan -> branch-aware tracking -> LOD粗评估 -> thickness/rear-BEMA/front-BEMA 四机制对照 -> uncertainty spot-check)
+    -> data/processed/phaseC1a/*.csv
+    -> results/figures/phaseC1a/*.png
+    -> results/logs/phaseC1a/phaseC1a_rear_air_gap_sandbox.md
+
 selected phase outputs
     -> results/report/ (精选 CSV / PNG / Markdown 汇报层)
     -> results/report/phaseA1_2_pvk_surrogate_and_pristine/*
@@ -1120,6 +1171,7 @@ selected phase outputs
     -> results/report/phaseA2_pvk_thickness_scan/*
     -> results/report/phaseB1_rear_bema_sandbox/*
     -> results/report/phaseB2_front_bema_sandbox/*
+    -> results/report/phaseC1a_rear_air_gap_sandbox/*
 ```
 
 可按 SOP 理解为：
@@ -1143,7 +1195,8 @@ selected phase outputs
 17. `stepB1_rear_bema_sandbox.py` 则把 rear-only `PVK/C60` intermixing 单独拆成独立机制，得到与 `d_PVK` 可比较的后界面粗糙指纹
 18. `stepA2_1_pvk_uncertainty_ensemble.py` 则把 `PVK surrogate v2` 的 band-edge 不确定性正式传播到 thickness 与 rear-BEMA 两类机制，用于区分高置信度结构指纹和 surrogate-sensitive 特征
 19. `stepB2_front_bema_sandbox.py` 则把前界面 `NiOx/PVK` optical proxy 单独拆成第三类机制，形成与 thickness / rear-BEMA 并列的 front-side roughness 指纹
-20. 当前脚本链已经具备“文献数字化 / 椭偏报告解析 -> 材料数据库 -> 全栈对齐 `n-k` 表 -> pristine baseline decomposition -> seam forensic audit -> surrogate rebuild -> pristine rerun -> thickness scan -> rear-only BEMA sandbox -> PVK uncertainty propagation -> front-only BEMA sandbox -> 宏观正交界面指纹字典 -> 双窗联合反演 -> 固定参数理论重建”的前向-反演联合基线
+20. `stepC1a_rear_air_gap_sandbox.py` 则把真实 rear air-gap 作为第四类机制单独引入，提供与 thickness / front-BEMA / rear-BEMA 可直接比较的分离层指纹与理论 LOD
+21. 当前脚本链已经具备“文献数字化 / 椭偏报告解析 -> 材料数据库 -> 全栈对齐 `n-k` 表 -> pristine baseline decomposition -> seam forensic audit -> surrogate rebuild -> pristine rerun -> thickness scan -> rear-only BEMA sandbox -> PVK uncertainty propagation -> front-only BEMA sandbox -> rear air-gap sandbox -> 宏观正交界面指纹字典 -> 双窗联合反演 -> 固定参数理论重建”的前向-反演联合基线
 
 ## 6. Key Physical / Numerical Assumptions
 
@@ -1180,6 +1233,14 @@ selected phase outputs
 - Phase B-2 的 spot-check 进一步表明：
   - front-window 平均 `ΔR` 属于较稳健特征
   - transition/rear 振幅量级与 `R_total(780 nm)` 仍会受到 surrogate 先验影响
+- Phase C-1a 进一步引入 rear air-gap only：
+  - 层序固定为 `Glass / ITO / NiOx / SAM / PVK / Air_gap_rear / C60 / Ag / Air`
+  - rear-gap 被视为真实分离层，不做 `PVK/C60` 厚度守恒扣减
+  - 低 gap 区域采用 `0-20 nm / 0.5 nm` 高分辨扫描，并补 `25 / 30 / 40 / 50 nm`
+- 当前 C-1a 的 first-pass 结果表明：
+  - rear-gap 的主敏感窗口位于 transition/rear，理论 LOD 在 `1 nm` 级已经超过 `0.2%`
+  - rear-gap 比 rear-BEMA 更强、更非线性，也比 thickness 更不像全局平移
+  - rear-gap 可作为与 thickness / rear-BEMA / front-BEMA 并列的第四类机制字典
 - `1000-1100 nm` 属于超出原始椭偏测量窗口的模型外推区
 - Phase 04 中 `1100-1500 nm` 的 PVK 折射率不再直接沿用表格，而是基于 `1050-1100 nm` 的真实点二次拟合 Cauchy 尾段后继续外推，且仍强制 `k = 0`
 - 粗糙层采用 `50% PVK + 50% Air` 的 BEMA 有效介质
@@ -1430,30 +1491,30 @@ selected phase outputs
 ## 9. Recent Update Summary
 
 - 更新时间：`2026-04-12`
-- 当前 Phase：`Phase B-2`
+- 当前 Phase：`Phase C-1a`
 - 本次新增/修改：
-  - 在 `src/core/full_stack_microcavity.py` 中新增 front-only `NiOx/PVK` proxy BEMA 前向入口
-  - 新增 `src/scripts/stepB2_front_bema_sandbox.py`，建立 nominal front-only BEMA 指纹字典与 uncertainty spot-check
-  - 新增 `data/processed/phaseB2/`、`results/figures/phaseB2/`、`results/logs/phaseB2/` 标准输出口径
-  - 新增 `results/report/phaseB2_front_bema_sandbox/` 并更新 report 根索引
-  - 更新 `PROJECT_STATE.md`，补充 `Phase B-2` SOP、数据流与机制结论范围
+  - 在 `src/core/full_stack_microcavity.py` 中新增 rear air-gap only 前向入口
+  - 新增 `src/scripts/stepC1a_rear_air_gap_sandbox.py`，建立 rear-gap 主扫描、LOD 粗评估与 uncertainty spot-check
+  - 新增 `data/processed/phaseC1a/`、`results/figures/phaseC1a/`、`results/logs/phaseC1a/` 标准输出口径
+  - 新增 `results/report/phaseC1a_rear_air_gap_sandbox/` 并更新 report 根索引
+  - 更新 `PROJECT_STATE.md`，补充 `Phase C-1a` SOP、数据流与机制结论范围
 - 已验证结论：
-  - front-only BEMA 的主响应偏向 `400-810 nm`，尤其是 transition 区，而不是 rear-only BEMA 那种后窗主导响应
-  - front-only BEMA 更像前窗背景变化与过渡区包络/斜率扭曲；`d_PVK` 仍主要表现为全局腔长/后窗 fringe 平移
-  - 当前 thickness / rear-BEMA / front-BEMA 已形成三方可比较的机制字典
-  - spot-check 显示 front-window 平均 `ΔR` 相对稳健，但 transition/rear 振幅量级与 `R_total(780 nm)` 仍受 surrogate 先验影响
-  - `R_stack` 对 front-BEMA 的机制灵敏度仍高于 `R_total`
+  - rear-gap 的主敏感窗口位于 transition/rear，尤其是后窗内部，明显不同于 front-BEMA 的前窗/过渡区主导口径
+  - rear-gap 在 low-gap 区域就能给出超过 `0.2%` 的理论 `ΔR_total`，当前 coarse LOD 已下探到 `1 nm`
+  - rear-gap 比 rear-BEMA 更强、更非线性，也比 thickness 更不像全局 fringe 平移，因此可作为第四类独立机制字典
+  - spot-check 显示 rear-gap 的 band-edge 邻域绝对量仍受 surrogate 影响，但其机制类别判断仍然成立
+  - `R_stack` 仍比 `R_total` 更适合做 rear-gap 机制诊断
 - 仍待验证：
-  - `air-gap only` 尚未与当前三机制字典做统一正交对照
-  - dual-BEMA 尚未建立，当前还没有前后界面同时粗糙的耦合图谱
+  - `Phase C-1b front air-gap only` 尚未建立，当前还没有前后界面 gap 的完整对照
+  - gap vs BEMA coupled comparison 尚未展开，当前还没有 gap+BEMA 的耦合图谱
   - `constant-glass vs dispersive-glass` 与参数化 band-edge dielectric model 仍未展开
 
 ## 10. Recommended Next Actions
 
 建议后续优先处理以下事项：
 
-1. 优先进入 `Phase C-1 air-gap only`，在 thickness / rear-BEMA / front-BEMA 三方字典基础上补齐另一类几何缺陷机制
-2. 在 air-gap only 完成后，再评估是否需要 dual-BEMA 或 roughness + air-gap 耦合图谱
+1. 优先进入 `Phase C-1b front air-gap only`，补齐 front/rear gap 对照后再评估 gap vs BEMA 耦合问题
+2. 在 front-gap 完成后，再决定是否进入 `Phase C-2 gap vs BEMA coupled comparison`
 3. 回查 `Ag_mirro-500us` 与 `Ag_mirro-10ms` 的归一化失配来源，优先检查仪器门控、导出流程与实际曝光标签
 4. 基于 `phase07_fit_summary.csv` 的贴边结果，重新评估 `ito_alpha`、`pvk_b_scale` 与 `niox_k` 的边界和先验
 5. 建立 `data/raw/phase06/` 或稳定数据索引，把 OneDrive 外部路径纳入规范化入口
