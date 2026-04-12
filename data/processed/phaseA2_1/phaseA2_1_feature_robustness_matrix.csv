@@ -1,0 +1,9 @@
+﻿feature_name,mechanism_type,wavelength_range,robustness_level,explanation
+rear-window dominant DeltaR wavelength under d_PVK,thickness,810-1100 nm,high,Tracks whether thickness-induced response stays centered in the same rear-window region across ensemble members.
+rear-window DeltaR amplitude under d_PVK,thickness,810-1100 nm,high,Measures how much total-response amplitude depends on the band-edge prior.
+rear-window dominant DeltaR wavelength under rear-BEMA,rear_bema,810-1100 nm,high,Checks whether rear-BEMA remains localized in the same spectral neighborhood across ensemble members.
+rear-window DeltaR amplitude under rear-BEMA,rear_bema,810-1100 nm,low,Measures whether rear-BEMA amplitude is stable or heavily contaminated by band-edge prior uncertainty.
+band-edge DeltaR amplitude under d_PVK,thickness,740-850 nm,high,Captures how strongly thickness conclusions near the band edge depend on the surrogate family.
+band-edge DeltaR amplitude under rear-BEMA,rear_bema,740-850 nm,low,Captures how strongly rear-BEMA conclusions near the band edge depend on the surrogate family.
+absolute R_total at 780 nm under d_PVK,thickness,around 780 nm,low,Represents a band-edge-local observable expected to be more surrogate-sensitive than rear-window fringe metrics.
+absolute R_total at 780 nm under rear-BEMA,rear_bema,around 780 nm,low,Represents a band-edge-local observable expected to be more surrogate-sensitive than rear-window envelope metrics.

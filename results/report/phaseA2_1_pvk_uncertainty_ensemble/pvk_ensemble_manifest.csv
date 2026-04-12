@@ -1,0 +1,4 @@
+﻿ensemble_id,description,perturbation_window_nm,perturbation_type,notes
+nominal,Repaired PVK surrogate v2 without extra perturbation,740-850 (soft 730-900),none,Direct reuse of Phase A-1.2 nominal surrogate
+more_absorptive,Locally stronger band-edge absorption tail in 740-850 nm,740-850 (soft 730-900),smooth_k_up_with_linked_n_shift,Band-edge tail stays nonzero for longer wavelength before relaxing to nominal tail
+less_absorptive,Locally weaker band-edge absorption tail in 740-850 nm,740-850 (soft 730-900),smooth_k_down_with_linked_n_shift,Band-edge tail becomes thinner but remains continuous and seam-free

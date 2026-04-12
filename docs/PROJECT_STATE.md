@@ -5,8 +5,8 @@
 ## 1. Current Snapshot
 
 - 更新时间：2026-04-12
-- 当前判断 Phase：`Phase B-1`
-- 阶段定义：`在 repaired PVK surrogate v2 上引入 rear-only PVK/C60 BEMA 粗糙层，建立后界面粗糙指纹并与 d_PVK 厚度调制做正交比较`
+- 当前判断 Phase：`Phase A-2.1`
+- 阶段定义：`围绕 PVK surrogate v2 构建 band-edge uncertainty ensemble，并把这组不确定性传播到 thickness 与 rear-only BEMA 两类机制结论中`
 - 当前可用能力：
   - 已有 `step01_absolute_calibration.py`，可将样品与银镜原始计数转换为绝对反射率
   - 已有 `step01b_cauchy_extrapolation.py`，可基于 [LIT-0001] 的 `ITO/CsFAPI` 数字化折射率曲线生成 `750-1100 nm` 的 CsFAPI 扩展 `n-k` 中间件
@@ -37,6 +37,7 @@
   - 已新增 `stepA2_pvk_thickness_scan.py`，可基于 `aligned_full_stack_nk_pvk_v2.csv` 扫描 `d_PVK = 500-900 nm`、输出 `R_stack / R_total / ΔR` 热力图、peak/valley tracking 与特征汇总表
   - 已建立 `results/report/` 汇报资产层，并补齐 `Phase A-1.2` 与 `Phase A-2` 的精选 CSV / PNG / Markdown 报告
   - 已新增 `stepB1_rear_bema_sandbox.py`，可在 `PVK/C60` 后界面插入固定 `50/50` Bruggeman BEMA 层、执行厚度守恒扫描并与 `d_PVK` 指纹做对照
+  - 已新增 `stepA2_1_pvk_uncertainty_ensemble.py`，可构建 `nominal / more_absorptive / less_absorptive` 三成员 PVK ensemble，重跑代表性 thickness / rear-BEMA 子集并输出 robustness summary
   - 已产出标准中间文件 `data/processed/target_reflectance.csv` 与 `data/processed/CsFAPI_nk_extended.csv`
   - 已完成 Phase 02 形状畸变诊断，当前证据指向：ITO 近红外吸收失真是长波端托平与整体形状失配的主导因素
   - 已完成 Phase 04 空气隙前向预测，当前基线下 `d_air = 2 nm` 与 `5 nm` 的 `max(|ΔR|)` 分别约为 `0.538%` 与 `1.347%`，均高于 `0.2%` 典型噪声线
@@ -54,7 +55,7 @@
   - 尚未将 Phase 06 批量 HDR 输入规范化迁移到 `data/raw/phase06/`
   - Phase 07 当前两例真实样本都存在参数贴边，说明双窗架构已跑通，但材料先验与边界设定仍需继续收敛
   - Phase 08 目前仅建立“固定参数前向重建”链路，尚未引入新的物理先验、层结构变体扫描或跨样本共享参数约束
-  - `Phase B-1` 已完成 first-pass rear-only BEMA sandbox，但尚未把 surrogate 不确定性传播到 thickness/BEMA 指纹比较
+  - `Phase A-2.1` 已完成 first-pass uncertainty propagation，但尚未扩展到更高维的 surrogate family 或参数化介电函数不确定性
   - `PVK uncertainty ensemble`、`constant-glass vs dispersive-glass` 与参数化 band-edge dielectric model 仍未展开
 
 ## 2. Current Directory Tree
@@ -94,6 +95,7 @@ TMM-interference-spectrum/
 │       ├── stepA1_2_build_pvk_surrogate_v2.py
 │       ├── stepA1_2_rerun_pristine_with_pvk_v2.py
 │       ├── stepA2_pvk_thickness_scan.py
+│       ├── stepA2_1_pvk_uncertainty_ensemble.py
 │       └── stepB1_rear_bema_sandbox.py
 ├── data/
 │   └── processed/
@@ -108,6 +110,7 @@ TMM-interference-spectrum/
 │       ├── phaseA1/
 │       ├── phaseA1_2/
 │       ├── phaseA2/
+│       ├── phaseA2_1/
 │       ├── phaseB1/
 │       ├── phaseA1_seam_audit/
 │       └── target_reflectance.csv
@@ -116,6 +119,7 @@ TMM-interference-spectrum/
 │   │   ├── phase02_fig2_fapi_optical_constants_digitized.csv
 │   │   └── phase02_fig3_csfapi_optical_constants_digitized.csv
 │   ├── n-kdata/
+│   ├── pvk_ensemble/
 │   ├── aligned_full_stack_nk.csv
 │   ├── aligned_full_stack_nk_pvk_v2.csv
 │   ├── materials_master_db.json
@@ -126,6 +130,7 @@ TMM-interference-spectrum/
 ├── results/
 │   ├── figures/
 │   │   ├── phaseA2/
+│   │   ├── phaseA2_1/
 │   │   ├── phaseB1/
 │   │   ├── phaseA1_2/
 │   │   ├── phaseA1_seam_audit/
@@ -153,6 +158,7 @@ TMM-interference-spectrum/
 │   └── logs/
 │       ├── phase03_batch_fit/
 │       ├── phaseA2/
+│       ├── phaseA2_1/
 │       ├── phaseB1/
 │       ├── phaseA1_2/
 │       ├── phaseA1_seam_audit/
@@ -171,6 +177,7 @@ TMM-interference-spectrum/
 │       ├── README.md
 │       ├── report_manifest.csv
 │       ├── phaseA1_2_pvk_surrogate_and_pristine/
+│       ├── phaseA2_1_pvk_uncertainty_ensemble/
 │       ├── phaseA2_pvk_thickness_scan/
 │       └── phaseB1_rear_bema_sandbox/
 ├── test_data/
@@ -803,6 +810,43 @@ TMM-interference-spectrum/
 - `results/figures/phaseB1/phaseB1_bema_vs_pvk_deltaR_comparison.png`
 - `results/logs/phaseB1/phaseB1_rear_bema_sandbox.md`
 
+### 4.21 `stepA2_1_pvk_uncertainty_ensemble.py`
+
+- 文件位置：`src/scripts/stepA2_1_pvk_uncertainty_ensemble.py`
+- 主要职责：围绕 `PVK surrogate v2` 的 `740-850 nm` band-edge / absorption-tail 不确定性构建小型 ensemble，并把这组先验扰动传播到 `d_PVK` 与 rear-only BEMA 两类机制
+
+输入：
+- `resources/aligned_full_stack_nk_pvk_v2.csv`
+- `data/processed/phaseA1_2/phaseA1_2_pristine_baseline.csv`
+- `data/processed/phaseA2/phaseA2_pvk_thickness_scan.csv`
+- `data/processed/phaseA2/phaseA2_pvk_feature_summary.csv`
+- `data/processed/phaseB1/phaseB1_rear_bema_scan.csv`
+- `data/processed/phaseB1/phaseB1_rear_bema_feature_summary.csv`
+
+核心处理流程：
+- 以 `PVK surrogate v2` 为 nominal 成员，构建：
+  - `nominal`
+  - `more_absorptive`
+  - `less_absorptive`
+- 在 `740-850 nm` 主扰动窗内对 `k(λ)` 施加 smooth envelope 缩放，并用弱耦合 `n(λ)` 修正保证 `n/k/eps1/eps2` 连续且导数平滑
+- 额外在 `730-900 nm` 软窗内收尾，避免引入新的 band-edge seam
+- 输出 ensemble 的 `n/k/eps/导数` QA 图和 local comparison 表
+- 对代表性厚度子集 `d_PVK = 600 / 700 / 800 nm` 重算 `R_stack / R_total / ΔR`
+- 对代表性 rear-BEMA 子集 `d_BEMA,rear = 0 / 10 / 20 / 30 nm` 重算 `R_stack / R_total / ΔR`
+- 计算 rear-window 与 transition-window 的稳健性摘要，并输出 `robust vs surrogate-sensitive` 特征矩阵
+
+输出：
+- `resources/pvk_ensemble/aligned_full_stack_nk_pvk_ens_*.csv`
+- `data/processed/phaseA2_1/pvk_ensemble_manifest.csv`
+- `data/processed/phaseA2_1/pvk_ensemble_local_comparison.csv`
+- `data/processed/phaseA2_1/phaseA2_1_thickness_ensemble_scan.csv`
+- `data/processed/phaseA2_1/phaseA2_1_thickness_robustness_summary.csv`
+- `data/processed/phaseA2_1/phaseA2_1_rear_bema_ensemble_scan.csv`
+- `data/processed/phaseA2_1/phaseA2_1_rear_bema_robustness_summary.csv`
+- `data/processed/phaseA2_1/phaseA2_1_feature_robustness_matrix.csv`
+- `results/figures/phaseA2_1/*.png`
+- `results/logs/phaseA2_1/phaseA2_1_pvk_uncertainty_ensemble.md`
+
 ## 5. Data Flow
 
 当前项目主数据流如下：
@@ -1014,9 +1058,19 @@ data/processed/phaseA2/phaseA2_pvk_thickness_scan.csv
     -> results/figures/phaseB1/phaseB1_*.png
     -> results/logs/phaseB1/phaseB1_rear_bema_sandbox.md
 
+resources/aligned_full_stack_nk_pvk_v2.csv
+data/processed/phaseA2/phaseA2_pvk_thickness_scan.csv
+data/processed/phaseB1/phaseB1_rear_bema_scan.csv
+    -> stepA2_1_pvk_uncertainty_ensemble.py (PVK nominal/more/less absorptive ensemble -> thickness 子集传播 -> rear-BEMA 子集传播 -> robustness summary / feature matrix)
+    -> resources/pvk_ensemble/aligned_full_stack_nk_pvk_ens_*.csv
+    -> data/processed/phaseA2_1/*.csv
+    -> results/figures/phaseA2_1/*.png
+    -> results/logs/phaseA2_1/phaseA2_1_pvk_uncertainty_ensemble.md
+
 selected phase outputs
     -> results/report/ (精选 CSV / PNG / Markdown 汇报层)
     -> results/report/phaseA1_2_pvk_surrogate_and_pristine/*
+    -> results/report/phaseA2_1_pvk_uncertainty_ensemble/*
     -> results/report/phaseA2_pvk_thickness_scan/*
     -> results/report/phaseB1_rear_bema_sandbox/*
 ```
@@ -1040,7 +1094,8 @@ selected phase outputs
 15. `stepA1_2_rerun_pristine_with_pvk_v2.py` 进一步验证修复后 `ΔR_stack(749->750)` 与 `ΔR_total(749->750)` 已显著压低，同时后窗 fringe 保持稳定
 16. `stepA2_pvk_thickness_scan.py` 进一步把 repaired pristine baseline 推进为厚度-条纹相位图谱，可直接区分“厚度导致的全局 fringe 漂移”与“界面缺陷导致的局部扰动”
 17. `stepB1_rear_bema_sandbox.py` 则把 rear-only `PVK/C60` intermixing 单独拆成独立机制，得到与 `d_PVK` 可比较的后界面粗糙指纹
-18. 当前脚本链已经具备“文献数字化 / 椭偏报告解析 -> 材料数据库 -> 全栈对齐 `n-k` 表 -> pristine baseline decomposition -> seam forensic audit -> surrogate rebuild -> pristine rerun -> thickness scan -> rear-only BEMA sandbox -> 宏观正交界面指纹字典 -> 双窗联合反演 -> 固定参数理论重建”的前向-反演联合基线
+18. `stepA2_1_pvk_uncertainty_ensemble.py` 则把 `PVK surrogate v2` 的 band-edge 不确定性正式传播到 thickness 与 rear-BEMA 两类机制，用于区分高置信度结构指纹和 surrogate-sensitive 特征
+19. 当前脚本链已经具备“文献数字化 / 椭偏报告解析 -> 材料数据库 -> 全栈对齐 `n-k` 表 -> pristine baseline decomposition -> seam forensic audit -> surrogate rebuild -> pristine rerun -> thickness scan -> rear-only BEMA sandbox -> PVK uncertainty propagation -> 宏观正交界面指纹字典 -> 双窗联合反演 -> 固定参数理论重建”的前向-反演联合基线
 
 ## 6. Key Physical / Numerical Assumptions
 
@@ -1060,6 +1115,15 @@ selected phase outputs
   - 不再允许 `750 nm` 起 `k = 0` 的硬切换
 - Phase A-2 固定 `PVK surrogate v2` 与其余材料参数，仅扫描 `d_PVK`，因此当前厚度灵敏度图谱反映的是“零缺陷微腔光程变化”，不是缺陷调制叠加结果
 - Phase B-1 固定 `PVK surrogate v2` 与名义层厚，仅在 `PVK/C60` 后界面加入 `50/50` solid-solid BEMA，并执行 `PVK/C60` 守恒扣减，因此当前 rear-BEMA 指纹反映的是“后界面 intermixing + 相邻层变薄”的联合机制
+- Phase A-2.1 进一步引入三成员 PVK uncertainty ensemble：
+  - `nominal` 直接沿用 `PVK surrogate v2`
+  - `more_absorptive` 在 `740-850 nm` 增强 `k(λ)` 吸收尾，并做弱耦合 `n(λ)` 上调
+  - `less_absorptive` 在 `740-850 nm` 削弱 `k(λ)` 吸收尾，并做弱耦合 `n(λ)` 下调
+  - 三成员都要求在 `730-900 nm` 保持连续、无新 seam，且不破坏 `850-1100 nm` 的 nominal rear-window 趋势
+- 当前 A-2.1 的 first-pass 传播结果表明：
+  - `d_PVK` 的 rear-window 相位/峰位漂移结论对 surrogate 选择高度稳健
+  - rear-only BEMA 的“局部包络/轻微振幅扰动”结论仍成立，但其幅值量级对 band-edge 先验敏感
+  - 绝对 `R_total(780 nm)` 一类 band-edge 邻域观测量不宜直接作为高置信度结构归因特征
 - `1000-1100 nm` 属于超出原始椭偏测量窗口的模型外推区
 - Phase 04 中 `1100-1500 nm` 的 PVK 折射率不再直接沿用表格，而是基于 `1050-1100 nm` 的真实点二次拟合 Cauchy 尾段后继续外推，且仍强制 `k = 0`
 - 粗糙层采用 `50% PVK + 50% Air` 的 BEMA 有效介质
@@ -1310,33 +1374,33 @@ selected phase outputs
 ## 9. Recent Update Summary
 
 - 更新时间：`2026-04-12`
-- 当前 Phase：`Phase B-1`
+- 当前 Phase：`Phase A-2.1`
 - 本次新增/修改：
-  - 新增 `src/scripts/stepB1_rear_bema_sandbox.py`，建立 rear-only `PVK/C60` BEMA sandbox
-  - 在 `src/core/full_stack_microcavity.py` 中新增 rear-BEMA 前向入口与 `50/50` Bruggeman 有效介质求解
-  - 新增 `data/processed/phaseB1/`、`results/figures/phaseB1/`、`results/logs/phaseB1/` 标准输出口径
-  - 新增 `results/report/phaseB1_rear_bema_sandbox/` 并更新 report 根索引
-  - 更新 `PROJECT_STATE.md`，补充 `Phase B-1` SOP、数据流与机制结论范围
+  - 新增 `src/scripts/stepA2_1_pvk_uncertainty_ensemble.py`，建立三成员 `PVK band-edge uncertainty ensemble`
+  - 新增 `resources/pvk_ensemble/`，保留 `nominal / more_absorptive / less_absorptive` 三套全栈材料表
+  - 新增 `data/processed/phaseA2_1/`、`results/figures/phaseA2_1/`、`results/logs/phaseA2_1/` 标准输出口径
+  - 新增 `results/report/phaseA2_1_pvk_uncertainty_ensemble/` 并更新 report 根索引
+  - 更新 `PROJECT_STATE.md`，补充 `Phase A-2.1` SOP、数据流与稳健性结论范围
 - 已验证结论：
-  - rear-only BEMA 在 `0-30 nm` 范围内只引起约 `1 nm` 级的后窗峰位漂移，主效应不是全局相位变化
-  - rear-only BEMA 的主响应集中在 `650-1100 nm` 的 transition/rear 区间，前窗灵敏度很弱
-  - `R_stack` 对 rear-BEMA 的机制灵敏度仍略高于 `R_total`
-  - rear-only BEMA 与 `d_PVK` 的 `ΔR` 形态不同：前者更像局部包络重塑和轻微振幅变化，后者更像全局 fringe 相位漂移
-  - `d_BEMA,rear = 30 nm` 时 `d_C60,bulk = 0 nm`，说明大 BEMA 区间已进入“强 intermixing + C60 极薄”的极限测试区
+  - 三成员 ensemble 在 `749/750 nm` 附近都保持连续，未重新引入 seam
+  - `d_PVK` 的 rear-window 主敏感窗口与 peak/valley 相位漂移对 surrogate 选择高度稳健，说明厚度机制的核心结构结论不依赖单一 band-edge 先验
+  - rear-only BEMA 的“局部包络/轻微振幅扰动”结论仍成立，但 rear-window 幅值量级对 surrogate 选择存在明显敏感性
+  - `R_stack` 仍是区分 thickness 与 rear-BEMA 机制的更高灵敏度对象；前表面背景会轻度钝化 `R_total` 中的局部机制差异
+  - 绝对 band-edge 观测量，尤其是 `780 nm` 附近的 `R_total`，不适合在当前阶段直接用作高置信度结构归因特征
 - 仍待验证：
-  - `PVK uncertainty ensemble` 仍需建立，以量化 surrogate 不确定性对 thickness / rear-BEMA 指纹的传播
   - `Phase B-2 front-only BEMA` 尚未建立，当前还不能比较前后界面粗糙的差异
+  - `air-gap only` 尚未与 uncertainty-aware thickness / rear-BEMA 指纹做统一对照
   - `constant-glass vs dispersive-glass` 与参数化 band-edge dielectric model 仍未展开
 
 ## 10. Recommended Next Actions
 
 建议后续优先处理以下事项：
 
-1. 回查 `Ag_mirro-500us` 与 `Ag_mirro-10ms` 的归一化失配来源，优先检查仪器门控、导出流程与实际曝光标签
-2. 基于 `phase07_fit_summary.csv` 的贴边结果，重新评估 `ito_alpha`、`pvk_b_scale` 与 `niox_k` 的边界和先验
-3. 判断 `withAg / withoutAg` 是否应拆分为两套参数边界或固定参数策略
-4. 建立 `data/raw/phase06/` 或稳定数据索引，把 OneDrive 外部路径纳入规范化入口
-5. 继续把 `step01`/`step01b`/`step02` 中可复用逻辑下沉到 `src/core/`
+1. 优先进入 `Phase B-2 front-only BEMA`，在 uncertainty-aware 背景下建立与 rear-only BEMA 可直接比较的前界面粗糙指纹
+2. 在 front/rear BEMA 都完成后，再统一评估 `air-gap only` 是否提供与 BEMA 正交的新机制指纹
+3. 回查 `Ag_mirro-500us` 与 `Ag_mirro-10ms` 的归一化失配来源，优先检查仪器门控、导出流程与实际曝光标签
+4. 基于 `phase07_fit_summary.csv` 的贴边结果，重新评估 `ito_alpha`、`pvk_b_scale` 与 `niox_k` 的边界和先验
+5. 建立 `data/raw/phase06/` 或稳定数据索引，把 OneDrive 外部路径纳入规范化入口
 
 ## 11. Update Rule
 

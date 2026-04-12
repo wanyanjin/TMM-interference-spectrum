@@ -41,3 +41,12 @@
   - `R / ΔR` 热力图、代表曲线、peak/valley tracking
   - rear-BEMA 与 `d_PVK` 指纹的正交对照图
   - 可直接用于汇报的阶段总结文档 `PHASE_B1_REPORT.md`
+
+### `phaseA2_1_pvk_uncertainty_ensemble/`
+
+- 主题：`PVK surrogate v2` 的 band-edge uncertainty ensemble 及其对 thickness / rear-BEMA 机制的传播
+- 主要内容：
+  - ensemble manifest 与局部 `n/k/eps` 对照
+  - thickness 与 rear-BEMA 的 ensemble robustness summary
+  - “robust features vs surrogate-sensitive features” 总结矩阵
+  - 可直接用于汇报的阶段总结文档 `PHASE_A2_1_REPORT.md`
