@@ -5,8 +5,8 @@
 ## 1. Current Snapshot
 
 - 更新时间：2026-04-12
-- 当前判断 Phase：`Phase A-1.2`
-- 阶段定义：`重建 PVK surrogate v2 并重跑 pristine baseline，消除 740-780 nm band-edge seam artifact，同时保持后窗微腔 fringe 的可解释零缺陷参考谱`
+- 当前判断 Phase：`Phase A-2`
+- 阶段定义：`在 repaired PVK surrogate v2 上扫描 d_PVK 对 pristine baseline 的调制，并建立 results/report 汇报资产层`
 - 当前可用能力：
   - 已有 `step01_absolute_calibration.py`，可将样品与银镜原始计数转换为绝对反射率
   - 已有 `step01b_cauchy_extrapolation.py`，可基于 [LIT-0001] 的 `ITO/CsFAPI` 数字化折射率曲线生成 `750-1100 nm` 的 CsFAPI 扩展 `n-k` 中间件
@@ -34,6 +34,8 @@
   - 已新增 `stepA1_1_pvk_seam_audit.py`，可围绕 `749/750 nm` 对 PVK seam 做局部 n-k/eps/导数审计、上游三源追溯、简化堆栈敏感性比较、Ag 终端边界对照与代码路径核查
   - 已新增 `stepA1_2_build_pvk_surrogate_v2.py`，可在不覆盖 v1 材料表的前提下，对 PVK 的 `740-780 nm` band-edge 区域执行局部 surrogate rebuild，并输出 `aligned_full_stack_nk_pvk_v2.csv`、候选过渡带指标表与 v1/v2 QA 图
   - 已新增 `stepA1_2_rerun_pristine_with_pvk_v2.py`，可复用 Phase A-1 pristine decomposition 口径，用 `PVK surrogate v2` 重跑 `R_front / R_stack / R_total`，并输出 v1/v2 全谱与局部对照
+  - 已新增 `stepA2_pvk_thickness_scan.py`，可基于 `aligned_full_stack_nk_pvk_v2.csv` 扫描 `d_PVK = 500-900 nm`、输出 `R_stack / R_total / ΔR` 热力图、peak/valley tracking 与特征汇总表
+  - 已建立 `results/report/` 汇报资产层，并补齐 `Phase A-1.2` 与 `Phase A-2` 的精选 CSV / PNG / Markdown 报告
   - 已产出标准中间文件 `data/processed/target_reflectance.csv` 与 `data/processed/CsFAPI_nk_extended.csv`
   - 已完成 Phase 02 形状畸变诊断，当前证据指向：ITO 近红外吸收失真是长波端托平与整体形状失配的主导因素
   - 已完成 Phase 04 空气隙前向预测，当前基线下 `d_air = 2 nm` 与 `5 nm` 的 `max(|ΔR|)` 分别约为 `0.538%` 与 `1.347%`，均高于 `0.2%` 典型噪声线
@@ -51,8 +53,8 @@
   - 尚未将 Phase 06 批量 HDR 输入规范化迁移到 `data/raw/phase06/`
   - Phase 07 当前两例真实样本都存在参数贴边，说明双窗架构已跑通，但材料先验与边界设定仍需继续收敛
   - Phase 08 目前仅建立“固定参数前向重建”链路，尚未引入新的物理先验、层结构变体扫描或跨样本共享参数约束
-  - Phase A-1.2 已完成 first-pass surrogate rebuild，但尚未扩展到 `PVK uncertainty ensemble` 或参数化介电函数重建
-  - Phase A-1 的 pristine baseline 已修复首要 seam artifact，但尚未展开 `PVK thickness scan` 或 `constant-glass vs dispersive-glass` 灵敏度分析
+  - `Phase A-2` 已完成 first-pass `d_PVK` thickness scan，但尚未将 surrogate 不确定性传播到厚度图谱
+  - `PVK uncertainty ensemble`、`constant-glass vs dispersive-glass` 与参数化 band-edge dielectric model 仍未展开
 
 ## 2. Current Directory Tree
 
@@ -89,7 +91,8 @@ TMM-interference-spectrum/
 │       ├── stepA1_pristine_baseline.py
 │       ├── stepA1_1_pvk_seam_audit.py
 │       ├── stepA1_2_build_pvk_surrogate_v2.py
-│       └── stepA1_2_rerun_pristine_with_pvk_v2.py
+│       ├── stepA1_2_rerun_pristine_with_pvk_v2.py
+│       └── stepA2_pvk_thickness_scan.py
 ├── data/
 │   └── processed/
 │       ├── CsFAPI_nk_extended.csv
@@ -102,6 +105,7 @@ TMM-interference-spectrum/
 │       ├── phase08/
 │       ├── phaseA1/
 │       ├── phaseA1_2/
+│       ├── phaseA2/
 │       ├── phaseA1_seam_audit/
 │       └── target_reflectance.csv
 ├── resources/
@@ -118,6 +122,7 @@ TMM-interference-spectrum/
 │   └── MinerU-0.13.1-arm64.dmg
 ├── results/
 │   ├── figures/
+│   │   ├── phaseA2/
 │   │   ├── phaseA1_2/
 │   │   ├── phaseA1_seam_audit/
 │   │   ├── phaseA1/
@@ -143,6 +148,7 @@ TMM-interference-spectrum/
 │   │   └── tmm_inversion_result.png
 │   └── logs/
 │       ├── phase03_batch_fit/
+│       ├── phaseA2/
 │       ├── phaseA1_2/
 │       ├── phaseA1_seam_audit/
 │       ├── phaseA1/
@@ -155,7 +161,12 @@ TMM-interference-spectrum/
 │       ├── phase07_orthogonal_radar_diagnostic.md
 │       ├── phase02_shape_diagnostic_report.md
 │       ├── phase02_fig2_fapi_digitization_notes.md
-│       └── phase02_fig3_csfapi_digitization_notes.md
+│       ├── phase02_fig3_csfapi_digitization_notes.md
+│   └── report/
+│       ├── README.md
+│       ├── report_manifest.csv
+│       ├── phaseA1_2_pvk_surrogate_and_pristine/
+│       └── phaseA2_pvk_thickness_scan/
 ├── test_data/
 │   ├── sample.csv
 │   ├── glass-1mm.csv
@@ -724,6 +735,33 @@ TMM-interference-spectrum/
 - `results/figures/phaseA1_2/phaseA1_2_pristine_v1_vs_v2_full_spectrum.png`
 - `results/logs/phaseA1_2/phaseA1_2_pvk_surrogate_rebuild.md`
 
+### 4.19 `stepA2_pvk_thickness_scan.py`
+
+- 文件位置：`src/scripts/stepA2_pvk_thickness_scan.py`
+- 主要职责：基于 `PVK surrogate v2` 扫描 `d_PVK` 对 pristine baseline 的调制规律，建立厚度-条纹相位-谱形图谱
+
+输入：
+- `resources/aligned_full_stack_nk_pvk_v2.csv`
+- `src/scripts/stepA1_pristine_baseline.py`
+
+核心处理流程：
+- 固定 `Glass / ITO / NiOx / SAM / C60 / Ag` 与常数玻璃口径，仅扫描 `d_PVK`
+- 以 `500-900 nm`、`5 nm` 步长重算 `R_stack / R_total`
+- 相对 `700 nm` 参考厚度构造 `ΔR_stack` 与 `ΔR_total`
+- 在 `810-1100 nm` 后窗提取主峰、主谷、峰谷间距与代表波长反射率
+- 输出 `R_stack / R_total / ΔR` 热力图、peak/valley tracking 图和代表厚度曲线图
+
+输出：
+- `data/processed/phaseA2/phaseA2_pvk_thickness_scan.csv`
+- `data/processed/phaseA2/phaseA2_pvk_feature_summary.csv`
+- `results/figures/phaseA2/phaseA2_R_stack_heatmap.png`
+- `results/figures/phaseA2/phaseA2_R_total_heatmap.png`
+- `results/figures/phaseA2/phaseA2_deltaR_stack_vs_700nm_heatmap.png`
+- `results/figures/phaseA2/phaseA2_deltaR_total_vs_700nm_heatmap.png`
+- `results/figures/phaseA2/phaseA2_peak_valley_tracking.png`
+- `results/figures/phaseA2/phaseA2_selected_thickness_curves.png`
+- `results/logs/phaseA2/phaseA2_pvk_thickness_scan.md`
+
 ## 5. Data Flow
 
 当前项目主数据流如下：
@@ -918,6 +956,18 @@ data/processed/phaseA1/phaseA1_pristine_baseline.csv
     -> data/processed/phaseA1_2/phaseA1_2_pristine_baseline.csv
     -> results/figures/phaseA1_2/phaseA1_2_pristine_*.png
     -> results/logs/phaseA1_2/phaseA1_2_pvk_surrogate_rebuild.md
+
+resources/aligned_full_stack_nk_pvk_v2.csv
+    -> stepA2_pvk_thickness_scan.py (扫描 d_PVK -> pristine baseline rerun -> rear-window peak/valley tracking -> R/ΔR 热力图)
+    -> data/processed/phaseA2/phaseA2_pvk_thickness_scan.csv
+    -> data/processed/phaseA2/phaseA2_pvk_feature_summary.csv
+    -> results/figures/phaseA2/phaseA2_*.png
+    -> results/logs/phaseA2/phaseA2_pvk_thickness_scan.md
+
+selected phase outputs
+    -> results/report/ (精选 CSV / PNG / Markdown 汇报层)
+    -> results/report/phaseA1_2_pvk_surrogate_and_pristine/*
+    -> results/report/phaseA2_pvk_thickness_scan/*
 ```
 
 可按 SOP 理解为：
@@ -937,7 +987,8 @@ data/processed/phaseA1/phaseA1_pristine_baseline.csv
 13. `stepA1_1_pvk_seam_audit.py` 则把 Phase A-1 中暴露的 `749/750 nm` 台阶追溯到 PVK seam，本质上为后续 repair 提供证据链而不是直接修复
 14. `stepA1_2_build_pvk_surrogate_v2.py` 在材料层重建 `PVK surrogate v2`，把 `749/750 nm` 的跳点降级为连续 band-edge 过渡
 15. `stepA1_2_rerun_pristine_with_pvk_v2.py` 进一步验证修复后 `ΔR_stack(749->750)` 与 `ΔR_total(749->750)` 已显著压低，同时后窗 fringe 保持稳定
-16. 当前脚本链已经具备“文献数字化 / 椭偏报告解析 -> 材料数据库 -> 全栈对齐 `n-k` 表 -> pristine baseline decomposition -> seam forensic audit -> surrogate rebuild -> pristine rerun -> 宏观正交界面指纹字典 -> 双窗联合反演 -> 固定参数理论重建”的前向-反演联合基线
+16. `stepA2_pvk_thickness_scan.py` 进一步把 repaired pristine baseline 推进为厚度-条纹相位图谱，可直接区分“厚度导致的全局 fringe 漂移”与“界面缺陷导致的局部扰动”
+17. 当前脚本链已经具备“文献数字化 / 椭偏报告解析 -> 材料数据库 -> 全栈对齐 `n-k` 表 -> pristine baseline decomposition -> seam forensic audit -> surrogate rebuild -> pristine rerun -> thickness scan -> 宏观正交界面指纹字典 -> 双窗联合反演 -> 固定参数理论重建”的前向-反演联合基线
 
 ## 6. Key Physical / Numerical Assumptions
 
@@ -955,6 +1006,7 @@ data/processed/phaseA1/phaseA1_pristine_baseline.csv
   - 主推荐 transition zone 为 `740-780 nm`
   - `n` 用 `smoothstep` 桥接到 long-wave 趋势，`k` 用 `smoothstep + cosine-tail` 衰减到透明尾
   - 不再允许 `750 nm` 起 `k = 0` 的硬切换
+- Phase A-2 固定 `PVK surrogate v2` 与其余材料参数，仅扫描 `d_PVK`，因此当前厚度灵敏度图谱反映的是“零缺陷微腔光程变化”，不是缺陷调制叠加结果
 - `1000-1100 nm` 属于超出原始椭偏测量窗口的模型外推区
 - Phase 04 中 `1100-1500 nm` 的 PVK 折射率不再直接沿用表格，而是基于 `1050-1100 nm` 的真实点二次拟合 Cauchy 尾段后继续外推，且仍强制 `k = 0`
 - 粗糙层采用 `50% PVK + 50% Air` 的 BEMA 有效介质
@@ -1205,24 +1257,23 @@ data/processed/phaseA1/phaseA1_pristine_baseline.csv
 ## 9. Recent Update Summary
 
 - 更新时间：`2026-04-12`
-- 当前 Phase：`Phase A-1.2`
+- 当前 Phase：`Phase A-2`
 - 本次新增/修改：
-  - 新增 `src/scripts/stepA1_2_build_pvk_surrogate_v2.py`，建立 `PVK surrogate v2` 的局部 band-edge 重建流程
-  - 新增 `src/scripts/stepA1_2_rerun_pristine_with_pvk_v2.py`，在不改几何和其他材料的前提下重跑 pristine baseline
-  - 新增 `resources/aligned_full_stack_nk_pvk_v2.csv` 与 `data/processed/phaseA1_2/`、`results/figures/phaseA1_2/`、`results/logs/phaseA1_2/` 标准输出口径
-  - 更新 `PROJECT_STATE.md`，补充 `Phase A-1.2` 的 SOP、数据流与 surrogate repair 结论范围
+  - 更新 `AGENTS.md`，正式加入 `results/report/` 汇报资产持久化规则
+  - 新增 `src/scripts/stepA2_pvk_thickness_scan.py`，建立 `d_PVK = 500-900 nm` 的 pristine thickness scan
+  - 新增 `data/processed/phaseA2/`、`results/figures/phaseA2/`、`results/logs/phaseA2/` 标准输出口径
+  - 新增 `results/report/README.md`、`results/report/report_manifest.csv` 以及 `Phase A-1.2 / Phase A-2` 两套汇报友好资产目录
+  - 更新 `PROJECT_STATE.md`，补充 `Phase A-2` SOP、数据流与 report 层
 - 已验证结论：
-  - `PVK surrogate v2` 已把主推荐 transition zone 锁定为 `740-780 nm`
-  - `749->750 nm` 的 seam 步长已显著压低：
-    - `ΔR_stack`: `+0.113042 -> +0.001713`
-    - `ΔR_total`: `+0.107011 -> +0.001580`
-  - `Δn`、`Δk` 与 `Δeps2` 也已同步压低，`740-780 nm` 导数与二阶差分尖峰明显减弱
-  - `750 nm` 附近的原始台阶已降级为连续但较陡的 band-edge 过渡
-  - `810-1100 nm` 的后窗微腔 fringe 在当前指标下保持不变
+  - `Phase A-1.2` 的 repaired baseline 已被同步整理为可直接汇报的 report 资产
+  - `Phase A-2` 已确认后窗是 `d_PVK` 的主敏感窗口，最强响应集中在 `1098-1100 nm`
+  - `R_stack` 的厚度灵敏度略高于 `R_total`，说明固定前表面背景会弱化部分厚度特征
+  - 后窗对厚度存在清晰系统漂移和局部近线性区间，但将 `500-900 nm` 全范围压缩为单一主峰/主谷轨迹时会出现 mode switching
+  - 厚度变化更像“全局微腔光程变化”，而非局部缺陷式谱形扭曲
 - 仍待验证：
-  - 后续仍需决定是否进入 `d_PVK thickness scan`、`PVK uncertainty ensemble` 或参数化 band-edge dielectric model
-  - `constant-glass vs dispersive-glass` 仍未展开
-  - 当前真实样本的多参数贴边与 HDR 失配问题不属于本轮 seam audit 范围
+  - `PVK uncertainty ensemble` 仍需建立，以量化 surrogate 不确定性对 thickness scan 结论的传播
+  - `constant-glass vs dispersive-glass` 与参数化 band-edge dielectric model 仍未展开
+  - 当前真实样本的多参数贴边与 HDR 失配问题不属于本轮理论基线任务范围
 
 ## 10. Recommended Next Actions
 

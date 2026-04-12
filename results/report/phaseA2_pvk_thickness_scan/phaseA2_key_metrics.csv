@@ -1,0 +1,11 @@
+﻿metric,value
+d_PVK_range_nm,500-900
+d_PVK_step_nm,5
+reference_d_PVK_nm,700
+n_scan_points,81
+R_total_range_at_850nm_pct,21.431
+R_total_range_at_900nm_pct,22.926
+R_total_range_at_950nm_pct,25.284
+R_total_range_at_1000nm_pct,27.648
+R_total_range_at_1050nm_pct,29.833
+R_total_range_at_1100nm_pct,31.694
