@@ -50,3 +50,12 @@
   - thickness 与 rear-BEMA 的 ensemble robustness summary
   - “robust features vs surrogate-sensitive features” 总结矩阵
   - 可直接用于汇报的阶段总结文档 `PHASE_A2_1_REPORT.md`
+
+### `phaseB2_front_bema_sandbox/`
+
+- 主题：front-only `NiOx/PVK` proxy BEMA 前向模拟
+- 主要内容：
+  - front-BEMA 主扫描表与特征汇总表
+  - 前窗/过渡区重点图、热力图与代表曲线
+  - front vs rear vs thickness 的正交对照图
+  - uncertainty spot-check 与阶段总结文档 `PHASE_B2_REPORT.md`

@@ -1,0 +1,11 @@
+﻿metric,value
+bema_fraction,0.50
+d_BEMA_range_nm,0-30
+d_BEMA_step_nm,1
+sam_fixed_nm,5
+niox_fixed_nm,45
+max_front_mean_deltaR_total_400_650_pct,1.164
+max_transition_abs_deltaR_total_650_810_pct,19.256
+max_rear_abs_deltaR_total_810_1100_pct,18.690
+robust_feature_count,1
+sensitive_feature_count,3
