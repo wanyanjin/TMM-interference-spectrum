@@ -91,11 +91,14 @@ def configure_style() -> None:
             "axes.labelcolor": "#222222",
             "axes.titlesize": 18,
             "axes.titleweight": "bold",
+            "axes.labelweight": "bold",
             "axes.labelsize": 13,
             "xtick.labelsize": 11,
             "ytick.labelsize": 11,
             "legend.fontsize": 10,
-            "font.family": "DejaVu Sans",
+            "font.family": "serif",
+            "font.serif": ["Times New Roman", "Times", "Nimbus Roman", "DejaVu Serif"],
+            "font.weight": "bold",
             "grid.color": "#bcbcbc",
             "grid.alpha": 0.25,
             "grid.linestyle": "--",
@@ -138,16 +141,17 @@ def apply_window_background(ax: plt.Axes) -> None:
             transform=ax.get_xaxis_transform(),
             ha="center",
             va="top",
-            fontsize=10,
+            fontsize=11,
+            fontweight="bold",
             color="#555555",
         )
 
 
 def finalize_axes(ax: plt.Axes, ylabel: str, title: str) -> None:
     ax.set_xlim(400.0, 1100.0)
-    ax.set_xlabel("Wavelength (nm)")
-    ax.set_ylabel(ylabel)
-    ax.set_title(title)
+    ax.set_xlabel("Wavelength (nm)", fontweight="bold")
+    ax.set_ylabel(ylabel, fontweight="bold")
+    ax.set_title(title, fontweight="bold")
     ax.grid(True)
 
 
@@ -217,7 +221,11 @@ def render_selected_curves(
             label=f"{value:g} nm",
         )
     finalize_axes(ax, "R_total (%)", title)
-    ax.legend(title=legend_title, loc="best", ncol=min(len(selected_values), 3))
+    legend = ax.legend(title=legend_title, loc="best", ncol=min(len(selected_values), 3))
+    if legend is not None:
+        plt.setp(legend.get_texts(), fontweight="bold")
+        if legend.get_title() is not None:
+            legend.get_title().set_fontweight("bold")
     fig.tight_layout()
     fig.savefig(output_path, dpi=320, bbox_inches="tight")
     plt.close(fig)
@@ -257,14 +265,14 @@ def render_structure_schematic(output_path: Path) -> None:
     for (label, color), width in zip(layers, widths):
         rect = Rectangle((x, 0.4), width, 1.4, facecolor=color, edgecolor="#666666", linewidth=1.1)
         ax.add_patch(rect)
-        ax.text(x + width / 2.0, 1.1, label, ha="center", va="center", fontsize=12)
+        ax.text(x + width / 2.0, 1.1, label, ha="center", va="center", fontsize=13, fontweight="bold")
         x += width
     arrow = FancyArrowPatch((0.2, 2.15), (x - 0.2, 2.15), arrowstyle="->", mutation_scale=16, linewidth=1.8, color="#444444")
     ax.add_patch(arrow)
-    ax.text(0.1, 2.35, "Incident light", fontsize=12, ha="left", va="bottom")
-    ax.text(1.0, 0.15, "glass front surface = incoherent", fontsize=11, color="#444444")
-    ax.text(4.2, 0.15, "thin-film stack = coherent", fontsize=11, color="#444444")
-    ax.text(6.3, 2.35, "observable = R_total", fontsize=12, color="#005b96", ha="left")
+    ax.text(0.1, 2.35, "Incident light", fontsize=13, fontweight="bold", ha="left", va="bottom")
+    ax.text(1.0, 0.15, "glass front surface = incoherent", fontsize=11.5, fontweight="bold", color="#444444")
+    ax.text(4.2, 0.15, "thin-film stack = coherent", fontsize=11.5, fontweight="bold", color="#444444")
+    ax.text(6.3, 2.35, "observable = R_total", fontsize=13, fontweight="bold", color="#005b96", ha="left")
     ax.set_xlim(-0.1, x + 0.1)
     ax.set_ylim(0.0, 2.7)
     ax.axis("off")
@@ -282,10 +290,10 @@ def save_structure_pair(fig: plt.Figure, png_path: Path, svg_path: Path) -> None
 def draw_common_structure_header(ax: plt.Axes, total_width: float) -> None:
     arrow = FancyArrowPatch((0.2, 2.15), (total_width - 0.2, 2.15), arrowstyle="->", mutation_scale=16, linewidth=1.8, color="#444444")
     ax.add_patch(arrow)
-    ax.text(0.1, 2.35, "Incident light", fontsize=12, ha="left", va="bottom")
-    ax.text(total_width - 0.1, 2.35, "observable = R_total", fontsize=12, color="#005b96", ha="right", va="bottom")
-    ax.text(0.95, 0.15, "glass front surface = incoherent", fontsize=11, color="#444444", ha="left")
-    ax.text(total_width * 0.48, 0.15, "thin-film stack = coherent", fontsize=11, color="#444444", ha="left")
+    ax.text(0.1, 2.35, "Incident light", fontsize=13, fontweight="bold", ha="left", va="bottom")
+    ax.text(total_width - 0.1, 2.35, "observable = R_total", fontsize=13, fontweight="bold", color="#005b96", ha="right", va="bottom")
+    ax.text(0.95, 0.15, "glass front surface = incoherent", fontsize=11.5, fontweight="bold", color="#444444", ha="left")
+    ax.text(total_width * 0.48, 0.15, "thin-film stack = coherent", fontsize=11.5, fontweight="bold", color="#444444", ha="left")
 
 
 def render_mechanism_structure(
@@ -364,12 +372,12 @@ def render_mechanism_structure(
         label = str(layer["label"])
         thickness = str(layer["thickness"])
         text = label if not thickness else f"{label}\n{thickness}"
-        ax.text(x + width / 2.0, 1.11, text, ha="center", va="center", fontsize=11)
+        ax.text(x + width / 2.0, 1.11, text, ha="center", va="center", fontsize=12.5, fontweight="bold")
         centers[layer_id] = (x + width / 2.0, x, x + width)
         x += width
 
     draw_common_structure_header(ax, x)
-    ax.text(x * 0.5, 1.97, footer_note, fontsize=11, color="#666666", ha="center", va="center")
+    ax.text(x * 0.5, 1.97, footer_note, fontsize=12, fontweight="bold", color="#666666", ha="center", va="center")
     if annotation_target is not None:
         target_id, label_text, color = annotation_target
         cx, x0, x1 = centers[target_id]
@@ -379,11 +387,12 @@ def render_mechanism_structure(
             xytext=(cx, 2.55),
             ha="center",
             va="bottom",
-            fontsize=11,
+            fontsize=14.5,
+            fontweight="bold",
             color=color,
-            arrowprops={"arrowstyle": "-|>", "color": color, "lw": 1.6},
+            arrowprops={"arrowstyle": "-|>", "color": color, "lw": 1.9},
         )
-    ax.text(x * 0.5, -0.02, cue_text, fontsize=10.5, color=note_color, ha="center", va="top")
+    ax.text(x * 0.5, -0.02, cue_text, fontsize=12, fontweight="bold", color=note_color, ha="center", va="top")
     ax.set_xlim(-0.1, x + 0.1)
     ax.set_ylim(-0.18, 2.85)
     ax.axis("off")
@@ -433,9 +442,9 @@ def render_structure_overview(png_path: Path, svg_path: Path) -> None:
             x += width
         if highlights:
             hid = next(iter(highlights))
-            ax.text(centers[hid], 1.48, badge, ha="center", va="bottom", fontsize=9.5, color=color)
+            ax.text(centers[hid], 1.48, badge, ha="center", va="bottom", fontsize=10.5, fontweight="bold", color=color)
             ax.plot([centers[hid], centers[hid]], [1.28, 1.44], color=color, linewidth=1.3)
-        ax.set_title(title, fontsize=12, pad=8)
+        ax.set_title(title, fontsize=12.5, fontweight="bold", pad=8)
         ax.set_xlim(-0.05, x + 0.05)
         ax.set_ylim(0.12, 1.72)
         ax.axis("off")
@@ -463,7 +472,7 @@ def render_summary_matrix(output_path: Path) -> None:
         colWidths=[0.14, 0.19, 0.21, 0.46],
     )
     table.auto_set_font_size(False)
-    table.set_fontsize(11)
+    table.set_fontsize(11.5)
     table.scale(1, 2.0)
     for (row, col), cell in table.get_celld().items():
         cell.set_edgecolor("#777777")
@@ -483,15 +492,15 @@ def render_appendix_local_zoom(compare_frame: pd.DataFrame, output_path: Path) -
     axes[0].plot(wl, compare_frame["k_v1"].to_numpy(dtype=float), color="#b03a2e", linewidth=2.0, label="v1")
     axes[0].plot(wl, compare_frame["k_v2"].to_numpy(dtype=float), color="#005b96", linewidth=2.0, label="v2")
     axes[0].axvline(750.0, color="#666666", linestyle=":", linewidth=1.0)
-    axes[0].set_ylabel("k")
-    axes[0].set_title("PVK band-edge surrogate fix near the 749/750 nm seam")
+    axes[0].set_ylabel("k", fontweight="bold")
+    axes[0].set_title("PVK band-edge surrogate fix near the 749/750 nm seam", fontweight="bold")
     axes[0].grid(True)
     axes[0].legend(loc="best")
     axes[1].plot(wl, compare_frame["eps2_v1"].to_numpy(dtype=float), color="#b03a2e", linewidth=2.0, label="eps2 v1")
     axes[1].plot(wl, compare_frame["eps2_v2"].to_numpy(dtype=float), color="#005b96", linewidth=2.0, label="eps2 v2")
     axes[1].axvline(750.0, color="#666666", linestyle=":", linewidth=1.0)
-    axes[1].set_xlabel("Wavelength (nm)")
-    axes[1].set_ylabel("eps2")
+    axes[1].set_xlabel("Wavelength (nm)", fontweight="bold")
+    axes[1].set_ylabel("eps2", fontweight="bold")
     axes[1].grid(True)
     axes[1].legend(loc="best")
     fig.savefig(output_path, dpi=320, bbox_inches="tight")
