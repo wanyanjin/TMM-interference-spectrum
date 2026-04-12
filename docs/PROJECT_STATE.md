@@ -31,6 +31,7 @@
   - 已新增 `step07_dual_window_inversion.py`，可优先读取原始多曝光目录并复用 Phase 06 HDR 逻辑，或直接消费 `*_hdr_curves.csv`，统一落盘为 `fit_input -> fit_summary / fit_curve / optimizer_log / 4 张诊断图`
   - 已新增 `step08_theoretical_tmm_modeling.py`，可读取 `phase07_fit_summary.csv` 与对应 `fit_input`，冻结 Phase 07 最优参数并重建理论反射率、前表面散射因子和后窗 z-score 对比，统一落盘为 `phase08_theory_curve / phase08_theory_summary / phase08_source_manifest / theory_vs_measured 图`
   - 已新增 `stepA1_pristine_baseline.py`，可严格基于 `aligned_full_stack_nk.csv` 和常数玻璃 `n=1.515, k=0` 生成 `R_front / R_stack / R_total` 的 pristine baseline decomposition，并输出三曲线图、三区图与标准日志
+  - 已新增 `stepA1_1_pvk_seam_audit.py`，可围绕 `749/750 nm` 对 PVK seam 做局部 n-k/eps/导数审计、上游三源追溯、简化堆栈敏感性比较、Ag 终端边界对照与代码路径核查
   - 已产出标准中间文件 `data/processed/target_reflectance.csv` 与 `data/processed/CsFAPI_nk_extended.csv`
   - 已完成 Phase 02 形状畸变诊断，当前证据指向：ITO 近红外吸收失真是长波端托平与整体形状失配的主导因素
   - 已完成 Phase 04 空气隙前向预测，当前基线下 `d_air = 2 nm` 与 `5 nm` 的 `max(|ΔR|)` 分别约为 `0.538%` 与 `1.347%`，均高于 `0.2%` 典型噪声线
@@ -49,6 +50,7 @@
   - Phase 07 当前两例真实样本都存在参数贴边，说明双窗架构已跑通，但材料先验与边界设定仍需继续收敛
   - Phase 08 目前仅建立“固定参数前向重建”链路，尚未引入新的物理先验、层结构变体扫描或跨样本共享参数约束
   - Phase A-1 的 pristine baseline 只建立零缺陷参考谱，尚未展开 `PVK thickness scan` 或 `constant-glass vs dispersive-glass` 灵敏度分析
+  - Phase A-1.1 已完成 seam 定位，但尚未实施任何 blend-zone repair 或 tail refit
 
 ## 2. Current Directory Tree
 
@@ -82,7 +84,8 @@ TMM-interference-spectrum/
 │       ├── step07_dual_window_inversion.py
 │       ├── step07_orthogonal_radar_and_baseline.py
 │       ├── step08_theoretical_tmm_modeling.py
-│       └── stepA1_pristine_baseline.py
+│       ├── stepA1_pristine_baseline.py
+│       └── stepA1_1_pvk_seam_audit.py
 ├── data/
 │   └── processed/
 │       ├── CsFAPI_nk_extended.csv
@@ -94,6 +97,7 @@ TMM-interference-spectrum/
 │       ├── phase07/
 │       ├── phase08/
 │       ├── phaseA1/
+│       ├── phaseA1_seam_audit/
 │       └── target_reflectance.csv
 ├── resources/
 │   ├── digitized/
@@ -108,6 +112,7 @@ TMM-interference-spectrum/
 │   └── MinerU-0.13.1-arm64.dmg
 ├── results/
 │   ├── figures/
+│   │   ├── phaseA1_seam_audit/
 │   │   ├── phaseA1/
 │   │   ├── phase08/
 │   │   ├── phase07/
@@ -131,6 +136,7 @@ TMM-interference-spectrum/
 │   │   └── tmm_inversion_result.png
 │   └── logs/
 │       ├── phase03_batch_fit/
+│       ├── phaseA1_seam_audit/
 │       ├── phaseA1/
 │       ├── phase08/
 │       ├── phase07/
@@ -628,6 +634,34 @@ TMM-interference-spectrum/
 - `results/figures/phaseA1/phaseA1_pristine_3zones.png`
 - `results/logs/phaseA1/phaseA1_pristine_baseline.md`
 
+### 4.16 `stepA1_1_pvk_seam_audit.py`
+
+- 文件位置：`src/scripts/stepA1_1_pvk_seam_audit.py`
+- 核心依赖：`src/core/full_stack_microcavity.py`
+- 主要职责：对 `749/750 nm` 附近的 PVK seam 做法医式审计，确认接缝来源、结构放大链路与边界条件影响
+
+输入：
+- `resources/aligned_full_stack_nk.csv`
+- `data/processed/phaseA1/phaseA1_pristine_baseline.csv`
+- `data/processed/CsFAPI_nk_extended.csv`
+- `resources/digitized/phase02_fig3_csfapi_optical_constants_digitized.csv`
+- `src/scripts/step05c_build_aligned_nk_stack.py`
+
+核心处理流程：
+- 抽取 `730-770 nm` 的 `n_PVK / k_PVK / eps1 / eps2` 与一阶导数
+- 对照 digitized / extended / aligned 三份 PVK 数据，定位 seam 的引入步骤
+- 比较 `Glass/PVK/Air`、`Glass/ITO/NiOx/SAM/PVK/Air` 与完整 stack 的局部反射率，判断 seam 是否被层序放大
+- 比较 `finite Ag + Air exit` 与 `semi-infinite Ag`，判断 Ag 终端是否是重要放大器
+- 核查 Phase A-1 与全栈主链路是否存在插值、层序或边界条件 bug
+
+输出：
+- `data/processed/phaseA1_seam_audit/pvk_seam_local_audit.csv`
+- `data/processed/phaseA1_seam_audit/pvk_source_comparison.csv`
+- `data/processed/phaseA1_seam_audit/seam_stack_sensitivity.csv`
+- `data/processed/phaseA1_seam_audit/seam_ag_boundary_sensitivity.csv`
+- `results/figures/phaseA1_seam_audit/*.png`
+- `results/logs/phaseA1_seam_audit/phaseA1_seam_audit.md`
+
 ## 5. Data Flow
 
 当前项目主数据流如下：
@@ -794,6 +828,16 @@ resources/aligned_full_stack_nk.csv
     -> results/figures/phaseA1/phaseA1_pristine_decomposition.png
     -> results/figures/phaseA1/phaseA1_pristine_3zones.png
     -> results/logs/phaseA1/phaseA1_pristine_baseline.md
+
+resources/aligned_full_stack_nk.csv
+data/processed/phaseA1/phaseA1_pristine_baseline.csv
+data/processed/CsFAPI_nk_extended.csv
+resources/digitized/phase02_fig3_csfapi_optical_constants_digitized.csv
+src/scripts/step05c_build_aligned_nk_stack.py
+    -> stepA1_1_pvk_seam_audit.py (PVK seam 局部法医审计 -> 三源追溯 -> 堆栈放大比较 -> Ag 边界对照 -> 代码级排查)
+    -> data/processed/phaseA1_seam_audit/*.csv
+    -> results/figures/phaseA1_seam_audit/*.png
+    -> results/logs/phaseA1_seam_audit/phaseA1_seam_audit.md
 ```
 
 可按 SOP 理解为：
@@ -810,7 +854,8 @@ resources/aligned_full_stack_nk.csv
 10. `step07_dual_window_inversion.py` 则把 `Phase 06 HDR`、`Phase 05c 对齐 n-k` 和 `Phase 07 双窗反演` 接成当前主干闭环，能够直接把 `hdr_curves` 样本转为标准化拟合输入、参数表、逐波长拟合表、优化日志和诊断图
 11. `step08_theoretical_tmm_modeling.py` 在不新增拟合自由度的前提下，把 `Phase 07` 的最优参数固化为可复现的前向建模输出，便于后续做结构假设对比和跨样本理论审计
 12. `stepA1_pristine_baseline.py` 则进一步把全栈材料表压缩为最严格的零缺陷参考谱，显式拆开 `R_front`、`R_stack` 与 `R_total`
-13. 当前脚本链已经具备“文献数字化 / 椭偏报告解析 -> 材料数据库 -> 全栈对齐 `n-k` 表 -> pristine baseline decomposition -> 宏观正交界面指纹字典 -> 双窗联合反演 -> 固定参数理论重建”的前向-反演联合基线
+13. `stepA1_1_pvk_seam_audit.py` 则把 Phase A-1 中暴露的 `749/750 nm` 台阶追溯到 PVK seam，本质上为后续 repair 提供证据链而不是直接修复
+14. 当前脚本链已经具备“文献数字化 / 椭偏报告解析 -> 材料数据库 -> 全栈对齐 `n-k` 表 -> pristine baseline decomposition -> seam forensic audit -> 宏观正交界面指纹字典 -> 双窗联合反演 -> 固定参数理论重建”的前向-反演联合基线
 
 ## 6. Key Physical / Numerical Assumptions
 
@@ -1075,18 +1120,19 @@ resources/aligned_full_stack_nk.csv
 - 更新时间：`2026-04-12`
 - 当前 Phase：`Phase A-1`
 - 本次新增/修改：
-  - 新增 `src/core/full_stack_microcavity.py` 的 pristine decomposition 入口，显式返回 `R_front / T_front / R_stack / R_total`
-  - 新增 `src/scripts/stepA1_pristine_baseline.py`，建立零缺陷纯前向基线计算脚本
-  - 新增 `data/processed/phaseA1/`、`results/figures/phaseA1/`、`results/logs/phaseA1/` 输出口径
-  - 更新 `PROJECT_STATE.md`，补充 `Phase A-1` 的 SOP、数据流与输出说明
+  - 新增 `src/scripts/stepA1_1_pvk_seam_audit.py`，建立 `749/750 nm` seam 的法医式审计脚本
+  - 新增 `data/processed/phaseA1_seam_audit/`、`results/figures/phaseA1_seam_audit/`、`results/logs/phaseA1_seam_audit/` 输出口径
+  - 更新 `PROJECT_STATE.md`，补充 `Phase A-1.1` 的 SOP、数据流与定位结论范围
 - 已验证结论：
-  - `Phase A-1` 仅依赖 `aligned_full_stack_nk.csv`，不读取实验目标、不过拟合、不启用任何调制项
-  - 玻璃在本轮强制使用常数 `n = 1.515`, `k = 0`
-  - Ag 终端口径固定为 `100 nm finite film + semi-infinite Air exit medium`
+  - `749/750 nm` seam 已确认存在，且在 `k_PVK` / `eps2` 上最明显
+  - seam 直接锚定到 `step05c_build_aligned_nk_stack.py` 的 `digitized 左段 + extended 右段 + bridge/smooth` 拼接逻辑
+  - 最简堆栈已能看到 seam，完整 stack 会将其显著放大
+  - Ag 有限厚度终端不是主导来源，只是弱影响因子
+  - 当前证据更支持“PVK 数据拼接伪影”，而不是代码实现 bug
 - 仍待验证：
-  - 需在项目 `.venv` 中执行 `stepA1_pristine_baseline.py`，确认 CSV / PNG / MD 输出完整落盘
-  - 后续仍需展开 `PVK thickness scan` 与 `constant-glass vs dispersive-glass` sensitivity check
-  - 当前真实样本的多参数贴边与 HDR 失配问题不属于本轮 pristine baseline 范围
+  - 后续仍需决定是否进入 `blend-zone repair`、`re-fit PVK near-IR tail` 或保持现状
+  - `constant-glass vs dispersive-glass` 与 `PVK thickness scan` 仍未展开
+  - 当前真实样本的多参数贴边与 HDR 失配问题不属于本轮 seam audit 范围
 
 ## 10. Recommended Next Actions
 
