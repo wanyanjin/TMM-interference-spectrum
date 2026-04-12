@@ -1,0 +1,9 @@
+﻿metric,value
+bema_fraction,0.50
+d_BEMA_range_nm,0-30
+d_BEMA_step_nm,1
+max_abs_deltaR_stack_810_1100_pct,0.850
+max_abs_deltaR_total_810_1100_pct,0.824
+rear_contrast_drop_stack_pct,-0.129
+rear_contrast_drop_total_pct,-0.124
+min_d_C60_bulk_nm,0.000

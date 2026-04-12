@@ -32,3 +32,12 @@
   - 一份详细 Markdown 报告
   - 必要时的 manifest / README / 指标摘要
 - 新阶段完成后，必须同步更新本索引。
+
+### `phaseB1_rear_bema_sandbox/`
+
+- 主题：rear-only `PVK/C60` Bruggeman 粗糙层前向模拟
+- 主要内容：
+  - rear-BEMA 扫描主表与特征汇总表
+  - `R / ΔR` 热力图、代表曲线、peak/valley tracking
+  - rear-BEMA 与 `d_PVK` 指纹的正交对照图
+  - 可直接用于汇报的阶段总结文档 `PHASE_B1_REPORT.md`

@@ -5,8 +5,8 @@
 ## 1. Current Snapshot
 
 - 更新时间：2026-04-12
-- 当前判断 Phase：`Phase A-2`
-- 阶段定义：`在 repaired PVK surrogate v2 上扫描 d_PVK 对 pristine baseline 的调制，并建立 results/report 汇报资产层`
+- 当前判断 Phase：`Phase B-1`
+- 阶段定义：`在 repaired PVK surrogate v2 上引入 rear-only PVK/C60 BEMA 粗糙层，建立后界面粗糙指纹并与 d_PVK 厚度调制做正交比较`
 - 当前可用能力：
   - 已有 `step01_absolute_calibration.py`，可将样品与银镜原始计数转换为绝对反射率
   - 已有 `step01b_cauchy_extrapolation.py`，可基于 [LIT-0001] 的 `ITO/CsFAPI` 数字化折射率曲线生成 `750-1100 nm` 的 CsFAPI 扩展 `n-k` 中间件
@@ -36,6 +36,7 @@
   - 已新增 `stepA1_2_rerun_pristine_with_pvk_v2.py`，可复用 Phase A-1 pristine decomposition 口径，用 `PVK surrogate v2` 重跑 `R_front / R_stack / R_total`，并输出 v1/v2 全谱与局部对照
   - 已新增 `stepA2_pvk_thickness_scan.py`，可基于 `aligned_full_stack_nk_pvk_v2.csv` 扫描 `d_PVK = 500-900 nm`、输出 `R_stack / R_total / ΔR` 热力图、peak/valley tracking 与特征汇总表
   - 已建立 `results/report/` 汇报资产层，并补齐 `Phase A-1.2` 与 `Phase A-2` 的精选 CSV / PNG / Markdown 报告
+  - 已新增 `stepB1_rear_bema_sandbox.py`，可在 `PVK/C60` 后界面插入固定 `50/50` Bruggeman BEMA 层、执行厚度守恒扫描并与 `d_PVK` 指纹做对照
   - 已产出标准中间文件 `data/processed/target_reflectance.csv` 与 `data/processed/CsFAPI_nk_extended.csv`
   - 已完成 Phase 02 形状畸变诊断，当前证据指向：ITO 近红外吸收失真是长波端托平与整体形状失配的主导因素
   - 已完成 Phase 04 空气隙前向预测，当前基线下 `d_air = 2 nm` 与 `5 nm` 的 `max(|ΔR|)` 分别约为 `0.538%` 与 `1.347%`，均高于 `0.2%` 典型噪声线
@@ -53,7 +54,7 @@
   - 尚未将 Phase 06 批量 HDR 输入规范化迁移到 `data/raw/phase06/`
   - Phase 07 当前两例真实样本都存在参数贴边，说明双窗架构已跑通，但材料先验与边界设定仍需继续收敛
   - Phase 08 目前仅建立“固定参数前向重建”链路，尚未引入新的物理先验、层结构变体扫描或跨样本共享参数约束
-  - `Phase A-2` 已完成 first-pass `d_PVK` thickness scan，但尚未将 surrogate 不确定性传播到厚度图谱
+  - `Phase B-1` 已完成 first-pass rear-only BEMA sandbox，但尚未把 surrogate 不确定性传播到 thickness/BEMA 指纹比较
   - `PVK uncertainty ensemble`、`constant-glass vs dispersive-glass` 与参数化 band-edge dielectric model 仍未展开
 
 ## 2. Current Directory Tree
@@ -92,7 +93,8 @@ TMM-interference-spectrum/
 │       ├── stepA1_1_pvk_seam_audit.py
 │       ├── stepA1_2_build_pvk_surrogate_v2.py
 │       ├── stepA1_2_rerun_pristine_with_pvk_v2.py
-│       └── stepA2_pvk_thickness_scan.py
+│       ├── stepA2_pvk_thickness_scan.py
+│       └── stepB1_rear_bema_sandbox.py
 ├── data/
 │   └── processed/
 │       ├── CsFAPI_nk_extended.csv
@@ -106,6 +108,7 @@ TMM-interference-spectrum/
 │       ├── phaseA1/
 │       ├── phaseA1_2/
 │       ├── phaseA2/
+│       ├── phaseB1/
 │       ├── phaseA1_seam_audit/
 │       └── target_reflectance.csv
 ├── resources/
@@ -123,6 +126,7 @@ TMM-interference-spectrum/
 ├── results/
 │   ├── figures/
 │   │   ├── phaseA2/
+│   │   ├── phaseB1/
 │   │   ├── phaseA1_2/
 │   │   ├── phaseA1_seam_audit/
 │   │   ├── phaseA1/
@@ -149,6 +153,7 @@ TMM-interference-spectrum/
 │   └── logs/
 │       ├── phase03_batch_fit/
 │       ├── phaseA2/
+│       ├── phaseB1/
 │       ├── phaseA1_2/
 │       ├── phaseA1_seam_audit/
 │       ├── phaseA1/
@@ -166,7 +171,8 @@ TMM-interference-spectrum/
 │       ├── README.md
 │       ├── report_manifest.csv
 │       ├── phaseA1_2_pvk_surrogate_and_pristine/
-│       └── phaseA2_pvk_thickness_scan/
+│       ├── phaseA2_pvk_thickness_scan/
+│       └── phaseB1_rear_bema_sandbox/
 ├── test_data/
 │   ├── sample.csv
 │   ├── glass-1mm.csv
@@ -762,6 +768,41 @@ TMM-interference-spectrum/
 - `results/figures/phaseA2/phaseA2_selected_thickness_curves.png`
 - `results/logs/phaseA2/phaseA2_pvk_thickness_scan.md`
 
+### 4.20 `stepB1_rear_bema_sandbox.py`
+
+- 文件位置：`src/scripts/stepB1_rear_bema_sandbox.py`
+- 主要职责：在保持 `PVK surrogate v2` 与名义几何不变的前提下，仅对 `PVK/C60` 后界面引入 `50/50` solid-solid Bruggeman 粗糙层，建立 rear-only roughness 指纹字典
+
+输入：
+- `resources/aligned_full_stack_nk_pvk_v2.csv`
+- `data/processed/phaseA1_2/phaseA1_2_pristine_baseline.csv`
+- `data/processed/phaseA2/phaseA2_pvk_thickness_scan.csv`
+- `data/processed/phaseA2/phaseA2_pvk_feature_summary.csv`
+
+核心处理流程：
+- 构建层序：
+  - `Glass / ITO / NiOx / SAM / PVK_bulk / BEMA(PVK,C60) / C60_bulk / Ag / Air`
+- 固定 Bruggeman 体积分数为 `50% PVK + 50% C60`
+- 对 `d_BEMA,rear = 0-30 nm` 做 `1 nm` 扫描
+- 执行厚度守恒：
+  - `d_PVK,bulk = 700 - 0.5 * d_BEMA,rear`
+  - `d_C60,bulk = max(0, 15 - 0.5 * d_BEMA,rear)`
+- 计算 `R_stack / R_total / ΔR`，提取后窗峰谷、对比度和最大 `|ΔR|`
+- 与 `Phase A-2` 的 `d_PVK` 指纹做后窗 `ΔR` 对照
+
+输出：
+- `data/processed/phaseB1/phaseB1_rear_bema_scan.csv`
+- `data/processed/phaseB1/phaseB1_rear_bema_feature_summary.csv`
+- `results/figures/phaseB1/phaseB1_R_stack_heatmap.png`
+- `results/figures/phaseB1/phaseB1_R_total_heatmap.png`
+- `results/figures/phaseB1/phaseB1_deltaR_stack_heatmap.png`
+- `results/figures/phaseB1/phaseB1_deltaR_total_heatmap.png`
+- `results/figures/phaseB1/phaseB1_selected_bema_curves.png`
+- `results/figures/phaseB1/phaseB1_peak_valley_tracking.png`
+- `results/figures/phaseB1/phaseB1_contrast_vs_bema.png`
+- `results/figures/phaseB1/phaseB1_bema_vs_pvk_deltaR_comparison.png`
+- `results/logs/phaseB1/phaseB1_rear_bema_sandbox.md`
+
 ## 5. Data Flow
 
 当前项目主数据流如下：
@@ -964,10 +1005,20 @@ resources/aligned_full_stack_nk_pvk_v2.csv
     -> results/figures/phaseA2/phaseA2_*.png
     -> results/logs/phaseA2/phaseA2_pvk_thickness_scan.md
 
+resources/aligned_full_stack_nk_pvk_v2.csv
+data/processed/phaseA1_2/phaseA1_2_pristine_baseline.csv
+data/processed/phaseA2/phaseA2_pvk_thickness_scan.csv
+    -> stepB1_rear_bema_sandbox.py (rear-only PVK/C60 BEMA -> 厚度守恒 -> R/ΔR 热力图 -> d_PVK 正交对照)
+    -> data/processed/phaseB1/phaseB1_rear_bema_scan.csv
+    -> data/processed/phaseB1/phaseB1_rear_bema_feature_summary.csv
+    -> results/figures/phaseB1/phaseB1_*.png
+    -> results/logs/phaseB1/phaseB1_rear_bema_sandbox.md
+
 selected phase outputs
     -> results/report/ (精选 CSV / PNG / Markdown 汇报层)
     -> results/report/phaseA1_2_pvk_surrogate_and_pristine/*
     -> results/report/phaseA2_pvk_thickness_scan/*
+    -> results/report/phaseB1_rear_bema_sandbox/*
 ```
 
 可按 SOP 理解为：
@@ -988,7 +1039,8 @@ selected phase outputs
 14. `stepA1_2_build_pvk_surrogate_v2.py` 在材料层重建 `PVK surrogate v2`，把 `749/750 nm` 的跳点降级为连续 band-edge 过渡
 15. `stepA1_2_rerun_pristine_with_pvk_v2.py` 进一步验证修复后 `ΔR_stack(749->750)` 与 `ΔR_total(749->750)` 已显著压低，同时后窗 fringe 保持稳定
 16. `stepA2_pvk_thickness_scan.py` 进一步把 repaired pristine baseline 推进为厚度-条纹相位图谱，可直接区分“厚度导致的全局 fringe 漂移”与“界面缺陷导致的局部扰动”
-17. 当前脚本链已经具备“文献数字化 / 椭偏报告解析 -> 材料数据库 -> 全栈对齐 `n-k` 表 -> pristine baseline decomposition -> seam forensic audit -> surrogate rebuild -> pristine rerun -> thickness scan -> 宏观正交界面指纹字典 -> 双窗联合反演 -> 固定参数理论重建”的前向-反演联合基线
+17. `stepB1_rear_bema_sandbox.py` 则把 rear-only `PVK/C60` intermixing 单独拆成独立机制，得到与 `d_PVK` 可比较的后界面粗糙指纹
+18. 当前脚本链已经具备“文献数字化 / 椭偏报告解析 -> 材料数据库 -> 全栈对齐 `n-k` 表 -> pristine baseline decomposition -> seam forensic audit -> surrogate rebuild -> pristine rerun -> thickness scan -> rear-only BEMA sandbox -> 宏观正交界面指纹字典 -> 双窗联合反演 -> 固定参数理论重建”的前向-反演联合基线
 
 ## 6. Key Physical / Numerical Assumptions
 
@@ -1007,6 +1059,7 @@ selected phase outputs
   - `n` 用 `smoothstep` 桥接到 long-wave 趋势，`k` 用 `smoothstep + cosine-tail` 衰减到透明尾
   - 不再允许 `750 nm` 起 `k = 0` 的硬切换
 - Phase A-2 固定 `PVK surrogate v2` 与其余材料参数，仅扫描 `d_PVK`，因此当前厚度灵敏度图谱反映的是“零缺陷微腔光程变化”，不是缺陷调制叠加结果
+- Phase B-1 固定 `PVK surrogate v2` 与名义层厚，仅在 `PVK/C60` 后界面加入 `50/50` solid-solid BEMA，并执行 `PVK/C60` 守恒扣减，因此当前 rear-BEMA 指纹反映的是“后界面 intermixing + 相邻层变薄”的联合机制
 - `1000-1100 nm` 属于超出原始椭偏测量窗口的模型外推区
 - Phase 04 中 `1100-1500 nm` 的 PVK 折射率不再直接沿用表格，而是基于 `1050-1100 nm` 的真实点二次拟合 Cauchy 尾段后继续外推，且仍强制 `k = 0`
 - 粗糙层采用 `50% PVK + 50% Air` 的 BEMA 有效介质
@@ -1257,23 +1310,23 @@ selected phase outputs
 ## 9. Recent Update Summary
 
 - 更新时间：`2026-04-12`
-- 当前 Phase：`Phase A-2`
+- 当前 Phase：`Phase B-1`
 - 本次新增/修改：
-  - 更新 `AGENTS.md`，正式加入 `results/report/` 汇报资产持久化规则
-  - 新增 `src/scripts/stepA2_pvk_thickness_scan.py`，建立 `d_PVK = 500-900 nm` 的 pristine thickness scan
-  - 新增 `data/processed/phaseA2/`、`results/figures/phaseA2/`、`results/logs/phaseA2/` 标准输出口径
-  - 新增 `results/report/README.md`、`results/report/report_manifest.csv` 以及 `Phase A-1.2 / Phase A-2` 两套汇报友好资产目录
-  - 更新 `PROJECT_STATE.md`，补充 `Phase A-2` SOP、数据流与 report 层
+  - 新增 `src/scripts/stepB1_rear_bema_sandbox.py`，建立 rear-only `PVK/C60` BEMA sandbox
+  - 在 `src/core/full_stack_microcavity.py` 中新增 rear-BEMA 前向入口与 `50/50` Bruggeman 有效介质求解
+  - 新增 `data/processed/phaseB1/`、`results/figures/phaseB1/`、`results/logs/phaseB1/` 标准输出口径
+  - 新增 `results/report/phaseB1_rear_bema_sandbox/` 并更新 report 根索引
+  - 更新 `PROJECT_STATE.md`，补充 `Phase B-1` SOP、数据流与机制结论范围
 - 已验证结论：
-  - `Phase A-1.2` 的 repaired baseline 已被同步整理为可直接汇报的 report 资产
-  - `Phase A-2` 已确认后窗是 `d_PVK` 的主敏感窗口，最强响应集中在 `1098-1100 nm`
-  - `R_stack` 的厚度灵敏度略高于 `R_total`，说明固定前表面背景会弱化部分厚度特征
-  - 后窗对厚度存在清晰系统漂移和局部近线性区间，但将 `500-900 nm` 全范围压缩为单一主峰/主谷轨迹时会出现 mode switching
-  - 厚度变化更像“全局微腔光程变化”，而非局部缺陷式谱形扭曲
+  - rear-only BEMA 在 `0-30 nm` 范围内只引起约 `1 nm` 级的后窗峰位漂移，主效应不是全局相位变化
+  - rear-only BEMA 的主响应集中在 `650-1100 nm` 的 transition/rear 区间，前窗灵敏度很弱
+  - `R_stack` 对 rear-BEMA 的机制灵敏度仍略高于 `R_total`
+  - rear-only BEMA 与 `d_PVK` 的 `ΔR` 形态不同：前者更像局部包络重塑和轻微振幅变化，后者更像全局 fringe 相位漂移
+  - `d_BEMA,rear = 30 nm` 时 `d_C60,bulk = 0 nm`，说明大 BEMA 区间已进入“强 intermixing + C60 极薄”的极限测试区
 - 仍待验证：
-  - `PVK uncertainty ensemble` 仍需建立，以量化 surrogate 不确定性对 thickness scan 结论的传播
+  - `PVK uncertainty ensemble` 仍需建立，以量化 surrogate 不确定性对 thickness / rear-BEMA 指纹的传播
+  - `Phase B-2 front-only BEMA` 尚未建立，当前还不能比较前后界面粗糙的差异
   - `constant-glass vs dispersive-glass` 与参数化 band-edge dielectric model 仍未展开
-  - 当前真实样本的多参数贴边与 HDR 失配问题不属于本轮理论基线任务范围
 
 ## 10. Recommended Next Actions
 
