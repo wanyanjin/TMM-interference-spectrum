@@ -75,3 +75,11 @@
   - front-gap 主扫描、LOD 粗评估与前/过渡/后窗响应分解
   - front-gap 与 thickness / front-BEMA / rear-gap 的机制对照
   - uncertainty spot-check 与阶段总结文档 `PHASE_C1B_REPORT.md`
+
+### `ppt_phaseAtoC_assets/`
+
+- 主题：Phase A→C 的 PPT 汇报资产整理
+- 主要内容：
+  - 基于既有 `data/processed` 结果重绘的 `R_total-only` 主汇报图
+  - 每页的 `slide_text.md` 与 `source_manifest.md`
+  - 一份总 `00_manifest.md` 用于快速组装明日 PPT

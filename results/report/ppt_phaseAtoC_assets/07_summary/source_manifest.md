@@ -1,0 +1,23 @@
+# Source Manifest
+
+- 原始来源：
+  - `data/processed/phaseA2/phaseA2_pvk_thickness_scan.csv`
+  - `data/processed/phaseB1/phaseB1_rear_bema_scan.csv`
+  - `data/processed/phaseB2/phaseB2_front_bema_scan.csv`
+  - `data/processed/phaseC1a/phaseC1a_rear_air_gap_scan.csv`
+  - `data/processed/phaseC1b/phaseC1b_front_air_gap_scan.csv`
+- 参考报告：
+  - `results/report/phaseA2_pvk_thickness_scan/PHASE_A2_REPORT.md`
+  - `results/report/phaseB1_rear_bema_sandbox/PHASE_B1_REPORT.md`
+  - `results/report/phaseB2_front_bema_sandbox/PHASE_B2_REPORT.md`
+  - `results/report/phaseC1a_rear_air_gap_sandbox/PHASE_C1A_REPORT.md`
+  - `results/report/phaseC1b_front_air_gap_sandbox/PHASE_C1B_REPORT.md`
+- 直接复用图：无
+- 基于已有结论重绘：
+  - `mechanism_summary_matrix.png`
+- 代表参数：
+  - thickness: `650 / 750 / 850 nm`
+  - rear-BEMA: `10 / 20 / 30 nm`
+  - front-BEMA: `10 / 20 nm`
+  - rear-gap: `1 / 2 / 5 / 10 nm`
+  - front-gap: `1 / 2 / 5 / 10 / 20 nm`

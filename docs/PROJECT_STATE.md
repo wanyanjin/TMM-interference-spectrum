@@ -41,6 +41,7 @@
   - 已新增 `stepB2_front_bema_sandbox.py`，可在固定 `SAM` 厚度前提下引入 `NiOx/PVK` front-side BEMA proxy，输出 front-only roughness 主扫描、与 thickness/rear-BEMA 的正交对照，以及 uncertainty spot-check
   - 已新增 `stepC1a_rear_air_gap_sandbox.py`，可在 `PVK/C60` 后界面插入真实 air gap，输出 low-gap 高分辨主扫描、LOD 粗评估、branch-aware tracking 和与 thickness / rear-BEMA / front-BEMA 的四机制对照
   - 已新增 `stepC1b_front_air_gap_sandbox.py`，可在 `SAM/PVK` 前界面插入真实 air gap，输出 low-gap 高分辨主扫描、前/过渡/后窗分窗响应、LOD 粗评估、uncertainty spot-check 与五机制对照
+  - 已新增 `stepPPT_phaseAtoC_assets.py`，可基于现有 `data/processed` 结果重绘一套统一风格的 `R_total-only` PPT 汇报资产，并同步生成每页 `slide_text.md / source_manifest.md`
   - 已产出标准中间文件 `data/processed/target_reflectance.csv` 与 `data/processed/CsFAPI_nk_extended.csv`
   - 已完成 Phase 02 形状畸变诊断，当前证据指向：ITO 近红外吸收失真是长波端托平与整体形状失配的主导因素
   - 已完成 Phase 04 空气隙前向预测，当前基线下 `d_air = 2 nm` 与 `5 nm` 的 `max(|ΔR|)` 分别约为 `0.538%` 与 `1.347%`，均高于 `0.2%` 典型噪声线
@@ -199,7 +200,8 @@ TMM-interference-spectrum/
 │       ├── phaseB1_rear_bema_sandbox/
 │       ├── phaseB2_front_bema_sandbox/
 │       ├── phaseC1a_rear_air_gap_sandbox/
-│       └── phaseC1b_front_air_gap_sandbox/
+│       ├── phaseC1b_front_air_gap_sandbox/
+│       └── ppt_phaseAtoC_assets/
 ├── test_data/
 │   ├── sample.csv
 │   ├── glass-1mm.csv
@@ -966,6 +968,42 @@ TMM-interference-spectrum/
 - `results/figures/phaseC1b/*.png`
 - `results/logs/phaseC1b/phaseC1b_front_air_gap_sandbox.md`
 
+### 4.25 `stepPPT_phaseAtoC_assets.py`
+
+- 文件位置：`src/scripts/stepPPT_phaseAtoC_assets.py`
+- 主要职责：基于 `Phase A-1.2` 到 `Phase C-1b` 的既有 `processed/report` 结果，重绘一套统一风格的 `R_total-only` PPT 汇报资产，不引入任何新的物理模拟
+
+输入：
+- `data/processed/phaseA1/phaseA1_pristine_baseline.csv`
+- `data/processed/phaseA1_2/phaseA1_2_pristine_baseline.csv`
+- `data/processed/phaseA1_2/pvk_v1_v2_local_comparison.csv`
+- `data/processed/phaseA2/phaseA2_pvk_thickness_scan.csv`
+- `data/processed/phaseB1/phaseB1_rear_bema_scan.csv`
+- `data/processed/phaseB2/phaseB2_front_bema_scan.csv`
+- `data/processed/phaseC1a/phaseC1a_rear_air_gap_scan.csv`
+- `data/processed/phaseC1b/phaseC1b_front_air_gap_scan.csv`
+- `results/report/phaseA*_*/PHASE_*.md`
+- `results/report/phaseB*_*/PHASE_*.md`
+- `results/report/phaseC*_*/PHASE_*.md`
+
+核心处理流程：
+- 统一重绘 baseline、thickness、rear-BEMA、front-BEMA、rear-gap、front-gap 的 `R_total / Delta R_total` 主图
+- 为每一页输出 `main_figure.png / secondary_figure.png / slide_text.md / source_manifest.md`
+- 生成 `07_summary/mechanism_summary_matrix.png` 和 `appendix_pvk_surrogate_fix` 两张附录图
+- 生成总 `00_manifest.md`，用于快速拼装 Phase A→C 的 PPT 叙事线
+- 同步更新 `results/report/README.md` 与 `report_manifest.csv`
+
+输出：
+- `results/report/ppt_phaseAtoC_assets/00_manifest.md`
+- `results/report/ppt_phaseAtoC_assets/01_baseline/*`
+- `results/report/ppt_phaseAtoC_assets/02_thickness/*`
+- `results/report/ppt_phaseAtoC_assets/03_rear_bema/*`
+- `results/report/ppt_phaseAtoC_assets/04_front_bema/*`
+- `results/report/ppt_phaseAtoC_assets/05_rear_gap/*`
+- `results/report/ppt_phaseAtoC_assets/06_front_gap/*`
+- `results/report/ppt_phaseAtoC_assets/07_summary/*`
+- `results/report/ppt_phaseAtoC_assets/appendix_pvk_surrogate_fix/*`
+
 ## 5. Data Flow
 
 当前项目主数据流如下：
@@ -1224,6 +1262,7 @@ selected phase outputs
     -> results/report/phaseB2_front_bema_sandbox/*
     -> results/report/phaseC1a_rear_air_gap_sandbox/*
     -> results/report/phaseC1b_front_air_gap_sandbox/*
+    -> results/report/ppt_phaseAtoC_assets/*
 ```
 
 可按 SOP 理解为：
@@ -1545,17 +1584,14 @@ selected phase outputs
 - 更新时间：`2026-04-12`
 - 当前 Phase：`Phase C-1b`
 - 本次新增/修改：
-  - 在 `src/core/full_stack_microcavity.py` 中新增 front air-gap only 前向入口
-  - 新增 `src/scripts/stepC1b_front_air_gap_sandbox.py`，建立 front-gap 主扫描、LOD 粗评估与 uncertainty spot-check
-  - 新增 `data/processed/phaseC1b/`、`results/figures/phaseC1b/`、`results/logs/phaseC1b/` 标准输出口径
-  - 新增 `results/report/phaseC1b_front_air_gap_sandbox/` 并更新 report 根索引
-  - 更新 `PROJECT_STATE.md`，补充 `Phase C-1b` SOP、数据流与机制结论范围
+  - 新增 `src/scripts/stepPPT_phaseAtoC_assets.py`，把 `Phase A-1.2 → Phase C-1b` 的既有结果重绘为统一风格的 `R_total-only` PPT 资产
+  - 新增 `results/report/ppt_phaseAtoC_assets/`，按 baseline / five mechanisms / summary / appendix 组织明日 PPT 素材
+  - 为每一页同步写出 `slide_text.md` 与 `source_manifest.md`，便于直接做汇报与回查来源
+  - 更新 `results/report/README.md`、`report_manifest.csv` 与 `PROJECT_STATE.md`，登记新的汇报资产入口
 - 已验证结论：
-  - front-gap 在 low-gap 区域就能给出超过 `0.2%` 的理论 `ΔR_total`，当前 coarse LOD 已下探到 `1 nm`
-  - front-gap 的主响应落在前窗到过渡区，但会比 front-BEMA 更强地牵动后窗次级结构
-  - front-gap 比 front-BEMA 更强、更非线性，也与 thickness 的全局腔长变化显著不同，因此可作为第五类独立机制字典
-  - spot-check 显示 front-gap 的 front-window mean `ΔR_total` 与 rear-window 幅值相对稳健，但 transition/band-edge 邻域绝对量仍受 surrogate 影响
-  - 当前已经形成 thickness / rear-BEMA / front-BEMA / rear-gap / front-gap 五机制对照框架
+  - 已形成面向 PPT 的 baseline → thickness → rear-BEMA → front-BEMA → rear-gap → front-gap 主叙事线
+  - 主汇报图现已统一为 `R_total-only` 口径，不再把 `R_stack` 混入正文资产
+  - 各页均已补齐可直接复用的短文案与来源说明，适合快速装配组会或阶段总结幻灯片
 - 仍待验证：
   - gap vs BEMA coupled comparison 尚未展开，当前还没有 gap+BEMA 的耦合图谱
   - front-gap / rear-gap 的对称性与可分性尚未做系统归一化比较
