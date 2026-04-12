@@ -4,9 +4,9 @@
 
 ## 1. Current Snapshot
 
-- 更新时间：2026-04-10
-- 当前判断 Phase：`Phase 07`
-- 阶段定义：`双窗联合反演架构落地：HDR / HDR 中间件双入口 -> 标准化 R_abs -> 全栈 TMM -> 双窗加权优化 -> 诊断图表与结果台账`
+- 更新时间：2026-04-12
+- 当前判断 Phase：`Phase 08`
+- 阶段定义：`固定 Phase 07 最优参数并复用现有标准输入，建立可批量复现实测空间反射率的 TMM 理论前向建模链路`
 - 当前可用能力：
   - 已有 `step01_absolute_calibration.py`，可将样品与银镜原始计数转换为绝对反射率
   - 已有 `step01b_cauchy_extrapolation.py`，可基于 [LIT-0001] 的 `ITO/CsFAPI` 数字化折射率曲线生成 `750-1100 nm` 的 CsFAPI 扩展 `n-k` 中间件
@@ -29,6 +29,7 @@
   - 已有 `step07_orthogonal_radar_and_baseline.py`，可输出 pristine 全谱三分区基准图、Front/Back 正交雷达图与 `Phase 07` 指纹字典
   - 已新增 `src/core/phase07_dual_window.py`，可基于 `aligned_full_stack_nk.csv` 构建 `Glass / ITO / NiOx / SAM / PVK / PVK-C60 Roughness / C60 / Ag(or Air)` Phase 07 堆栈，执行 C60 守恒约束、双窗加权残差、`d_bulk` 后窗 basin 扫描、DE 全局搜索、局部 least-squares 精修与 Phase 07 诊断出图
   - 已新增 `step07_dual_window_inversion.py`，可优先读取原始多曝光目录并复用 Phase 06 HDR 逻辑，或直接消费 `*_hdr_curves.csv`，统一落盘为 `fit_input -> fit_summary / fit_curve / optimizer_log / 4 张诊断图`
+  - 已新增 `step08_theoretical_tmm_modeling.py`，可读取 `phase07_fit_summary.csv` 与对应 `fit_input`，冻结 Phase 07 最优参数并重建理论反射率、前表面散射因子和后窗 z-score 对比，统一落盘为 `phase08_theory_curve / phase08_theory_summary / phase08_source_manifest / theory_vs_measured 图`
   - 已产出标准中间文件 `data/processed/target_reflectance.csv` 与 `data/processed/CsFAPI_nk_extended.csv`
   - 已完成 Phase 02 形状畸变诊断，当前证据指向：ITO 近红外吸收失真是长波端托平与整体形状失配的主导因素
   - 已完成 Phase 04 空气隙前向预测，当前基线下 `d_air = 2 nm` 与 `5 nm` 的 `max(|ΔR|)` 分别约为 `0.538%` 与 `1.347%`，均高于 `0.2%` 典型噪声线
@@ -45,6 +46,7 @@
   - 尚未形成规范化的 Phase 日志、资源索引和结构化结果台账
   - 尚未将 Phase 06 批量 HDR 输入规范化迁移到 `data/raw/phase06/`
   - Phase 07 当前两例真实样本都存在参数贴边，说明双窗架构已跑通，但材料先验与边界设定仍需继续收敛
+  - Phase 08 目前仅建立“固定参数前向重建”链路，尚未引入新的物理先验、层结构变体扫描或跨样本共享参数约束
 
 ## 2. Current Directory Tree
 
@@ -76,7 +78,8 @@ TMM-interference-spectrum/
 │       ├── step06_batch_hdr_calibration.py
 │       ├── step06_single_sample_hdr_absolute_calibration.py
 │       ├── step07_dual_window_inversion.py
-│       └── step07_orthogonal_radar_and_baseline.py
+│       ├── step07_orthogonal_radar_and_baseline.py
+│       └── step08_theoretical_tmm_modeling.py
 ├── data/
 │   └── processed/
 │       ├── CsFAPI_nk_extended.csv
@@ -86,6 +89,7 @@ TMM-interference-spectrum/
 │       ├── phase04c/
 │       ├── phase06/
 │       ├── phase07/
+│       ├── phase08/
 │       └── target_reflectance.csv
 ├── resources/
 │   ├── digitized/
@@ -100,6 +104,7 @@ TMM-interference-spectrum/
 │   └── MinerU-0.13.1-arm64.dmg
 ├── results/
 │   ├── figures/
+│   │   ├── phase08/
 │   │   ├── phase07/
 │   │   ├── absolute_reflectance_interference.png
 │   │   ├── cauchy_extrapolation_check.png
@@ -121,6 +126,7 @@ TMM-interference-spectrum/
 │   │   └── tmm_inversion_result.png
 │   └── logs/
 │       ├── phase03_batch_fit/
+│       ├── phase08/
 │       ├── phase07/
 │       ├── phase04c_fingerprint_mapping.md
 │       ├── phase04a_air_gap_diagnostic.md
@@ -567,6 +573,31 @@ TMM-interference-spectrum/
 - `results/figures/phase07/*_rear_basin_scan.png`
 - `results/logs/phase07/*_optimizer_log.md`
 
+### 4.14 `step08_theoretical_tmm_modeling.py`
+
+- 文件位置：`src/scripts/step08_theoretical_tmm_modeling.py`
+- 核心依赖：`src/core/phase07_dual_window.py`
+- 主要职责：冻结 `Phase 07` 最优参数并在实测空间重建理论反射率，形成 `Phase 08` 的批量 TMM 前向建模基线
+
+输入：
+- `data/processed/phase07/phase07_fit_summary.csv`
+- `data/processed/phase07/fit_inputs/*_fit_input.csv`
+- `resources/aligned_full_stack_nk.csv`
+
+核心处理流程：
+- 逐样本读取 `Phase 07 fit_summary + fit_input`
+- 复用 `calc_macro_reflectance()` 重建全栈物理反射率
+- 复用 `apply_front_scattering_observation_model()` 把物理曲线映射回 collected reflectance
+- 对后窗额外输出 `z-score` 理论对比与导数相关性，检查干涉形貌是否被保留
+- 批量写出理论曲线表、批次摘要、来源清单和理论对比图
+
+输出：
+- `data/processed/phase08/phase08_theory_summary.csv`
+- `data/processed/phase08/phase08_source_manifest.csv`
+- `data/processed/phase08/theory_curves/*_theory_curve.csv`
+- `results/figures/phase08/*_theory_vs_measured.png`
+- `results/logs/phase08/phase08_theoretical_tmm_modeling.md`
+
 ## 5. Data Flow
 
 当前项目主数据流如下：
@@ -716,6 +747,16 @@ resources/aligned_full_stack_nk.csv
     -> results/figures/phase07/*_residual_diagnostics.png
     -> results/figures/phase07/*_rear_basin_scan.png
     -> results/logs/phase07/*_optimizer_log.md
+
+data/processed/phase07/phase07_fit_summary.csv
+data/processed/phase07/fit_inputs/*_fit_input.csv
+resources/aligned_full_stack_nk.csv
+    -> step08_theoretical_tmm_modeling.py (冻结 Phase 07 参数 -> 重建物理反射率 -> 前表面散射映射 -> 后窗 z-score 理论核对 -> 批量输出)
+    -> data/processed/phase08/phase08_theory_summary.csv
+    -> data/processed/phase08/phase08_source_manifest.csv
+    -> data/processed/phase08/theory_curves/*_theory_curve.csv
+    -> results/figures/phase08/*_theory_vs_measured.png
+    -> results/logs/phase08/phase08_theoretical_tmm_modeling.md
 ```
 
 可按 SOP 理解为：
@@ -730,7 +771,8 @@ resources/aligned_full_stack_nk.csv
 8. `step06_dual_mode_microcavity_sandbox.py` 则在不再引入拟合自由度的前提下，把全栈材料表直接转为双模式微腔缺陷字典，用于后续缺陷定量和指纹匹配
 9. `step07_orthogonal_radar_and_baseline.py` 进一步把缺陷模式压缩为 `front/back` 两类宏观正交界面，并补上面向后续 LM 的标准前向接口与三分区基准可视化
 10. `step07_dual_window_inversion.py` 则把 `Phase 06 HDR`、`Phase 05c 对齐 n-k` 和 `Phase 07 双窗反演` 接成当前主干闭环，能够直接把 `hdr_curves` 样本转为标准化拟合输入、参数表、逐波长拟合表、优化日志和诊断图
-11. 当前脚本链已经具备“文献数字化 / 椭偏报告解析 -> 材料数据库 -> 全栈对齐 `n-k` 表 -> 宏观正交界面指纹字典 -> 双窗联合反演”的 Phase 07 闭环
+11. `step08_theoretical_tmm_modeling.py` 在不新增拟合自由度的前提下，把 `Phase 07` 的最优参数固化为可复现的前向建模输出，便于后续做结构假设对比和跨样本理论审计
+12. 当前脚本链已经具备“文献数字化 / 椭偏报告解析 -> 材料数据库 -> 全栈对齐 `n-k` 表 -> 宏观正交界面指纹字典 -> 双窗联合反演 -> 固定参数理论重建”的 Phase 08 起步闭环
 
 ## 6. Key Physical / Numerical Assumptions
 
@@ -992,23 +1034,21 @@ resources/aligned_full_stack_nk.csv
 
 ## 9. Recent Update Summary
 
-- 更新时间：`2026-04-10`
-- 当前 Phase：`Phase 07`
+- 更新时间：`2026-04-12`
+- 当前 Phase：`Phase 08`
 - 本次新增/修改：
-  - 新增 `src/core/phase07_dual_window.py`，建立 Phase 07 双窗反演核心模块
-  - 新增 `src/scripts/step07_dual_window_inversion.py`，建立原始多曝光 / `hdr_curves` 双入口拟合脚本
-  - 新增 `data/processed/phase07/fit_inputs/` 与 `data/processed/phase07/fit_results/` 标准中间件落盘规则
-  - 新增 `results/figures/phase07/` 与 `results/logs/phase07/`，输出单样本 4 图 + 优化日志
-  - 更新 `PROJECT_STATE.md`，记录 Phase 07 的 C60 守恒、双窗窗口口径、优化器结构和当前边界风险
+  - 已将 `Phase 07` 当前仓库状态提交并推送到 `origin/main`
+  - 新增 `src/scripts/step08_theoretical_tmm_modeling.py`，建立“固定 Phase 07 最优参数 -> 批量重建理论曲线”的前向建模脚本
+  - 为 `Phase 08` 预留 `data/processed/phase08/`、`results/figures/phase08/`、`results/logs/phase08/` 输出口径
+  - 更新 `PROJECT_STATE.md`，补充 `Phase 08` 的 SOP、数据流与当前能力边界
 - 已验证结论：
-  - 当前 `DEVICE-1-withAg-P1` 与 `DEVICE-1-withoutAg-P1` 已成功完成双窗拟合并落盘
-  - C60 守恒检查通过：`d_rough = 0/10/20/30 nm` 对应 `d_C60_bulk = 15/10/5/0 nm`
-  - `withAg / withoutAg` 两类终端边界都可返回有限且 `0-1` 范围内的反射率
-  - 前窗 / 后窗的 `scale_w` 均大于 `0.005` 下限，未出现权重爆炸
+  - `origin/main` 已包含最新 `Phase 07` 双窗诊断探针、拟合结果和文档同步
+  - `Phase 08` 脚本严格复用 `Phase 07` 的 `fit_summary + fit_input + aligned_full_stack_nk`，没有引入新的物理自由度
+  - `Phase 08` 的输出命名、目录归属和数据流均已按项目规范固定
 - 仍待验证：
+  - 需在项目 `.venv` 中执行 `step08_theoretical_tmm_modeling.py`，确认 `Phase 08` 批量前向输出能完整落盘
   - 当前真实样本的多参数贴边仍需通过更强先验或更合理边界进一步收敛
   - `Ag_mirro-500us` 与 `Ag_mirro-10ms` 的归一化失配根因仍未确认
-  - 当前 HDR 逻辑虽已扩展到批量样品，但仍未纳入标准 `data/raw/` 目录
 
 ## 10. Recommended Next Actions
 
