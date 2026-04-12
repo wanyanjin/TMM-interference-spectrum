@@ -41,6 +41,7 @@ EXPECTED_WAVELENGTHS_NM = np.arange(
 )
 
 AIR_INDEX = 1.0 + 0.0j
+DEFAULT_CONSTANT_GLASS_INDEX = 1.515 + 0.0j
 SAM_INDEX = 1.5 + 0.0j
 ITO_THICKNESS_NM = 100.0
 NIOX_THICKNESS_NM = 45.0
@@ -64,6 +65,12 @@ SUPPORTED_STACK_MODES = (
     INTERFACE_BACK,
 )
 SUPPORTED_FITTING_INTERFACES = (INTERFACE_FRONT, INTERFACE_BACK)
+AG_BOUNDARY_FINITE_FILM = "finite_100nm_air_exit"
+AG_BOUNDARY_SEMI_INFINITE = "semi_infinite_ag"
+SUPPORTED_AG_BOUNDARY_MODES = (
+    AG_BOUNDARY_FINITE_FILM,
+    AG_BOUNDARY_SEMI_INFINITE,
+)
 
 REQUIRED_COLUMNS = (
     "Wavelength_nm",
@@ -193,6 +200,14 @@ class OpticalStackTable:
             raise ValueError(f"不支持的模式: {mode}")
         return normalized_mode
 
+    def _normalize_ag_boundary_mode(self, ag_boundary_mode: str) -> str:
+        normalized_mode = str(ag_boundary_mode).strip().lower()
+        if normalized_mode not in SUPPORTED_AG_BOUNDARY_MODES:
+            raise ValueError(
+                f"ag_boundary_mode 必须是 {SUPPORTED_AG_BOUNDARY_MODES} 之一，当前为 {ag_boundary_mode}"
+            )
+        return normalized_mode
+
     def _normalize_fitting_interface(self, interface_type: str) -> str:
         normalized_type = str(interface_type).strip().lower()
         if normalized_type not in SUPPORTED_FITTING_INTERFACES:
@@ -208,6 +223,13 @@ class OpticalStackTable:
 
     def front_surface_reflectance(self) -> np.ndarray:
         reflection = (AIR_INDEX - self.n_glass) / (AIR_INDEX + self.n_glass)
+        return np.abs(reflection) ** 2
+
+    def front_surface_reflectance_with_glass(self, glass_nk: np.ndarray) -> np.ndarray:
+        glass = np.asarray(glass_nk, dtype=np.complex128)
+        if glass.shape != self.wavelength_nm.shape:
+            raise ValueError("glass_nk 的形状必须与内部波长网格一致。")
+        reflection = (AIR_INDEX - glass) / (AIR_INDEX + glass)
         return np.abs(reflection) ** 2
 
     def build_stack(
@@ -305,6 +327,104 @@ class OpticalStackTable:
             result = coh_tmm("s", n_list, d_list, th_0=0.0, lam_vac=float(wavelength_nm))
             reflectance[index] = float(result["R"])
         return reflectance
+
+    def calc_pristine_stack_reflectance(
+        self,
+        *,
+        thicknesses: LayerThicknesses | None = None,
+        use_constant_glass: bool = True,
+        constant_glass_nk: complex = DEFAULT_CONSTANT_GLASS_INDEX,
+        ag_boundary_mode: str = AG_BOUNDARY_FINITE_FILM,
+    ) -> np.ndarray:
+        thickness_state = thicknesses or self.thicknesses
+        normalized_ag_mode = self._normalize_ag_boundary_mode(ag_boundary_mode)
+        reflectance = np.empty_like(self.wavelength_nm, dtype=float)
+        if use_constant_glass:
+            glass_grid = np.full(self.wavelength_nm.shape, complex(constant_glass_nk), dtype=np.complex128)
+        else:
+            glass_grid = np.asarray(self.n_glass, dtype=np.complex128)
+
+        for index, wavelength_nm in enumerate(self.wavelength_nm):
+            glass_nk = complex(glass_grid[index])
+            ito_nk = complex(self.n_ito[index])
+            niox_nk = complex(self.n_niox[index])
+            pvk_nk = complex(self.n_pvk[index])
+            c60_nk = complex(self.n_c60[index])
+            ag_nk = complex(self.n_ag[index])
+
+            if normalized_ag_mode == AG_BOUNDARY_FINITE_FILM:
+                n_list = [glass_nk, ito_nk, niox_nk, SAM_INDEX, pvk_nk, c60_nk, ag_nk, AIR_INDEX]
+                d_list = [
+                    np.inf,
+                    thickness_state.ito_nm,
+                    thickness_state.niox_nm,
+                    thickness_state.sam_nm,
+                    thickness_state.pvk_nm,
+                    thickness_state.c60_nm,
+                    thickness_state.ag_nm,
+                    np.inf,
+                ]
+            else:
+                n_list = [glass_nk, ito_nk, niox_nk, SAM_INDEX, pvk_nk, c60_nk, ag_nk]
+                d_list = [
+                    np.inf,
+                    thickness_state.ito_nm,
+                    thickness_state.niox_nm,
+                    thickness_state.sam_nm,
+                    thickness_state.pvk_nm,
+                    thickness_state.c60_nm,
+                    np.inf,
+                ]
+
+            result = coh_tmm("s", n_list, d_list, th_0=0.0, lam_vac=float(wavelength_nm))
+            reflectance[index] = float(result["R"])
+        return reflectance
+
+    def compute_pristine_baseline_decomposition(
+        self,
+        wavelengths_nm: np.ndarray | None = None,
+        *,
+        use_constant_glass: bool = True,
+        constant_glass_nk: complex = DEFAULT_CONSTANT_GLASS_INDEX,
+        ag_boundary_mode: str = AG_BOUNDARY_FINITE_FILM,
+        **kwargs: float,
+    ) -> dict[str, np.ndarray]:
+        thickness_state = self._resolve_thicknesses(**kwargs)
+        if use_constant_glass:
+            glass_grid = np.full(self.wavelength_nm.shape, complex(constant_glass_nk), dtype=np.complex128)
+        else:
+            glass_grid = np.asarray(self.n_glass, dtype=np.complex128)
+
+        r_front = self.front_surface_reflectance_with_glass(glass_grid)
+        t_front = 1.0 - r_front
+        r_stack = self.calc_pristine_stack_reflectance(
+            thicknesses=thickness_state,
+            use_constant_glass=use_constant_glass,
+            constant_glass_nk=constant_glass_nk,
+            ag_boundary_mode=ag_boundary_mode,
+        )
+        denominator = 1.0 - r_front * r_stack
+        if np.any(np.isclose(denominator, 0.0)):
+            raise ValueError("Pristine baseline 的强度级联分母接近 0。")
+        r_total = r_front + (t_front**2) * r_stack / denominator
+
+        if wavelengths_nm is None or np.array_equal(np.asarray(wavelengths_nm, dtype=float), self.wavelength_nm):
+            return {
+                "Wavelength_nm": self.wavelength_nm.copy(),
+                "R_front": r_front,
+                "T_front": t_front,
+                "R_stack": r_stack,
+                "R_total": r_total,
+            }
+
+        query_wavelengths_nm = self._validate_query_wavelengths(wavelengths_nm)
+        return {
+            "Wavelength_nm": query_wavelengths_nm,
+            "R_front": np.interp(query_wavelengths_nm, self.wavelength_nm, r_front),
+            "T_front": np.interp(query_wavelengths_nm, self.wavelength_nm, t_front),
+            "R_stack": np.interp(query_wavelengths_nm, self.wavelength_nm, r_stack),
+            "R_total": np.interp(query_wavelengths_nm, self.wavelength_nm, r_total),
+        }
 
     def calc_macro_reflectance(
         self,
@@ -410,5 +530,24 @@ def forward_model_for_fitting(
         wavelengths_nm=wavelengths_nm,
         d_air_nm=d_air_nm,
         interface_type=interface_type,
+        **kwargs,
+    )
+
+
+def compute_pristine_baseline_decomposition(
+    wavelengths_nm: np.ndarray | None = None,
+    *,
+    use_constant_glass: bool = True,
+    constant_glass_nk: complex = DEFAULT_CONSTANT_GLASS_INDEX,
+    ag_boundary_mode: str = AG_BOUNDARY_FINITE_FILM,
+    **kwargs: float,
+) -> dict[str, np.ndarray]:
+    """Pristine baseline decomposition for Phase A-1 without any defect modulation."""
+    model = load_default_optical_stack_table()
+    return model.compute_pristine_baseline_decomposition(
+        wavelengths_nm=wavelengths_nm,
+        use_constant_glass=use_constant_glass,
+        constant_glass_nk=constant_glass_nk,
+        ag_boundary_mode=ag_boundary_mode,
         **kwargs,
     )
