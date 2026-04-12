@@ -24,6 +24,7 @@ from core.phase07_dual_window import (  # noqa: E402
     plot_rear_basin_scan,
     plot_rear_window_sanity_check,
     plot_residual_diagnostics,
+    plot_stage1_front_fit,
     write_optimizer_log,
     write_phase07_fit_input,
 )
@@ -113,6 +114,7 @@ def main() -> int:
     optimizer_log_path = output_dirs["logs"] / f"phase07_{sample_slug}_zscore_fit_log.md"
     full_plot_path = output_dirs["figures"] / f"phase07_{sample_slug}_full_fit.png"
     dual_plot_path = output_dirs["figures"] / f"phase07_{sample_slug}_dual_window_zoom.png"
+    stage1_plot_path = output_dirs["figures"] / f"phase07_{sample_slug}_stage1_front_fit.png"
     residual_plot_path = output_dirs["figures"] / f"phase07_{sample_slug}_residual_diagnostics.png"
     basin_plot_path = output_dirs["figures"] / f"phase07_{sample_slug}_rear_basin_scan.png"
 
@@ -121,6 +123,7 @@ def main() -> int:
     write_optimizer_log(fit_result, optimizer_log_path)
     plot_measured_vs_fitted_full_spectrum(fit_result, full_plot_path)
     plot_dual_window_zoom(fit_result, dual_plot_path)
+    plot_stage1_front_fit(fit_result, stage1_plot_path)
     plot_residual_diagnostics(fit_result, residual_plot_path)
     plot_rear_basin_scan(fit_result, basin_plot_path)
 
@@ -141,6 +144,7 @@ def main() -> int:
         "",
         f"- full_plot: `{full_plot_path}`",
         f"- dual_window_plot: `{dual_plot_path}`",
+        f"- stage1_front_plot: `{stage1_plot_path}`",
         f"- residual_plot: `{residual_plot_path}`",
         f"- basin_plot: `{basin_plot_path}`",
     ]
@@ -152,6 +156,7 @@ def main() -> int:
     print(f"n_avg_pvk={sanity_check.n_avg_pvk:.6f}")
     print(f"d_estimate_nm={sanity_check.d_estimate_nm:.6f}")
     print(f"rear_sanity_plot={sanity_plot_path}")
+    print(f"stage1_front_plot={stage1_plot_path}")
     print(f"dual_window_plot={dual_plot_path}")
     return 0
 

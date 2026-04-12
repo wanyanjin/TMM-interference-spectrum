@@ -13,5 +13,6 @@
 
 - full_plot: `/Users/luxin/百度网盘同步/Code/TMM-interference-spectrum/results/figures/phase07/phase07_device_1_withag_p1_full_fit.png`
 - dual_window_plot: `/Users/luxin/百度网盘同步/Code/TMM-interference-spectrum/results/figures/phase07/phase07_device_1_withag_p1_dual_window_zoom.png`
+- stage1_front_plot: `/Users/luxin/百度网盘同步/Code/TMM-interference-spectrum/results/figures/phase07/phase07_device_1_withag_p1_stage1_front_fit.png`
 - residual_plot: `/Users/luxin/百度网盘同步/Code/TMM-interference-spectrum/results/figures/phase07/phase07_device_1_withag_p1_residual_diagnostics.png`
 - basin_plot: `/Users/luxin/百度网盘同步/Code/TMM-interference-spectrum/results/figures/phase07/phase07_device_1_withag_p1_rear_basin_scan.png`

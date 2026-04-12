@@ -1287,3 +1287,40 @@ resources/aligned_full_stack_nk.csv
   - `front_scale` 是观测几何修正，不是材料参数；其存在意味着当前绝对反射率链路仍未完全闭合到“无几何损失”的实验口径。
   - `ito_alpha`、`niox_k`、`pvk_b_scale` 仍贴边，说明前后窗之间仍有结构-色散退化，需要在 Phase 08 前向探伤沙盒中继续拆分。
   - masked 区平滑桥接仅用于视觉连续性，不能被解释为真实 PL 背景模型。
+
+## Phase 07 Diagnostic Sandbox Update (2026-04-11)
+
+- Current Phase: `Phase 07`
+- Update summary:
+  - 已新增 `src/scripts/step07_sandbox_probe_a.py`，用于在锁死前场几何与零 Debye-Waller 的条件下，单独探测前窗短波附加吸收是否能解释 `500-650 nm` 幅值失配。
+  - 已新增 `src/scripts/step07_sandbox_probe_b_heatmap.py`，用于在锁定当前 Stage 1 结果后，对后窗 `d_bulk` 与 `pvk_b_scale` 做二维网格扫描并输出 Z-Score Cost 热力图。
+- Verified results:
+  - Probe A 明确反驳了“NiOx 短波缺吸收”这一主假说：`NiOx` 额外短波吸收的最优解几乎为 `0`，且无法降低前窗 cost；`ITO` 额外短波吸收能部分改善前窗，但单参数最优 cost 仍远高于目标线，说明前窗失配不能被单一局部吸收项解释。
+  - Probe B 的后窗热力图显示：全局最小值位于 `d_bulk ≈ 630 nm`、`pvk_b_scale = 0.5` 的扫描边界；谷底轨迹近乎竖直，说明当前主导问题不是典型强 `n-d` 斜向简并，而更像 `pvk_b_scale` 被整体推向低边界后，`d_bulk` 在约 `630 nm` 附近形成局部吸引盆。
+- Risks / pending checks:
+  - 前窗问题更像“缺失的前端物理机制”或“吸收位置/形式不对”，而不是简单的 `NiOx k` 不足。
+  - 后窗问题暂未显示出预想中的长斜谷，提示后续更应优先收紧 `pvk_b_scale` 先验、检查长波折射率口径，而不是盲目把 `d_bulk` 与 `pvk_b_scale` 一起继续放宽。
+
+## Phase 07 Sandbox Probe D Audit Update (2026-04-11)
+
+- Current Phase: `Phase 07`
+- Update summary:
+  - 已新增 `src/scripts/step07_sandbox_probe_d_audit.py`，用于对 `DEVICE-1-withAg-P1` 在 `550 nm` 处执行双路线法医学审查：一条极简前表面理论正算，一条从 0409 原始 `*-cor.csv + .spe` 重建 HDR 并手工复算绝对反射率。
+  - 已输出 `results/logs/phase07/phase07_device_1_withag_p1_sandbox_probe_d_audit.md` 与 `results/figures/phase07/phase07_device_1_withag_p1_sandbox_probe_d_theory_audit.png`。
+- Verified results:
+  - Theory audit 对 `Air -> Glass(incoherent) -> ITO(100) -> NiOx(45) -> PVK(semi-infinite)` 在 `550 nm` 给出 `R_total = 11.889%`；其中单独 `Air/Glass` Fresnel 前表面约为 `4.193%`。
+  - Calibration audit 从 0409 原始文件重建后，在 `550.147 nm` 处得到：
+    - 样品原始均值：`32617.83 counts @ 150 ms`，`64895.00 counts @ 2000 ms`
+    - 银镜原始均值：`40565.95 counts @ 0.5 ms`，`64899.00 counts @ 10 ms`
+    - 厂家银镜反射率：`97.454%`
+  - 若直接忽略 HDR 对齐，仅按原始 `Counts/Time` 手算，则得到：
+    - `short-short = 0.261%`
+    - `long-long = 0.487%`
+  - 但按 HDR 对齐后的实际流水线口径手工复算：
+    - `manual_hdr = 2.671%`
+    - 与同批原始文件重建出的 `2.671%` 完全一致
+    - 与导出 `hdr_curves.csv` 中的 `2.710%` 仅差约 `0.039` 个百分点
+  - 这说明当前 Phase 06/07 校准代码在 `550 nm` 处是算理自洽的；不存在把理论 `~10%` 错算成 `~2.5%` 的隐藏曝光时间解析 Bug。相反，若不做 HDR 曝光对齐，反射率会更低。
+- Risks / pending checks:
+  - `11.889%` 的理想正反射模型与 `2.67%` 的实验校准值之间仍存在约 `4.45x` 的差距；这更符合观测几何 NA 截断、散射漏光或镜面收集损失，而不是当前代码公式错误。
+  - 银镜短曝光与长曝光之间仍存在显著经验对齐因子，说明仪器短曝光链路不能直接按 `Counts/Time` 视为与长曝光严格同口径。

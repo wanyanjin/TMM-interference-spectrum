@@ -1,4 +1,4 @@
-"""Phase 07 dual-window inversion core.
+"""Phase 07 two-step decoupled inversion core.
 
 The PVK optical constants consumed here come from the Phase 05c aligned stack,
 which ultimately traces back to [LIT-0001] within its measured window and uses
@@ -18,11 +18,11 @@ import pandas as pd
 from lmfit import Parameters, minimize
 from scipy.interpolate import PchipInterpolator
 from scipy.optimize import differential_evolution
+from scipy.signal import find_peaks, savgol_filter
 from tmm import coh_tmm
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-from scipy.signal import find_peaks, savgol_filter
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -43,6 +43,7 @@ NIOX_THICKNESS_NM = 45.0
 TOTAL_C60_THICKNESS_NM = 15.0
 AG_THICKNESS_NM = 100.0
 GLASS_FRONT_AIR_N = 1.0 + 0.0j
+
 THICKNESS_AVERAGE_POINT_COUNT = 5
 THICKNESS_AVERAGE_MIN_SIGMA_NM = 0.1
 PARAMETER_BOUND_TOLERANCE_RATIO = 0.05
@@ -58,6 +59,7 @@ DE_TOL = 1e-3
 TIE_BREAK_COST_REL_TOL = 0.02
 TIE_BREAK_COST_ABS_TOL = 1e-5
 OPTIMIZATION_WINDOW_STRIDE = 8
+SCATTER_FLOOR = 1e-6
 
 
 @dataclass(frozen=True)
@@ -101,27 +103,30 @@ class RearWindowSanityCheck:
 
 @dataclass(frozen=True)
 class Phase07Config:
-    parameter_specs: tuple[ParameterSpec, ...]
+    stage1_specs: tuple[ParameterSpec, ...]
+    stage2_specs: tuple[ParameterSpec, ...]
 
     @classmethod
     def default(cls) -> "Phase07Config":
         return cls(
-            parameter_specs=(
+            stage1_specs=(
+                ParameterSpec("d_ITO", 100.0, 90.0, 110.0),
+                ParameterSpec("d_NiOx", 45.0, 35.0, 55.0),
+                ParameterSpec("sigma_front_rms_nm", 25.0, 0.0, 60.0),
+            ),
+            stage2_specs=(
                 ParameterSpec("d_bulk", 700.0, 580.0, 900.0),
                 ParameterSpec("d_rough", 12.0, 0.0, 30.0),
                 ParameterSpec("sigma_thickness", 12.0, 0.0, 80.0),
-                ParameterSpec("front_scale", 0.25, 0.15, 1.00),
                 ParameterSpec("ito_alpha", 1.0, 0.0, 5.0),
                 ParameterSpec("pvk_b_scale", 1.0, 0.80, 1.25),
                 ParameterSpec("niox_k", 0.0, 0.0, 0.12),
-            )
+            ),
         )
 
-    def get_spec(self, name: str) -> ParameterSpec:
-        for spec in self.parameter_specs:
-            if spec.name == name:
-                return spec
-        raise KeyError(f"未知参数: {name}")
+    @property
+    def all_specs(self) -> tuple[ParameterSpec, ...]:
+        return self.stage1_specs + self.stage2_specs
 
 
 @dataclass(frozen=True)
@@ -160,9 +165,37 @@ class Phase07OpticalModel:
 
 
 @dataclass(frozen=True)
+class Phase07FrontStageResult:
+    best_params: dict[str, float]
+    fitted_reflectance: np.ndarray
+    physical_reflectance: np.ndarray
+    scatter_curve: np.ndarray
+    normalized_residual: np.ndarray
+    cost: float
+    optimizer_summary: tuple[dict[str, object], ...]
+
+
+@dataclass(frozen=True)
+class Phase07RearStageResult:
+    best_params: dict[str, float]
+    fitted_reflectance: np.ndarray
+    physical_reflectance: np.ndarray
+    normalized_residual: np.ndarray
+    total_cost: float
+    rear_cost: float
+    front_cost: float
+    rear_derivative_correlation: float
+    coarse_scan_thickness_nm: np.ndarray
+    coarse_scan_cost: np.ndarray
+    coarse_scan_basins_nm: np.ndarray
+    optimizer_summary: tuple[dict[str, object], ...]
+
+
+@dataclass(frozen=True)
 class Phase07FitResult:
     sample_input: Phase07SampleInput
     fitted_reflectance: np.ndarray
+    physical_reflectance: np.ndarray
     residual: np.ndarray
     normalized_residual: np.ndarray
     best_params: dict[str, float]
@@ -181,6 +214,8 @@ class Phase07FitResult:
     warnings: tuple[str, ...]
     rear_z_measured: np.ndarray
     rear_z_fitted: np.ndarray
+    stage1_result: Phase07FrontStageResult
+    stage2_result: Phase07RearStageResult
 
 
 def classify_window_label(wavelength_nm: float) -> str:
@@ -335,11 +370,7 @@ def build_phase07_stack_model(
     )
 
 
-def interpolate_complex(
-    base_wavelength_nm: np.ndarray,
-    base_values: np.ndarray,
-    query_wavelength_nm: np.ndarray,
-) -> np.ndarray:
+def interpolate_complex(base_wavelength_nm: np.ndarray, base_values: np.ndarray, query_wavelength_nm: np.ndarray) -> np.ndarray:
     query = np.asarray(query_wavelength_nm, dtype=float)
     if query.min() < base_wavelength_nm.min() or query.max() > base_wavelength_nm.max():
         raise ValueError(
@@ -374,12 +405,14 @@ def apply_pvk_b_scale(base_nk: np.ndarray, wavelength_nm: np.ndarray, pvk_b_scal
     return n_scaled + 1j * np.imag(base_nk)
 
 
-def apply_niox_k(base_nk: np.ndarray, extra_k: float) -> np.ndarray:
-    return np.real(base_nk) + 1j * (np.imag(base_nk) + extra_k)
+def apply_rear_weighted_niox_k(base_nk: np.ndarray, wavelength_nm: np.ndarray, extra_k: float) -> np.ndarray:
+    wavelength = np.asarray(wavelength_nm, dtype=float)
+    weight = ((wavelength - REAR_WINDOW_NM[0]) / (REAR_WINDOW_NM[1] - REAR_WINDOW_NM[0])) ** 2
+    weight = np.clip(weight, 0.0, 1.0)
+    return np.real(base_nk) + 1j * (np.imag(base_nk) + extra_k * weight)
 
 
 def compute_remaining_c60_bulk_thickness_nm(d_rough_nm: float) -> float:
-    # Roughness is a 50/50 PVK/C60 mixture, so half of its thickness consumes C60 mass.
     return max(0.0, TOTAL_C60_THICKNESS_NM - 0.5 * d_rough_nm)
 
 
@@ -392,13 +425,14 @@ def build_coherent_stack(
     rough_nk: complex,
     c60_nk: complex,
     ag_nk: complex,
+    d_ito_nm: float,
+    d_niox_nm: float,
     d_bulk_nm: float,
     d_rough_nm: float,
     d_c60_bulk_nm: float,
 ) -> tuple[list[complex], list[float]]:
     n_list = [glass_nk, ito_nk, niox_nk, SAM_NK, pvk_nk]
-    d_list = [np.inf, ITO_THICKNESS_NM, NIOX_THICKNESS_NM, SAM_THICKNESS_NM, d_bulk_nm]
-
+    d_list = [np.inf, d_ito_nm, d_niox_nm, SAM_THICKNESS_NM, d_bulk_nm]
     if d_rough_nm > 0.0:
         n_list.append(rough_nk)
         d_list.append(d_rough_nm)
@@ -411,7 +445,6 @@ def build_coherent_stack(
     else:
         n_list.append(GLASS_FRONT_AIR_N)
         d_list.append(np.inf)
-
     return n_list, d_list
 
 
@@ -424,6 +457,8 @@ def calc_macro_reflectance(
     model: Phase07OpticalModel,
     wavelengths_nm: np.ndarray,
     with_ag: bool,
+    d_ITO_nm: float,
+    d_NiOx_nm: float,
     d_bulk_nm: float,
     d_rough_nm: float,
     sigma_thickness_nm: float,
@@ -440,12 +475,10 @@ def calc_macro_reflectance(
     base_ag = interpolate_complex(model.wavelength_nm, model.n_ag, wavelengths)
 
     ito_nk = apply_ito_alpha(base_ito, wavelengths, ito_alpha)
-    niox_nk = apply_niox_k(base_niox, niox_k)
+    niox_nk = apply_rear_weighted_niox_k(base_niox, wavelengths, niox_k)
     pvk_nk = apply_pvk_b_scale(base_pvk, wavelengths, pvk_b_scale)
     rough_nk = calc_bruggeman_ema_50_50(pvk_nk, base_c60)
     d_c60_bulk_nm = compute_remaining_c60_bulk_thickness_nm(d_rough_nm)
-    r_front = calc_front_surface_reflectance(base_glass)
-    t_front = 1.0 - r_front
 
     def calc_single_reflectance(single_d_bulk_nm: float) -> np.ndarray:
         r_stack = np.empty(wavelengths.size, dtype=float)
@@ -459,25 +492,19 @@ def calc_macro_reflectance(
                 rough_nk=complex(rough_nk[index]),
                 c60_nk=complex(base_c60[index]),
                 ag_nk=complex(base_ag[index]),
+                d_ito_nm=d_ITO_nm,
+                d_niox_nm=d_NiOx_nm,
                 d_bulk_nm=single_d_bulk_nm,
                 d_rough_nm=d_rough_nm,
                 d_c60_bulk_nm=d_c60_bulk_nm,
             )
             r_stack[index] = float(coh_tmm("s", n_list, d_list, th_0=0.0, lam_vac=float(wavelength_nm))["R"])
-        denominator = 1.0 - r_front * r_stack
-        if np.any(np.isclose(denominator, 0.0)):
-            raise ValueError("厚玻璃非相干级联分母接近 0。")
-        return r_front + (t_front**2) * r_stack / denominator
+        return r_stack
 
     if sigma_thickness_nm < THICKNESS_AVERAGE_MIN_SIGMA_NM:
         return calc_single_reflectance(d_bulk_nm)
 
-    offsets_nm = np.linspace(
-        -3.0 * sigma_thickness_nm,
-        3.0 * sigma_thickness_nm,
-        THICKNESS_AVERAGE_POINT_COUNT,
-        dtype=float,
-    )
+    offsets_nm = np.linspace(-3.0 * sigma_thickness_nm, 3.0 * sigma_thickness_nm, THICKNESS_AVERAGE_POINT_COUNT, dtype=float)
     weights = np.exp(-(offsets_nm**2) / (2.0 * sigma_thickness_nm**2))
     weights /= np.sum(weights)
 
@@ -487,14 +514,46 @@ def calc_macro_reflectance(
     return averaged
 
 
+def compute_debye_waller_scatter(
+    glass_nk: np.ndarray,
+    wavelength_nm: np.ndarray,
+    sigma_front_rms_nm: float,
+) -> np.ndarray:
+    wavelength = np.asarray(wavelength_nm, dtype=float)
+    n_real = np.real(glass_nk)
+    x_front = (4.0 * np.pi * float(sigma_front_rms_nm) * n_real / wavelength) ** 2
+    return np.clip(np.exp(-x_front), SCATTER_FLOOR, 1.0)
+
+
+def apply_front_scattering_observation_model(
+    glass_nk: np.ndarray,
+    wavelength_nm: np.ndarray,
+    sigma_front_rms_nm: float,
+    stack_reflectance: np.ndarray,
+) -> tuple[np.ndarray, np.ndarray]:
+    r_front = calc_front_surface_reflectance(glass_nk)
+    t_front = 1.0 - r_front
+    s_front = compute_debye_waller_scatter(glass_nk, wavelength_nm, sigma_front_rms_nm)
+    denominator = 1.0 - r_front * stack_reflectance
+    if np.any(np.isclose(denominator, 0.0)):
+        raise ValueError("厚玻璃非相干级联分母接近 0。")
+    collected = s_front * r_front + (s_front**2) * (t_front**2) * stack_reflectance / denominator
+    return collected, s_front
+
+
 def compute_window_scales(sample_input: Phase07SampleInput) -> tuple[WindowScale, ...]:
     outputs: list[WindowScale] = []
     for label, bounds in ((WINDOW_FRONT, FRONT_WINDOW_NM), (WINDOW_REAR, REAR_WINDOW_NM)):
         mask = sample_input.window_label == label
         reflectance = sample_input.reflectance[mask]
-        median_reflectance = float(np.median(reflectance))
-        mad_reflectance = float(np.median(np.abs(reflectance - median_reflectance)))
-        scale_value = max(median_reflectance, 1.4826 * mad_reflectance, RESIDUAL_SCALE_FLOOR)
+        if reflectance.size == 0:
+            median_reflectance = RESIDUAL_SCALE_FLOOR
+            mad_reflectance = 0.0
+            scale_value = RESIDUAL_SCALE_FLOOR
+        else:
+            median_reflectance = float(np.median(reflectance))
+            mad_reflectance = float(np.median(np.abs(reflectance - median_reflectance)))
+            scale_value = max(median_reflectance, 1.4826 * mad_reflectance, RESIDUAL_SCALE_FLOOR)
         outputs.append(
             WindowScale(
                 label=label,
@@ -509,20 +568,15 @@ def compute_window_scales(sample_input: Phase07SampleInput) -> tuple[WindowScale
     return tuple(outputs)
 
 
-def build_optimization_sample_input(
-    sample_input: Phase07SampleInput,
-    stride: int = OPTIMIZATION_WINDOW_STRIDE,
-) -> Phase07SampleInput:
+def build_optimization_sample_input(sample_input: Phase07SampleInput, stride: int = OPTIMIZATION_WINDOW_STRIDE) -> Phase07SampleInput:
     if stride <= 1:
         return sample_input
-
     selected_indices: list[int] = []
     for label in (WINDOW_FRONT, WINDOW_REAR):
         label_indices = np.flatnonzero(sample_input.window_label == label)
         selected_indices.extend(label_indices[::stride].tolist())
         if label_indices.size > 0 and label_indices[-1] not in selected_indices:
             selected_indices.append(int(label_indices[-1]))
-
     selected_indices = sorted(set(selected_indices))
     return Phase07SampleInput(
         sample_name=sample_input.sample_name,
@@ -536,10 +590,7 @@ def build_optimization_sample_input(
     )
 
 
-def compute_rear_derivative_correlation(
-    sample_input: Phase07SampleInput,
-    modeled_reflectance: np.ndarray,
-) -> float:
+def compute_rear_derivative_correlation(sample_input: Phase07SampleInput, modeled_reflectance: np.ndarray) -> float:
     rear_mask = sample_input.rear_mask
     measured = sample_input.reflectance[rear_mask]
     modeled = modeled_reflectance[rear_mask]
@@ -557,35 +608,40 @@ def compute_zscore(values: np.ndarray) -> np.ndarray:
     return (array - float(np.mean(array))) / (float(np.std(array)) + 1e-9)
 
 
-def apply_front_scale_to_reflectance(
-    sample_input: Phase07SampleInput,
-    modeled_reflectance: np.ndarray,
-    front_scale: float,
-) -> np.ndarray:
-    adjusted = np.asarray(modeled_reflectance, dtype=float).copy()
-    adjusted[sample_input.front_mask] *= float(front_scale)
-    return adjusted
-
-
-def build_normalized_residual(
-    sample_input: Phase07SampleInput,
-    modeled_reflectance: np.ndarray,
-    window_scales: tuple[WindowScale, ...],
-) -> np.ndarray:
+def build_front_residual(sample_input: Phase07SampleInput, modeled_reflectance: np.ndarray, window_scales: tuple[WindowScale, ...]) -> np.ndarray:
     residual = modeled_reflectance - sample_input.reflectance
     normalized = np.full(residual.shape, np.nan, dtype=float)
     scale_map = {item.label: item.scale_value for item in window_scales}
     point_map = {item.label: item.point_count for item in window_scales}
-    front_mask = sample_input.window_label == WINDOW_FRONT
-    normalized[front_mask] = (
-        math.sqrt(0.5 / point_map[WINDOW_FRONT]) * residual[front_mask] / scale_map[WINDOW_FRONT]
-    )
-
-    rear_mask = sample_input.window_label == WINDOW_REAR
-    rear_z_modeled = compute_zscore(modeled_reflectance[rear_mask])
-    rear_z_measured = compute_zscore(sample_input.reflectance[rear_mask])
-    normalized[rear_mask] = math.sqrt(0.5 / point_map[WINDOW_REAR]) * (rear_z_modeled - rear_z_measured)
+    front_mask = sample_input.front_mask
+    if point_map[WINDOW_FRONT] > 0:
+        normalized[front_mask] = math.sqrt(1.0 / point_map[WINDOW_FRONT]) * residual[front_mask] / scale_map[WINDOW_FRONT]
     return normalized
+
+
+def build_rear_residual(sample_input: Phase07SampleInput, modeled_reflectance: np.ndarray, window_scales: tuple[WindowScale, ...]) -> np.ndarray:
+    normalized = np.full(sample_input.reflectance.shape, np.nan, dtype=float)
+    point_map = {item.label: item.point_count for item in window_scales}
+    rear_mask = sample_input.rear_mask
+    if point_map[WINDOW_REAR] > 0:
+        z_model = compute_zscore(modeled_reflectance[rear_mask])
+        z_meas = compute_zscore(sample_input.reflectance[rear_mask])
+        normalized[rear_mask] = math.sqrt(1.0 / point_map[WINDOW_REAR]) * (z_model - z_meas)
+    return normalized
+
+
+def compute_cost_from_normalized_residual(normalized_residual: np.ndarray) -> float:
+    finite = normalized_residual[np.isfinite(normalized_residual)]
+    if finite.size == 0:
+        raise ValueError("归一化残差为空，无法计算 cost。")
+    return float(np.sum(finite**2))
+
+
+def params_to_lmfit_parameters(specs: tuple[ParameterSpec, ...], initial_values: dict[str, float]) -> Parameters:
+    params = Parameters()
+    for spec in specs:
+        params.add(spec.name, value=float(initial_values[spec.name]), min=float(spec.minimum), max=float(spec.maximum))
+    return params
 
 
 def estimate_rear_window_thickness(
@@ -599,7 +655,6 @@ def estimate_rear_window_thickness(
     reflectance = sample_input.reflectance[rear_mask]
     if wavelength_nm.size < 9:
         raise ValueError("后窗点数不足，无法进行峰谷自证验算。")
-
     window_length = max(11, int(wavelength_nm.size * smoothing_fraction))
     if window_length % 2 == 0:
         window_length += 1
@@ -607,34 +662,24 @@ def estimate_rear_window_thickness(
         window_length = wavelength_nm.size - 1
         if window_length % 2 == 0:
             window_length -= 1
-
     smoothed = savgol_filter(reflectance, window_length=window_length, polyorder=polyorder)
     prominence = max((float(np.max(smoothed)) - float(np.min(smoothed))) * 0.015, 1e-6)
     distance = max(30, wavelength_nm.size // 8)
     peaks, _ = find_peaks(smoothed, prominence=prominence, distance=distance)
     valleys, _ = find_peaks(-smoothed, prominence=prominence, distance=distance)
-
-    extrema = sorted(
-        [(int(index), "peak") for index in peaks] + [(int(index), "valley") for index in valleys],
-        key=lambda item: item[0],
-    )
+    extrema = sorted([(int(index), "peak") for index in peaks] + [(int(index), "valley") for index in valleys], key=lambda item: item[0])
     selected_pair: tuple[int, int] | None = None
     selected_types: tuple[str, str] | None = None
     for left, right in zip(extrema, extrema[1:]):
-        if left[1] == right[1]:
-            continue
-        selected_pair = (left[0], right[0])
-        selected_types = (left[1], right[1])
-        break
-
+        if left[1] != right[1]:
+            selected_pair = (left[0], right[0])
+            selected_types = (left[1], right[1])
+            break
     if selected_pair is None or selected_types is None:
         peak_index = int(np.argmax(smoothed))
         valley_index = int(np.argmin(smoothed))
-        if peak_index == valley_index:
-            raise ValueError("后窗平滑曲线未能识别有效峰谷。")
         selected_pair = tuple(sorted((peak_index, valley_index)))
         selected_types = ("peak", "valley") if peak_index < valley_index else ("valley", "peak")
-
     left_index, right_index = selected_pair
     lambda_left = float(wavelength_nm[left_index])
     lambda_right = float(wavelength_nm[right_index])
@@ -645,13 +690,9 @@ def estimate_rear_window_thickness(
     else:
         lambda_peak_nm = lambda_right
         lambda_valley_nm = lambda_left
-
     lambda_mean = 0.5 * (lambda_peak_nm + lambda_valley_nm)
     n_avg_pvk = float(np.interp(lambda_mean, model.wavelength_nm, np.real(model.n_pvk)))
-    d_estimate_nm = (lambda_peak_nm * lambda_valley_nm) / (
-        4.0 * n_avg_pvk * abs(lambda_peak_nm - lambda_valley_nm)
-    )
-
+    d_estimate_nm = (lambda_peak_nm * lambda_valley_nm) / (4.0 * n_avg_pvk * abs(lambda_peak_nm - lambda_valley_nm))
     return RearWindowSanityCheck(
         sample_name=sample_input.sample_name,
         smoothing_window_length=window_length,
@@ -664,80 +705,188 @@ def estimate_rear_window_thickness(
     )
 
 
-def compute_cost_from_normalized_residual(normalized_residual: np.ndarray) -> float:
-    finite = normalized_residual[np.isfinite(normalized_residual)]
-    if finite.size == 0:
-        raise ValueError("归一化残差为空，无法计算 cost。")
-    return float(np.sum(finite**2))
-
-
-def parameter_vector_to_dict(config: Phase07Config, vector: np.ndarray) -> dict[str, float]:
+def _stage1_defaults() -> dict[str, float]:
     return {
-        spec.name: float(vector[index])
-        for index, spec in enumerate(config.parameter_specs)
+        "d_ITO": ITO_THICKNESS_NM,
+        "d_NiOx": NIOX_THICKNESS_NM,
+        "sigma_front_rms_nm": 25.0,
+        "d_bulk": 700.0,
+        "d_rough": 0.0,
+        "sigma_thickness": 0.0,
+        "ito_alpha": 0.0,
+        "pvk_b_scale": 1.0,
+        "niox_k": 0.0,
     }
 
 
-def params_to_lmfit_parameters(config: Phase07Config, initial_values: dict[str, float]) -> Parameters:
-    params = Parameters()
-    for spec in config.parameter_specs:
-        params.add(
-            spec.name,
-            value=float(initial_values[spec.name]),
-            min=float(spec.minimum),
-            max=float(spec.maximum),
-        )
-    return params
-
-
-def evaluate_model_and_cost(
+def evaluate_stage1_model(
     sample_input: Phase07SampleInput,
     model: Phase07OpticalModel,
-    params_dict: dict[str, float],
+    params: dict[str, float],
+    window_scales: tuple[WindowScale, ...],
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, float]:
+    wavelengths = sample_input.wavelength_nm
+    base_glass = interpolate_complex(model.wavelength_nm, model.n_glass, wavelengths)
+    physical = calc_macro_reflectance(
+        model=model,
+        wavelengths_nm=wavelengths,
+        with_ag=sample_input.with_ag,
+        d_ITO_nm=params["d_ITO"],
+        d_NiOx_nm=params["d_NiOx"],
+        d_bulk_nm=params["d_bulk"],
+        d_rough_nm=params["d_rough"],
+        sigma_thickness_nm=params["sigma_thickness"],
+        ito_alpha=params["ito_alpha"],
+        pvk_b_scale=params["pvk_b_scale"],
+        niox_k=params["niox_k"],
+    )
+    collected, scatter_curve = apply_front_scattering_observation_model(
+        glass_nk=base_glass,
+        wavelength_nm=wavelengths,
+        sigma_front_rms_nm=params["sigma_front_rms_nm"],
+        stack_reflectance=physical,
+    )
+    normalized = build_front_residual(sample_input, collected, window_scales)
+    cost = compute_cost_from_normalized_residual(np.where(sample_input.front_mask, normalized, np.nan))
+    return physical, collected, normalized, cost
+
+
+def fit_stage1_front_window(
+    sample_input: Phase07SampleInput,
+    model: Phase07OpticalModel,
+    config: Phase07Config,
+) -> Phase07FrontStageResult:
+    front_sample = Phase07SampleInput(
+        sample_name=sample_input.sample_name,
+        with_ag=sample_input.with_ag,
+        source_mode=sample_input.source_mode,
+        source_path=sample_input.source_path,
+        fit_input_path=sample_input.fit_input_path,
+        wavelength_nm=sample_input.wavelength_nm[sample_input.front_mask],
+        reflectance=sample_input.reflectance[sample_input.front_mask],
+        window_label=sample_input.window_label[sample_input.front_mask],
+    )
+    window_scales = compute_window_scales(front_sample)
+    optimization_sample = build_optimization_sample_input(front_sample)
+    optimization_scales = compute_window_scales(optimization_sample)
+    specs = config.stage1_specs
+    defaults = _stage1_defaults()
+
+    def vector_to_dict(vector: np.ndarray) -> dict[str, float]:
+        output = dict(defaults)
+        for index, spec in enumerate(specs):
+            output[spec.name] = float(vector[index])
+        return output
+
+    def scalar_cost(vector: np.ndarray) -> float:
+        params = vector_to_dict(np.asarray(vector, dtype=float))
+        _, _, _, cost = evaluate_stage1_model(optimization_sample, model, params, optimization_scales)
+        return cost
+
+    bounds = [(spec.minimum, spec.maximum) for spec in specs]
+    de_result = differential_evolution(
+        scalar_cost,
+        bounds=bounds,
+        seed=DE_SEED,
+        maxiter=DE_MAXITER,
+        popsize=DE_POPSIZE,
+        tol=DE_TOL,
+        polish=False,
+        updating="deferred",
+        workers=1,
+    )
+    de_params = vector_to_dict(np.asarray(de_result.x, dtype=float))
+    lmfit_params = params_to_lmfit_parameters(specs, de_params)
+
+    def residual_for_lmfit(params_obj: Parameters) -> np.ndarray:
+        params = dict(defaults)
+        for spec in specs:
+            params[spec.name] = float(params_obj[spec.name].value)
+        _, _, normalized, _ = evaluate_stage1_model(optimization_sample, model, params, optimization_scales)
+        return normalized[np.isfinite(normalized)]
+
+    lmfit_result = minimize(residual_for_lmfit, lmfit_params, method="least_squares", max_nfev=80)
+    best_params = dict(defaults)
+    for spec in specs:
+        best_params[spec.name] = float(lmfit_result.params[spec.name].value)
+    physical, collected, normalized, cost = evaluate_stage1_model(sample_input, model, best_params, window_scales)
+    _, scatter_curve = apply_front_scattering_observation_model(
+        glass_nk=interpolate_complex(model.wavelength_nm, model.n_glass, sample_input.wavelength_nm),
+        wavelength_nm=sample_input.wavelength_nm,
+        sigma_front_rms_nm=best_params["sigma_front_rms_nm"],
+        stack_reflectance=physical,
+    )
+    return Phase07FrontStageResult(
+        best_params={key: float(best_params[key]) for key in ("d_ITO", "d_NiOx", "sigma_front_rms_nm")},
+        fitted_reflectance=collected,
+        physical_reflectance=physical,
+        scatter_curve=scatter_curve,
+        normalized_residual=normalized,
+        cost=cost,
+        optimizer_summary=(
+            {
+                "stage": "stage1_front",
+                "de_fun": float(de_result.fun),
+                "de_nit": int(de_result.nit),
+                "de_nfev": int(de_result.nfev),
+                "lmfit_nfev": int(lmfit_result.nfev),
+                "lmfit_success": bool(lmfit_result.success),
+                "params": {key: float(best_params[key]) for key in ("d_ITO", "d_NiOx", "sigma_front_rms_nm")},
+                "front_cost": float(cost),
+            },
+        ),
+    )
+
+
+def evaluate_stage2_model(
+    sample_input: Phase07SampleInput,
+    model: Phase07OpticalModel,
+    stage1_params: dict[str, float],
+    stage2_params: dict[str, float],
     window_scales: tuple[WindowScale, ...],
     use_rear_only: bool = False,
-) -> tuple[np.ndarray, np.ndarray, float, float]:
-    physical_reflectance = calc_macro_reflectance(
+) -> tuple[np.ndarray, np.ndarray, float, float, np.ndarray]:
+    wavelengths = sample_input.wavelength_nm
+    base_glass = interpolate_complex(model.wavelength_nm, model.n_glass, wavelengths)
+    physical = calc_macro_reflectance(
         model=model,
-        wavelengths_nm=sample_input.wavelength_nm,
+        wavelengths_nm=wavelengths,
         with_ag=sample_input.with_ag,
-        d_bulk_nm=params_dict["d_bulk"],
-        d_rough_nm=params_dict["d_rough"],
-        sigma_thickness_nm=params_dict["sigma_thickness"],
-        ito_alpha=params_dict["ito_alpha"],
-        pvk_b_scale=params_dict["pvk_b_scale"],
-        niox_k=params_dict["niox_k"],
+        d_ITO_nm=stage1_params["d_ITO"],
+        d_NiOx_nm=stage1_params["d_NiOx"],
+        d_bulk_nm=stage2_params["d_bulk"],
+        d_rough_nm=stage2_params["d_rough"],
+        sigma_thickness_nm=stage2_params["sigma_thickness"],
+        ito_alpha=stage2_params["ito_alpha"],
+        pvk_b_scale=stage2_params["pvk_b_scale"],
+        niox_k=stage2_params["niox_k"],
     )
-    modeled_reflectance = apply_front_scale_to_reflectance(
-        sample_input=sample_input,
-        modeled_reflectance=physical_reflectance,
-        front_scale=params_dict["front_scale"],
+    collected, _ = apply_front_scattering_observation_model(
+        glass_nk=base_glass,
+        wavelength_nm=wavelengths,
+        sigma_front_rms_nm=stage1_params["sigma_front_rms_nm"],
+        stack_reflectance=physical,
     )
-    normalized_residual = build_normalized_residual(sample_input, modeled_reflectance, window_scales)
-    if use_rear_only:
-        rear_only = np.full_like(normalized_residual, np.nan)
-        rear_only[sample_input.rear_mask] = normalized_residual[sample_input.rear_mask]
-        cost = compute_cost_from_normalized_residual(rear_only)
-    else:
-        cost = compute_cost_from_normalized_residual(normalized_residual)
-    derivative_correlation = compute_rear_derivative_correlation(sample_input, modeled_reflectance)
-    return modeled_reflectance, normalized_residual, cost, derivative_correlation
+    front_norm = build_front_residual(sample_input, collected, window_scales)
+    rear_norm = build_rear_residual(sample_input, collected, window_scales)
+    normalized = np.where(np.isfinite(front_norm), front_norm, rear_norm)
+    cost_target = np.where(sample_input.rear_mask, rear_norm, np.nan) if use_rear_only else normalized
+    cost = compute_cost_from_normalized_residual(cost_target)
+    derivative_correlation = compute_rear_derivative_correlation(sample_input, collected)
+    rear_z_model = compute_zscore(collected[sample_input.rear_mask])
+    return physical, collected, cost, derivative_correlation, normalized
 
 
-def identify_coarse_scan_basins(
-    thickness_nm: np.ndarray,
-    cost_values: np.ndarray,
-) -> np.ndarray:
+def identify_coarse_scan_basins(thickness_nm: np.ndarray, cost_values: np.ndarray) -> np.ndarray:
     candidate_indices: list[int] = []
     for index in range(1, len(cost_values) - 1):
         if cost_values[index] <= cost_values[index - 1] and cost_values[index] <= cost_values[index + 1]:
             candidate_indices.append(index)
     if not candidate_indices:
         candidate_indices = [int(np.argmin(cost_values))]
-
-    ordered_indices = sorted(candidate_indices, key=lambda item: float(cost_values[item]))
+    ordered = sorted(candidate_indices, key=lambda item: float(cost_values[item]))
     selected_nm: list[float] = []
-    for index in ordered_indices:
+    for index in ordered:
         value_nm = float(thickness_nm[index])
         if all(abs(value_nm - existing) >= MIN_BASIN_SEPARATION_NM for existing in selected_nm):
             selected_nm.append(value_nm)
@@ -746,83 +895,62 @@ def identify_coarse_scan_basins(
     return np.asarray(selected_nm, dtype=float)
 
 
-def residual_for_lmfit(
-    params: Parameters,
+def fit_stage2_rear_window(
     sample_input: Phase07SampleInput,
     model: Phase07OpticalModel,
-    window_scales: tuple[WindowScale, ...],
-) -> np.ndarray:
-    param_dict = {name: float(params[name].value) for name in params}
-    _, normalized_residual, _, _ = evaluate_model_and_cost(
-        sample_input=sample_input,
-        model=model,
-        params_dict=param_dict,
-        window_scales=window_scales,
-        use_rear_only=False,
-    )
-    return normalized_residual[np.isfinite(normalized_residual)]
-
-
-def fit_dual_window_sample(
-    sample_input: Phase07SampleInput,
-    model: Phase07OpticalModel,
-    config: Phase07Config | None = None,
-) -> Phase07FitResult:
-    config = config or Phase07Config.default()
+    config: Phase07Config,
+    stage1_result: Phase07FrontStageResult,
+) -> Phase07RearStageResult:
     window_scales = compute_window_scales(sample_input)
-    optimization_sample_input = build_optimization_sample_input(sample_input)
-    optimization_window_scales = compute_window_scales(optimization_sample_input)
+    optimization_sample = build_optimization_sample_input(sample_input)
+    optimization_scales = compute_window_scales(optimization_sample)
+    specs = config.stage2_specs
+    defaults = {spec.name: spec.initial for spec in specs}
+    stage1_params = dict(stage1_result.best_params)
 
-    scan_spec = config.get_spec("d_bulk")
-    coarse_scan_thickness_nm = np.arange(
-        scan_spec.minimum,
-        scan_spec.maximum + REAR_D_BULK_SCAN_STEP_NM,
-        REAR_D_BULK_SCAN_STEP_NM,
-        dtype=float,
-    )
+    scan_spec = next(spec for spec in specs if spec.name == "d_bulk")
+    coarse_scan_thickness_nm = np.arange(scan_spec.minimum, scan_spec.maximum + REAR_D_BULK_SCAN_STEP_NM, REAR_D_BULK_SCAN_STEP_NM, dtype=float)
     coarse_scan_cost = np.empty_like(coarse_scan_thickness_nm)
-    defaults = {spec.name: spec.initial for spec in config.parameter_specs}
     for index, d_bulk_nm in enumerate(coarse_scan_thickness_nm):
         defaults["d_bulk"] = float(d_bulk_nm)
-        _, _, cost, _ = evaluate_model_and_cost(
-            sample_input=optimization_sample_input,
-            model=model,
-            params_dict=defaults,
-            window_scales=optimization_window_scales,
+        _, _, cost, _, _ = evaluate_stage2_model(
+            optimization_sample,
+            model,
+            stage1_params,
+            defaults,
+            optimization_scales,
             use_rear_only=True,
         )
         coarse_scan_cost[index] = cost
-
     coarse_scan_basins_nm = identify_coarse_scan_basins(coarse_scan_thickness_nm, coarse_scan_cost)
-    candidate_summaries: list[dict[str, object]] = []
 
+    def vector_to_dict(vector: np.ndarray) -> dict[str, float]:
+        return {spec.name: float(vector[index]) for index, spec in enumerate(specs)}
+
+    candidate_summaries: list[dict[str, object]] = []
     for basin_center_nm in coarse_scan_basins_nm:
-        basin_bounds: list[tuple[float, float]] = []
-        for spec in config.parameter_specs:
+        bounds: list[tuple[float, float]] = []
+        for spec in specs:
             if spec.name == "d_bulk":
-                basin_bounds.append(
-                    (
-                        max(spec.minimum, float(basin_center_nm - REAR_BASIN_HALF_WIDTH_NM)),
-                        min(spec.maximum, float(basin_center_nm + REAR_BASIN_HALF_WIDTH_NM)),
-                    )
-                )
+                bounds.append((max(spec.minimum, basin_center_nm - REAR_BASIN_HALF_WIDTH_NM), min(spec.maximum, basin_center_nm + REAR_BASIN_HALF_WIDTH_NM)))
             else:
-                basin_bounds.append((spec.minimum, spec.maximum))
+                bounds.append((spec.minimum, spec.maximum))
 
         def scalar_cost(vector: np.ndarray) -> float:
-            params_dict = parameter_vector_to_dict(config, vector)
-            _, _, cost, _ = evaluate_model_and_cost(
-                sample_input=optimization_sample_input,
-                model=model,
-                params_dict=params_dict,
-                window_scales=optimization_window_scales,
+            stage2_params = vector_to_dict(np.asarray(vector, dtype=float))
+            _, _, cost, _, _ = evaluate_stage2_model(
+                optimization_sample,
+                model,
+                stage1_params,
+                stage2_params,
+                optimization_scales,
                 use_rear_only=False,
             )
             return cost
 
         de_result = differential_evolution(
             scalar_cost,
-            bounds=basin_bounds,
+            bounds=bounds,
             seed=DE_SEED,
             maxiter=DE_MAXITER,
             popsize=DE_POPSIZE,
@@ -831,26 +959,33 @@ def fit_dual_window_sample(
             updating="deferred",
             workers=1,
         )
-        de_params = parameter_vector_to_dict(config, np.asarray(de_result.x, dtype=float))
-        lmfit_params = params_to_lmfit_parameters(config, de_params)
-        lmfit_result = minimize(
-            residual_for_lmfit,
-            lmfit_params,
-            args=(optimization_sample_input, model, optimization_window_scales),
-            method="least_squares",
-            max_nfev=80,
-        )
-        local_params = {
-            spec.name: float(lmfit_result.params[spec.name].value)
-            for spec in config.parameter_specs
-        }
-        modeled_reflectance, normalized_residual, total_cost, derivative_correlation = evaluate_model_and_cost(
-            sample_input=sample_input,
-            model=model,
-            params_dict=local_params,
-            window_scales=window_scales,
+        de_params = vector_to_dict(np.asarray(de_result.x, dtype=float))
+        lmfit_params = params_to_lmfit_parameters(specs, de_params)
+
+        def residual_for_lmfit(params_obj: Parameters) -> np.ndarray:
+            stage2_params = {spec.name: float(params_obj[spec.name].value) for spec in specs}
+            _, _, _, _, normalized = evaluate_stage2_model(
+                optimization_sample,
+                model,
+                stage1_params,
+                stage2_params,
+                optimization_scales,
+                use_rear_only=False,
+            )
+            return normalized[np.isfinite(normalized)]
+
+        lmfit_result = minimize(residual_for_lmfit, lmfit_params, method="least_squares", max_nfev=80)
+        stage2_params = {spec.name: float(lmfit_result.params[spec.name].value) for spec in specs}
+        physical, collected, total_cost, derivative_correlation, normalized = evaluate_stage2_model(
+            sample_input,
+            model,
+            stage1_params,
+            stage2_params,
+            window_scales,
             use_rear_only=False,
         )
+        front_cost = compute_cost_from_normalized_residual(np.where(sample_input.front_mask, normalized, np.nan))
+        rear_cost = compute_cost_from_normalized_residual(np.where(sample_input.rear_mask, normalized, np.nan))
         candidate_summaries.append(
             {
                 "basin_center_nm": float(basin_center_nm),
@@ -859,47 +994,76 @@ def fit_dual_window_sample(
                 "de_nfev": int(de_result.nfev),
                 "lmfit_nfev": int(lmfit_result.nfev),
                 "lmfit_success": bool(lmfit_result.success),
+                "params": stage2_params,
+                "physical_reflectance": physical,
+                "fitted_reflectance": collected,
+                "normalized_residual": normalized,
                 "total_cost": total_cost,
+                "front_cost": front_cost,
+                "rear_cost": rear_cost,
                 "rear_derivative_correlation": derivative_correlation,
-                "params": local_params,
-                "modeled_reflectance": modeled_reflectance,
-                "normalized_residual": normalized_residual,
             }
         )
 
     best_cost = min(float(item["total_cost"]) for item in candidate_summaries)
-    tied_candidates = [
-        item
-        for item in candidate_summaries
-        if float(item["total_cost"]) <= max(best_cost * (1.0 + TIE_BREAK_COST_REL_TOL), best_cost + TIE_BREAK_COST_ABS_TOL)
-    ]
-    chosen_candidate = max(
-        tied_candidates,
-        key=lambda item: (float(item["rear_derivative_correlation"]), -float(item["total_cost"])),
+    tied = [item for item in candidate_summaries if float(item["total_cost"]) <= max(best_cost * (1.0 + TIE_BREAK_COST_REL_TOL), best_cost + TIE_BREAK_COST_ABS_TOL)]
+    chosen = max(tied, key=lambda item: (float(item["rear_derivative_correlation"]), -float(item["total_cost"])))
+    return Phase07RearStageResult(
+        best_params={key: float(chosen["params"][key]) for key in chosen["params"]},
+        fitted_reflectance=np.asarray(chosen["fitted_reflectance"], dtype=float),
+        physical_reflectance=np.asarray(chosen["physical_reflectance"], dtype=float),
+        normalized_residual=np.asarray(chosen["normalized_residual"], dtype=float),
+        total_cost=float(chosen["total_cost"]),
+        rear_cost=float(chosen["rear_cost"]),
+        front_cost=float(chosen["front_cost"]),
+        rear_derivative_correlation=float(chosen["rear_derivative_correlation"]),
+        coarse_scan_thickness_nm=coarse_scan_thickness_nm,
+        coarse_scan_cost=coarse_scan_cost,
+        coarse_scan_basins_nm=coarse_scan_basins_nm,
+        optimizer_summary=tuple(
+            {
+                "stage": "stage2_rear",
+                "basin_center_nm": float(item["basin_center_nm"]),
+                "de_fun": float(item["de_fun"]),
+                "de_nit": int(item["de_nit"]),
+                "de_nfev": int(item["de_nfev"]),
+                "lmfit_nfev": int(item["lmfit_nfev"]),
+                "lmfit_success": bool(item["lmfit_success"]),
+                "total_cost": float(item["total_cost"]),
+                "front_cost": float(item["front_cost"]),
+                "rear_cost": float(item["rear_cost"]),
+                "rear_derivative_correlation": float(item["rear_derivative_correlation"]),
+                "params": {key: float(value) for key, value in dict(item["params"]).items()},
+            }
+            for item in candidate_summaries
+        ),
     )
 
-    best_params = dict(chosen_candidate["params"])
-    fitted_reflectance = np.asarray(chosen_candidate["modeled_reflectance"], dtype=float)
-    normalized_residual = np.asarray(chosen_candidate["normalized_residual"], dtype=float)
-    residual = fitted_reflectance - sample_input.reflectance
+
+def fit_phase07_two_step_sample(
+    sample_input: Phase07SampleInput,
+    model: Phase07OpticalModel,
+    config: Phase07Config | None = None,
+) -> Phase07FitResult:
+    config = config or Phase07Config.default()
+    window_scales = compute_window_scales(sample_input)
+    stage1_result = fit_stage1_front_window(sample_input, model, config)
+    stage2_result = fit_stage2_rear_window(sample_input, model, config, stage1_result)
+
+    best_params = dict(stage1_result.best_params)
+    best_params.update(stage2_result.best_params)
+    residual = stage2_result.fitted_reflectance - sample_input.reflectance
     masked_residual = residual[sample_input.masked_mask]
     masked_stats = MaskedResidualStats(
         mean=float(np.mean(masked_residual)),
         std=float(np.std(masked_residual)),
         max_abs=float(np.max(np.abs(masked_residual))),
     )
-
-    front_cost = compute_cost_from_normalized_residual(
-        np.where(sample_input.front_mask, normalized_residual, np.nan)
-    )
-    rear_cost = compute_cost_from_normalized_residual(
-        np.where(sample_input.rear_mask, normalized_residual, np.nan)
-    )
     d_c60_bulk_best = compute_remaining_c60_bulk_thickness_nm(best_params["d_rough"])
 
     bound_hit_flags: dict[str, bool] = {}
     warnings: list[str] = []
-    for spec in config.parameter_specs:
+    for spec in config.all_specs:
         span = spec.maximum - spec.minimum
         tolerance = PARAMETER_BOUND_TOLERANCE_RATIO * span
         value = best_params[spec.name]
@@ -909,63 +1073,62 @@ def fit_dual_window_sample(
             warnings.append(f"{spec.name} 接近边界")
     if np.isclose(d_c60_bulk_best, 0.0):
         warnings.append("d_C60_bulk 退化到 0 nm，粗糙层已耗尽致密 C60")
-    if d_c60_bulk_best == 0.0 and rear_cost > 0.02:
-        warnings.append("C60 退化后后窗残差仍偏大，可能存在结构未充分约束")
 
-    optimizer_stage_summary = tuple(
-        {
-            "basin_center_nm": float(item["basin_center_nm"]),
-            "de_fun": float(item["de_fun"]),
-            "de_nit": int(item["de_nit"]),
-            "de_nfev": int(item["de_nfev"]),
-            "lmfit_nfev": int(item["lmfit_nfev"]),
-            "lmfit_success": bool(item["lmfit_success"]),
-            "total_cost": float(item["total_cost"]),
-            "rear_derivative_correlation": float(item["rear_derivative_correlation"]),
-            "params": {
-                key: float(value)
-                for key, value in dict(item["params"]).items()
-            },
-        }
-        for item in candidate_summaries
-    )
-
+    optimizer_summary = stage1_result.optimizer_summary + stage2_result.optimizer_summary
     return Phase07FitResult(
         sample_input=sample_input,
-        fitted_reflectance=fitted_reflectance,
+        fitted_reflectance=stage2_result.fitted_reflectance,
+        physical_reflectance=stage2_result.physical_reflectance,
         residual=residual,
-        normalized_residual=normalized_residual,
+        normalized_residual=stage2_result.normalized_residual,
         best_params=best_params,
         d_c60_bulk_best=d_c60_bulk_best,
         window_scales=window_scales,
-        window_cost_front=front_cost,
-        window_cost_rear=rear_cost,
-        total_cost=float(chosen_candidate["total_cost"]),
+        window_cost_front=float(stage1_result.cost),
+        window_cost_rear=float(stage2_result.rear_cost),
+        total_cost=float(stage2_result.total_cost),
         masked_band_residual_stats=masked_stats,
-        rear_derivative_correlation=float(chosen_candidate["rear_derivative_correlation"]),
-        coarse_scan_thickness_nm=coarse_scan_thickness_nm,
-        coarse_scan_cost=coarse_scan_cost,
-        coarse_scan_basins_nm=coarse_scan_basins_nm,
-        optimizer_stage_summary=optimizer_stage_summary,
+        rear_derivative_correlation=float(stage2_result.rear_derivative_correlation),
+        coarse_scan_thickness_nm=stage2_result.coarse_scan_thickness_nm,
+        coarse_scan_cost=stage2_result.coarse_scan_cost,
+        coarse_scan_basins_nm=stage2_result.coarse_scan_basins_nm,
+        optimizer_stage_summary=optimizer_summary,
         bound_hit_flags=bound_hit_flags,
         warnings=tuple(warnings),
         rear_z_measured=compute_zscore(sample_input.reflectance[sample_input.rear_mask]),
-        rear_z_fitted=compute_zscore(fitted_reflectance[sample_input.rear_mask]),
+        rear_z_fitted=compute_zscore(stage2_result.fitted_reflectance[sample_input.rear_mask]),
+        stage1_result=stage1_result,
+        stage2_result=stage2_result,
     )
+
+
+def fit_dual_window_sample(
+    sample_input: Phase07SampleInput,
+    model: Phase07OpticalModel,
+    config: Phase07Config | None = None,
+) -> Phase07FitResult:
+    return fit_phase07_two_step_sample(sample_input=sample_input, model=model, config=config)
 
 
 def export_fit_curve_table(result: Phase07FitResult, output_path: Path) -> None:
     rear_z_measured = np.full(result.sample_input.wavelength_nm.shape, np.nan, dtype=float)
     rear_z_fitted = np.full(result.sample_input.wavelength_nm.shape, np.nan, dtype=float)
+    scatter_curve = np.full(result.sample_input.wavelength_nm.shape, np.nan, dtype=float)
+    physical_stage1 = np.full(result.sample_input.wavelength_nm.shape, np.nan, dtype=float)
     rear_z_measured[result.sample_input.rear_mask] = result.rear_z_measured
     rear_z_fitted[result.sample_input.rear_mask] = result.rear_z_fitted
+    scatter_curve[result.sample_input.front_mask] = result.stage1_result.scatter_curve[result.sample_input.front_mask]
+    physical_stage1[result.sample_input.front_mask] = result.stage1_result.physical_reflectance[result.sample_input.front_mask]
     frame = pd.DataFrame(
         {
             "Wavelength_nm": result.sample_input.wavelength_nm,
             "Absolute_Reflectance_Measured": result.sample_input.reflectance,
             "Absolute_Reflectance_Fitted": result.fitted_reflectance,
+            "Absolute_Reflectance_Physical": result.physical_reflectance,
             "Residual": result.residual,
             "Normalized_Residual": result.normalized_residual,
+            "Front_Scatter_Curve": scatter_curve,
+            "Front_Physical_Reflectance": physical_stage1,
             "Rear_ZScore_Measured": rear_z_measured,
             "Rear_ZScore_Fitted": rear_z_fitted,
             "window_label": result.sample_input.window_label,
@@ -979,7 +1142,10 @@ def export_fit_summary_table(result: Phase07FitResult, output_path: Path) -> Non
         "sample_name": result.sample_input.sample_name,
         "with_ag": result.sample_input.with_ag,
         "source_mode": result.sample_input.source_mode,
+        "stage1_locked": True,
         "d_C60_bulk_best": result.d_c60_bulk_best,
+        "stage1_front_cost": result.stage1_result.cost,
+        "stage2_rear_cost": result.stage2_result.rear_cost,
         "window_cost_front": result.window_cost_front,
         "window_cost_rear": result.window_cost_rear,
         "total_cost": result.total_cost,
@@ -1001,7 +1167,7 @@ def export_fit_summary_table(result: Phase07FitResult, output_path: Path) -> Non
 
 def write_optimizer_log(result: Phase07FitResult, output_path: Path) -> None:
     lines = [
-        f"# Phase 07 Dual-Window Inversion Log: {result.sample_input.sample_name}",
+        f"# Phase 07 Two-Step Inversion Log: {result.sample_input.sample_name}",
         "",
         "## Sample",
         "",
@@ -1009,25 +1175,18 @@ def write_optimizer_log(result: Phase07FitResult, output_path: Path) -> None:
         f"- source_path: `{result.sample_input.source_path}`",
         f"- with_ag: `{result.sample_input.with_ag}`",
         "",
-        "## Window Scales",
+        "## Stage 1 Front Lock",
+        "",
+        f"- d_ITO: `{result.stage1_result.best_params['d_ITO']:.6f}` nm",
+        f"- d_NiOx: `{result.stage1_result.best_params['d_NiOx']:.6f}` nm",
+        f"- sigma_front_rms_nm: `{result.stage1_result.best_params['sigma_front_rms_nm']:.6f}` nm",
+        f"- stage1_front_cost: `{result.stage1_result.cost:.6f}`",
+        "",
+        "## Stage 2 Rear Fit",
         "",
     ]
-    for scale in result.window_scales:
-        lines.extend(
-            [
-                f"- {scale.label}: n=`{scale.point_count}`, median=`{scale.median_reflectance:.6f}`, "
-                f"MAD=`{scale.mad_reflectance:.6f}`, scale=`{scale.scale_value:.6f}`",
-            ]
-        )
-    lines.extend(
-        [
-            "",
-            "## Best Parameters",
-            "",
-        ]
-    )
-    for key, value in result.best_params.items():
-        lines.append(f"- {key}: `{value:.6f}`")
+    for key in ("d_bulk", "d_rough", "sigma_thickness", "ito_alpha", "pvk_b_scale", "niox_k"):
+        lines.append(f"- {key}: `{result.best_params[key]:.6f}`")
     lines.extend(
         [
             f"- d_C60_bulk_best: `{result.d_c60_bulk_best:.6f}` nm",
@@ -1035,16 +1194,6 @@ def write_optimizer_log(result: Phase07FitResult, output_path: Path) -> None:
             f"- window_cost_rear: `{result.window_cost_rear:.6f}`",
             f"- total_cost: `{result.total_cost:.6f}`",
             f"- rear_derivative_correlation: `{result.rear_derivative_correlation:.6f}`",
-            "",
-            "## Masked Band Residual",
-            "",
-            f"- mean: `{result.masked_band_residual_stats.mean:.6e}`",
-            f"- std: `{result.masked_band_residual_stats.std:.6e}`",
-            f"- max_abs: `{result.masked_band_residual_stats.max_abs:.6e}`",
-            "",
-            "## Coarse Basin Candidates",
-            "",
-            f"- basins_nm: `{[float(value) for value in result.coarse_scan_basins_nm]}`",
             "",
             "## Boundary Checks",
             "",
@@ -1065,9 +1214,7 @@ def _apply_window_background(axis: plt.Axes) -> None:
     axis.axvspan(REAR_WINDOW_NM[0], REAR_WINDOW_NM[1], color="#e7f0fa", alpha=0.9)
 
 
-def plot_measured_vs_fitted_full_spectrum(result: Phase07FitResult, output_path: Path) -> None:
-    fig, ax = plt.subplots(figsize=(11.0, 5.6), dpi=320)
-    _apply_window_background(ax)
+def _build_masked_visual_guide(result: Phase07FitResult) -> np.ndarray:
     fitted_visual = result.fitted_reflectance.copy()
     front_indices = np.flatnonzero(result.sample_input.front_mask)
     rear_indices = np.flatnonzero(result.sample_input.rear_mask)
@@ -1100,21 +1247,16 @@ def plot_measured_vs_fitted_full_spectrum(result: Phase07FitResult, output_path:
         fitted_visual[masked_indices] = PchipInterpolator(control_x, control_y)(
             result.sample_input.wavelength_nm[masked_indices]
         )
-    ax.plot(
-        result.sample_input.wavelength_nm,
-        result.sample_input.reflectance * 100.0,
-        color="#424242",
-        linewidth=2.4,
-        label="Measured",
-    )
-    ax.plot(
-        result.sample_input.wavelength_nm,
-        fitted_visual * 100.0,
-        color="#005b96",
-        linewidth=1.8,
-        linestyle="--",
-        label="Fitted",
-    )
+    return fitted_visual
+
+
+def plot_measured_vs_fitted_full_spectrum(result: Phase07FitResult, output_path: Path) -> None:
+    fig, ax = plt.subplots(figsize=(11.0, 5.6), dpi=320)
+    _apply_window_background(ax)
+    fitted_visual = _build_masked_visual_guide(result)
+    masked_indices = np.flatnonzero(result.sample_input.masked_mask)
+    ax.plot(result.sample_input.wavelength_nm, result.sample_input.reflectance * 100.0, color="#424242", linewidth=2.4, label="Measured")
+    ax.plot(result.sample_input.wavelength_nm, fitted_visual * 100.0, color="#005b96", linewidth=1.8, linestyle="--", label="Fitted")
     if masked_indices.size > 1:
         ax.plot(
             result.sample_input.wavelength_nm[masked_indices],
@@ -1123,11 +1265,11 @@ def plot_measured_vs_fitted_full_spectrum(result: Phase07FitResult, output_path:
             linewidth=2.1,
             linestyle=":",
             alpha=0.95,
-            label="Masked visual guide",
+            label="Masked visual guide only",
         )
     ax.set_xlabel("Wavelength (nm)")
     ax.set_ylabel("Absolute Reflectance (%)")
-    ax.set_title(f"Phase 07 Dual-Window Fit: {result.sample_input.sample_name}")
+    ax.set_title(f"Phase 07 Two-Step Fit: {result.sample_input.sample_name}")
     ax.grid(True, linestyle="--", alpha=0.25)
     ax.legend()
     fig.tight_layout()
@@ -1138,82 +1280,72 @@ def plot_measured_vs_fitted_full_spectrum(result: Phase07FitResult, output_path:
 def plot_dual_window_zoom(result: Phase07FitResult, output_path: Path) -> None:
     fig, axes = plt.subplots(1, 2, figsize=(12.5, 4.8), dpi=320, constrained_layout=True)
     front_mask = result.sample_input.front_mask
-    axes[0].plot(
-        result.sample_input.wavelength_nm[front_mask],
-        result.sample_input.reflectance[front_mask] * 100.0,
-        color="#424242",
-        linewidth=2.3,
-        label="Measured",
-    )
-    axes[0].plot(
-        result.sample_input.wavelength_nm[front_mask],
-        result.fitted_reflectance[front_mask] * 100.0,
-        color="#b03a2e",
-        linewidth=1.8,
-        linestyle="--",
-        label="Fitted",
-    )
+    wavelength_front = result.sample_input.wavelength_nm[front_mask]
+    axes[0].plot(wavelength_front, result.sample_input.reflectance[front_mask] * 100.0, color="#424242", linewidth=2.3, label="Measured")
+    axes[0].plot(wavelength_front, result.fitted_reflectance[front_mask] * 100.0, color="#b03a2e", linewidth=1.8, linestyle="--", label="Collected fit")
+    axes[0].plot(wavelength_front, result.stage1_result.physical_reflectance[front_mask] * 100.0, color="#1f77b4", linewidth=1.5, linestyle=":", label="Unattenuated physical")
+    ax2 = axes[0].twinx()
+    ax2.plot(wavelength_front, result.stage1_result.scatter_curve[front_mask], color="#2e7d32", linewidth=1.4, alpha=0.8, label="S_front")
     axes[0].set_xlim(FRONT_WINDOW_NM[0], FRONT_WINDOW_NM[1])
     axes[0].set_xlabel("Wavelength (nm)")
     axes[0].set_ylabel("Absolute Reflectance (%)")
-    axes[0].set_title("Front Window")
+    ax2.set_ylabel("Front Scatter Factor")
+    axes[0].set_title("Stage 1 Front Window")
     axes[0].grid(True, linestyle="--", alpha=0.25)
-    axes[0].legend()
+    h1, l1 = axes[0].get_legend_handles_labels()
+    h2, l2 = ax2.get_legend_handles_labels()
+    axes[0].legend(h1 + h2, l1 + l2, loc="upper right")
 
     rear_mask = result.sample_input.rear_mask
     rear_wavelength_nm = result.sample_input.wavelength_nm[rear_mask]
-    axes[1].plot(
-        rear_wavelength_nm,
-        result.rear_z_measured,
-        color="#424242",
-        linewidth=2.3,
-        label="z_meas",
-    )
-    axes[1].plot(
-        rear_wavelength_nm,
-        result.rear_z_fitted,
-        color="#005b96",
-        linewidth=1.8,
-        linestyle="--",
-        label="z_model",
-    )
+    axes[1].plot(rear_wavelength_nm, result.rear_z_measured, color="#424242", linewidth=2.3, label="z_meas")
+    axes[1].plot(rear_wavelength_nm, result.rear_z_fitted, color="#005b96", linewidth=1.8, linestyle="--", label="z_model")
     axes[1].set_xlim(REAR_WINDOW_NM[0], REAR_WINDOW_NM[1])
     axes[1].set_xlabel("Wavelength (nm)")
     axes[1].set_ylabel("Z-Score Normalized Reflectance")
-    axes[1].set_title("Rear Window")
+    axes[1].set_title("Stage 2 Rear Window")
     axes[1].grid(True, linestyle="--", alpha=0.25)
     axes[1].legend()
     fig.savefig(output_path, dpi=320, bbox_inches="tight")
     plt.close(fig)
 
 
-def plot_rear_window_sanity_check(
-    sample_input: Phase07SampleInput,
-    sanity_check: RearWindowSanityCheck,
-    output_path: Path,
-) -> None:
+def plot_stage1_front_fit(result: Phase07FitResult, output_path: Path) -> None:
+    front_mask = result.sample_input.front_mask
+    wavelength_front = result.sample_input.wavelength_nm[front_mask]
+    fig, ax = plt.subplots(figsize=(10.5, 4.8), dpi=320)
+    ax.plot(wavelength_front, result.sample_input.reflectance[front_mask] * 100.0, color="#424242", linewidth=2.3, label="Measured")
+    ax.plot(wavelength_front, result.fitted_reflectance[front_mask] * 100.0, color="#b03a2e", linewidth=1.8, linestyle="--", label="Collected fit")
+    ax.plot(wavelength_front, result.stage1_result.physical_reflectance[front_mask] * 100.0, color="#1f77b4", linewidth=1.5, linestyle=":", label="Unattenuated physical")
+    ax2 = ax.twinx()
+    ax2.plot(wavelength_front, result.stage1_result.scatter_curve[front_mask], color="#2e7d32", linewidth=1.4, alpha=0.8, label="S_front")
+    ax.set_xlabel("Wavelength (nm)")
+    ax.set_ylabel("Absolute Reflectance (%)")
+    ax2.set_ylabel("Front Scatter Factor")
+    ax.set_title(f"Phase 07 Stage 1 Front Fit: {result.sample_input.sample_name}")
+    ax.grid(True, linestyle="--", alpha=0.25)
+    h1, l1 = ax.get_legend_handles_labels()
+    h2, l2 = ax2.get_legend_handles_labels()
+    ax.legend(h1 + h2, l1 + l2, loc="upper right")
+    fig.tight_layout()
+    fig.savefig(output_path, dpi=320, bbox_inches="tight")
+    plt.close(fig)
+
+
+def plot_rear_window_sanity_check(sample_input: Phase07SampleInput, sanity_check: RearWindowSanityCheck, output_path: Path) -> None:
     rear_mask = sample_input.rear_mask
     wavelength_nm = sample_input.wavelength_nm[rear_mask]
     reflectance = sample_input.reflectance[rear_mask]
-    smoothed = savgol_filter(
-        reflectance,
-        window_length=sanity_check.smoothing_window_length,
-        polyorder=sanity_check.smoothing_polyorder,
-    )
-
+    smoothed = savgol_filter(reflectance, window_length=sanity_check.smoothing_window_length, polyorder=sanity_check.smoothing_polyorder)
     fig, axes = plt.subplots(2, 1, figsize=(11.0, 7.0), dpi=320, constrained_layout=True, sharex=True)
     axes[0].plot(wavelength_nm, reflectance * 100.0, color="#9e9e9e", linewidth=1.1, label="Measured")
     axes[0].plot(wavelength_nm, smoothed * 100.0, color="#005b96", linewidth=2.0, label="Smoothed")
     axes[0].axvline(sanity_check.lambda_peak_nm, color="#2e7d32", linestyle="--", linewidth=1.3, label="Peak")
     axes[0].axvline(sanity_check.lambda_valley_nm, color="#c62828", linestyle="--", linewidth=1.3, label="Valley")
     axes[0].set_ylabel("Absolute Reflectance (%)")
-    axes[0].set_title(
-        f"Rear-Window Sanity Check: {sample_input.sample_name} | "
-        f"d_estimate={sanity_check.d_estimate_nm:.1f} nm"
-    )
+    axes[0].set_title(f"Rear-Window Sanity Check: {sample_input.sample_name} | d_estimate={sanity_check.d_estimate_nm:.1f} nm")
     axes[0].grid(True, linestyle="--", alpha=0.25)
     axes[0].legend()
-
     axes[1].plot(wavelength_nm, sanity_check.rear_z_measured, color="#5d4037", linewidth=1.6)
     axes[1].axvline(sanity_check.lambda_peak_nm, color="#2e7d32", linestyle="--", linewidth=1.2)
     axes[1].axvline(sanity_check.lambda_valley_nm, color="#c62828", linestyle="--", linewidth=1.2)
@@ -1236,13 +1368,7 @@ def plot_residual_diagnostics(result: Phase07FitResult, output_path: Path) -> No
     axes[0].grid(True, linestyle="--", alpha=0.25)
 
     finite_mask = np.isfinite(result.normalized_residual)
-    axes[1].plot(
-        result.sample_input.wavelength_nm[finite_mask],
-        result.normalized_residual[finite_mask],
-        color="#1565c0",
-        linewidth=1.4,
-        label="Normalized residual",
-    )
+    axes[1].plot(result.sample_input.wavelength_nm[finite_mask], result.normalized_residual[finite_mask], color="#1565c0", linewidth=1.4, label="Normalized residual")
     masked_band = result.sample_input.masked_mask
     axes[1].plot(
         result.sample_input.wavelength_nm[masked_band],
@@ -1250,12 +1376,12 @@ def plot_residual_diagnostics(result: Phase07FitResult, output_path: Path) -> No
         color="#ef6c00",
         linewidth=1.1,
         alpha=0.9,
-        label="Masked PL residual (%)",
+        label="Masked visual-only gap",
     )
     axes[1].axhline(0.0, color="#546e7a", linewidth=1.0, linestyle="--")
     axes[1].set_xlabel("Wavelength (nm)")
     axes[1].set_ylabel("Normalized Residual")
-    axes[1].set_title("Normalized Residual + Masked PL Band")
+    axes[1].set_title("Residual Diagnostics")
     axes[1].grid(True, linestyle="--", alpha=0.25)
     axes[1].legend()
     fig.savefig(output_path, dpi=320, bbox_inches="tight")
