@@ -5,8 +5,8 @@
 ## 1. Current Snapshot
 
 - 更新时间：2026-04-12
-- 当前判断 Phase：`Phase C-1a`
-- 阶段定义：`建立 rear air-gap only 指纹字典，完成 LOD 粗评估、uncertainty spot-check 与四机制对照`
+- 当前判断 Phase：`Phase C-1b`
+- 阶段定义：`建立 front air-gap only 指纹字典，完成 LOD 粗评估、uncertainty spot-check，并补齐 thickness / rear-BEMA / front-BEMA / rear-gap / front-gap 五机制对照`
 - 当前可用能力：
   - 已有 `step01_absolute_calibration.py`，可将样品与银镜原始计数转换为绝对反射率
   - 已有 `step01b_cauchy_extrapolation.py`，可基于 [LIT-0001] 的 `ITO/CsFAPI` 数字化折射率曲线生成 `750-1100 nm` 的 CsFAPI 扩展 `n-k` 中间件
@@ -40,6 +40,7 @@
   - 已新增 `stepA2_1_pvk_uncertainty_ensemble.py`，可构建 `nominal / more_absorptive / less_absorptive` 三成员 PVK ensemble，重跑代表性 thickness / rear-BEMA 子集并输出 robustness summary
   - 已新增 `stepB2_front_bema_sandbox.py`，可在固定 `SAM` 厚度前提下引入 `NiOx/PVK` front-side BEMA proxy，输出 front-only roughness 主扫描、与 thickness/rear-BEMA 的正交对照，以及 uncertainty spot-check
   - 已新增 `stepC1a_rear_air_gap_sandbox.py`，可在 `PVK/C60` 后界面插入真实 air gap，输出 low-gap 高分辨主扫描、LOD 粗评估、branch-aware tracking 和与 thickness / rear-BEMA / front-BEMA 的四机制对照
+  - 已新增 `stepC1b_front_air_gap_sandbox.py`，可在 `SAM/PVK` 前界面插入真实 air gap，输出 low-gap 高分辨主扫描、前/过渡/后窗分窗响应、LOD 粗评估、uncertainty spot-check 与五机制对照
   - 已产出标准中间文件 `data/processed/target_reflectance.csv` 与 `data/processed/CsFAPI_nk_extended.csv`
   - 已完成 Phase 02 形状畸变诊断，当前证据指向：ITO 近红外吸收失真是长波端托平与整体形状失配的主导因素
   - 已完成 Phase 04 空气隙前向预测，当前基线下 `d_air = 2 nm` 与 `5 nm` 的 `max(|ΔR|)` 分别约为 `0.538%` 与 `1.347%`，均高于 `0.2%` 典型噪声线
@@ -59,7 +60,7 @@
   - Phase 08 目前仅建立“固定参数前向重建”链路，尚未引入新的物理先验、层结构变体扫描或跨样本共享参数约束
   - `Phase A-2.1` 已完成 first-pass uncertainty propagation，但尚未扩展到更高维的 surrogate family 或参数化介电函数不确定性
   - `Phase B-2` 当前仍是 front-side optical proxy，而不是完整化学界面模型
-  - `Phase C-1a` 当前仍是 rear-gap only 的 specular TMM 模型，不含散射、dual-gap 或 gap+BEMA 耦合
+  - `Phase C-1a / C-1b` 当前仍是单侧 gap only 的 specular TMM 模型，不含散射、dual-gap 或 gap+BEMA 耦合
   - `constant-glass vs dispersive-glass` 与参数化 band-edge dielectric model 仍未展开
 
 ## 2. Current Directory Tree
@@ -102,7 +103,8 @@ TMM-interference-spectrum/
 │       ├── stepA2_1_pvk_uncertainty_ensemble.py
 │       ├── stepB1_rear_bema_sandbox.py
 │       ├── stepB2_front_bema_sandbox.py
-│       └── stepC1a_rear_air_gap_sandbox.py
+│       ├── stepC1a_rear_air_gap_sandbox.py
+│       └── stepC1b_front_air_gap_sandbox.py
 ├── data/
 │   └── processed/
 │       ├── CsFAPI_nk_extended.csv
@@ -120,6 +122,7 @@ TMM-interference-spectrum/
 │       ├── phaseB1/
 │       ├── phaseB2/
 │       ├── phaseC1a/
+│       ├── phaseC1b/
 │       ├── phaseA1_seam_audit/
 │       └── target_reflectance.csv
 ├── resources/
@@ -142,6 +145,7 @@ TMM-interference-spectrum/
 │   │   ├── phaseB1/
 │   │   ├── phaseB2/
 │   │   ├── phaseC1a/
+│   │   ├── phaseC1b/
 │   │   ├── phaseA1_2/
 │   │   ├── phaseA1_seam_audit/
 │   │   ├── phaseA1/
@@ -172,6 +176,7 @@ TMM-interference-spectrum/
 │       ├── phaseB1/
 │       ├── phaseB2/
 │       ├── phaseC1a/
+│       ├── phaseC1b/
 │       ├── phaseA1_2/
 │       ├── phaseA1_seam_audit/
 │       ├── phaseA1/
@@ -193,7 +198,8 @@ TMM-interference-spectrum/
 │       ├── phaseA2_pvk_thickness_scan/
 │       ├── phaseB1_rear_bema_sandbox/
 │       ├── phaseB2_front_bema_sandbox/
-│       └── phaseC1a_rear_air_gap_sandbox/
+│       ├── phaseC1a_rear_air_gap_sandbox/
+│       └── phaseC1b_front_air_gap_sandbox/
 ├── test_data/
 │   ├── sample.csv
 │   ├── glass-1mm.csv
@@ -925,6 +931,41 @@ TMM-interference-spectrum/
 - `results/figures/phaseC1a/*.png`
 - `results/logs/phaseC1a/phaseC1a_rear_air_gap_sandbox.md`
 
+### 4.24 `stepC1b_front_air_gap_sandbox.py`
+
+- 文件位置：`src/scripts/stepC1b_front_air_gap_sandbox.py`
+- 主要职责：仅在 `SAM/PVK` 前界面引入真实 front air-gap，建立 low-gap 高分辨指纹字典，并完成 LOD 粗评估、uncertainty spot-check 与五机制对照
+
+输入：
+- `resources/aligned_full_stack_nk_pvk_v2.csv`
+- `resources/pvk_ensemble/aligned_full_stack_nk_pvk_ens_{nominal,more_absorptive,less_absorptive}.csv`
+- `data/processed/phaseA2/phaseA2_pvk_thickness_scan.csv`
+- `data/processed/phaseB2/phaseB2_front_bema_scan.csv`
+- `data/processed/phaseC1a/phaseC1a_rear_air_gap_scan.csv`
+
+核心处理流程：
+- 构建层序：
+  - `Glass / ITO / NiOx / SAM / Air_gap_front / PVK / C60 / Ag / Air`
+- front-gap 被视为真实分离层，不做厚度守恒扣减：
+  - `d_SAM = 5 nm` fixed
+  - `d_PVK = 700 nm` fixed
+  - `d_C60 = 15 nm` fixed
+- 采用低 gap 高分辨扫描：
+  - `0-20 nm`，步长 `0.5 nm`
+  - 额外补 `25 / 30 / 40 / 50 nm`
+- 输出 `R_stack / R_total / ΔR` 热力图、front/transition/rear 分窗响应图、rear-window peak/valley tracking、波数轴对照和五机制比较图
+- 对 `1 / 2 / 3 / 5 / 10 nm` 给出基于 `ΔR_noise ≈ 0.2%` 的理论 LOD 粗评估
+- 对 `0 / 2 / 5 / 10 nm` 做三成员 ensemble spot-check，判断哪些结论稳健、哪些绝对量敏感
+
+输出：
+- `data/processed/phaseC1b/phaseC1b_front_air_gap_scan.csv`
+- `data/processed/phaseC1b/phaseC1b_front_air_gap_feature_summary.csv`
+- `data/processed/phaseC1b/phaseC1b_front_air_gap_lod_summary.csv`
+- `data/processed/phaseC1b/phaseC1b_front_air_gap_ensemble_spotcheck.csv`
+- `data/processed/phaseC1b/phaseC1b_front_air_gap_robustness_summary.csv`
+- `results/figures/phaseC1b/*.png`
+- `results/logs/phaseC1b/phaseC1b_front_air_gap_sandbox.md`
+
 ## 5. Data Flow
 
 当前项目主数据流如下：
@@ -1164,6 +1205,16 @@ data/processed/phaseB2/phaseB2_front_bema_scan.csv
     -> results/figures/phaseC1a/*.png
     -> results/logs/phaseC1a/phaseC1a_rear_air_gap_sandbox.md
 
+resources/aligned_full_stack_nk_pvk_v2.csv
+resources/pvk_ensemble/aligned_full_stack_nk_pvk_ens_*.csv
+data/processed/phaseA2/phaseA2_pvk_thickness_scan.csv
+data/processed/phaseB2/phaseB2_front_bema_scan.csv
+data/processed/phaseC1a/phaseC1a_rear_air_gap_scan.csv
+    -> stepC1b_front_air_gap_sandbox.py (front air-gap only -> low-gap high-resolution scan -> front/transition/rear 分窗响应 -> LOD粗评估 -> thickness/front-BEMA/rear-gap 五机制对照 -> uncertainty spot-check)
+    -> data/processed/phaseC1b/*.csv
+    -> results/figures/phaseC1b/*.png
+    -> results/logs/phaseC1b/phaseC1b_front_air_gap_sandbox.md
+
 selected phase outputs
     -> results/report/ (精选 CSV / PNG / Markdown 汇报层)
     -> results/report/phaseA1_2_pvk_surrogate_and_pristine/*
@@ -1172,6 +1223,7 @@ selected phase outputs
     -> results/report/phaseB1_rear_bema_sandbox/*
     -> results/report/phaseB2_front_bema_sandbox/*
     -> results/report/phaseC1a_rear_air_gap_sandbox/*
+    -> results/report/phaseC1b_front_air_gap_sandbox/*
 ```
 
 可按 SOP 理解为：
@@ -1491,30 +1543,30 @@ selected phase outputs
 ## 9. Recent Update Summary
 
 - 更新时间：`2026-04-12`
-- 当前 Phase：`Phase C-1a`
+- 当前 Phase：`Phase C-1b`
 - 本次新增/修改：
-  - 在 `src/core/full_stack_microcavity.py` 中新增 rear air-gap only 前向入口
-  - 新增 `src/scripts/stepC1a_rear_air_gap_sandbox.py`，建立 rear-gap 主扫描、LOD 粗评估与 uncertainty spot-check
-  - 新增 `data/processed/phaseC1a/`、`results/figures/phaseC1a/`、`results/logs/phaseC1a/` 标准输出口径
-  - 新增 `results/report/phaseC1a_rear_air_gap_sandbox/` 并更新 report 根索引
-  - 更新 `PROJECT_STATE.md`，补充 `Phase C-1a` SOP、数据流与机制结论范围
+  - 在 `src/core/full_stack_microcavity.py` 中新增 front air-gap only 前向入口
+  - 新增 `src/scripts/stepC1b_front_air_gap_sandbox.py`，建立 front-gap 主扫描、LOD 粗评估与 uncertainty spot-check
+  - 新增 `data/processed/phaseC1b/`、`results/figures/phaseC1b/`、`results/logs/phaseC1b/` 标准输出口径
+  - 新增 `results/report/phaseC1b_front_air_gap_sandbox/` 并更新 report 根索引
+  - 更新 `PROJECT_STATE.md`，补充 `Phase C-1b` SOP、数据流与机制结论范围
 - 已验证结论：
-  - rear-gap 的主敏感窗口位于 transition/rear，尤其是后窗内部，明显不同于 front-BEMA 的前窗/过渡区主导口径
-  - rear-gap 在 low-gap 区域就能给出超过 `0.2%` 的理论 `ΔR_total`，当前 coarse LOD 已下探到 `1 nm`
-  - rear-gap 比 rear-BEMA 更强、更非线性，也比 thickness 更不像全局 fringe 平移，因此可作为第四类独立机制字典
-  - spot-check 显示 rear-gap 的 band-edge 邻域绝对量仍受 surrogate 影响，但其机制类别判断仍然成立
-  - `R_stack` 仍比 `R_total` 更适合做 rear-gap 机制诊断
+  - front-gap 在 low-gap 区域就能给出超过 `0.2%` 的理论 `ΔR_total`，当前 coarse LOD 已下探到 `1 nm`
+  - front-gap 的主响应落在前窗到过渡区，但会比 front-BEMA 更强地牵动后窗次级结构
+  - front-gap 比 front-BEMA 更强、更非线性，也与 thickness 的全局腔长变化显著不同，因此可作为第五类独立机制字典
+  - spot-check 显示 front-gap 的 front-window mean `ΔR_total` 与 rear-window 幅值相对稳健，但 transition/band-edge 邻域绝对量仍受 surrogate 影响
+  - 当前已经形成 thickness / rear-BEMA / front-BEMA / rear-gap / front-gap 五机制对照框架
 - 仍待验证：
-  - `Phase C-1b front air-gap only` 尚未建立，当前还没有前后界面 gap 的完整对照
   - gap vs BEMA coupled comparison 尚未展开，当前还没有 gap+BEMA 的耦合图谱
+  - front-gap / rear-gap 的对称性与可分性尚未做系统归一化比较
   - `constant-glass vs dispersive-glass` 与参数化 band-edge dielectric model 仍未展开
 
 ## 10. Recommended Next Actions
 
 建议后续优先处理以下事项：
 
-1. 优先进入 `Phase C-1b front air-gap only`，补齐 front/rear gap 对照后再评估 gap vs BEMA 耦合问题
-2. 在 front-gap 完成后，再决定是否进入 `Phase C-2 gap vs BEMA coupled comparison`
+1. 优先进入 `Phase C-2 gap vs BEMA coupled comparison`，在 separation vs intermixing 两类缺陷之间建立系统混淆边界
+2. 并行评估是否需要新增 `Phase C-3 front-gap vs rear-gap symmetry comparison`，对前后界面分离机制做统一归一化比较
 3. 回查 `Ag_mirro-500us` 与 `Ag_mirro-10ms` 的归一化失配来源，优先检查仪器门控、导出流程与实际曝光标签
 4. 基于 `phase07_fit_summary.csv` 的贴边结果，重新评估 `ito_alpha`、`pvk_b_scale` 与 `niox_k` 的边界和先验
 5. 建立 `data/raw/phase06/` 或稳定数据索引，把 OneDrive 外部路径纳入规范化入口

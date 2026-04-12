@@ -67,3 +67,11 @@
   - rear-gap 主扫描、LOD 粗评估与 branch-aware tracking
   - rear-gap 与 thickness / rear-BEMA / front-BEMA 的机制对照
   - uncertainty spot-check 与阶段总结文档 `PHASE_C1A_REPORT.md`
+
+### `phaseC1b_front_air_gap_sandbox/`
+
+- 主题：front air-gap only 前向模拟
+- 主要内容：
+  - front-gap 主扫描、LOD 粗评估与前/过渡/后窗响应分解
+  - front-gap 与 thickness / front-BEMA / rear-gap 的机制对照
+  - uncertainty spot-check 与阶段总结文档 `PHASE_C1B_REPORT.md`
