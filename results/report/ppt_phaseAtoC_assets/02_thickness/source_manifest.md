@@ -7,8 +7,15 @@
   - `results/report/phaseA2_1_pvk_uncertainty_ensemble/PHASE_A2_1_REPORT.md`
 - 直接复用图：无
 - 基于已有数据重绘：
+  - `structure_schematic.png/.svg`
   - `thickness_deltaRtotal_heatmap.png`
   - `thickness_selected_rtotal_curves.png`
+- 结构图实现方式：
+  - 程序绘制（matplotlib），未使用 imagegen 位图生成
+- 结构层序定义：
+  - `Air / Glass / ITO / NiOx / SAM / PVK / C60 / Ag / Air`
+- phase 物理对应：
+  - 仅高亮 `PVK`，表示 `d_PVK` 为唯一变化量
 - 代表参数：
   - thickness: `650 / 700 / 750 / 850 nm`
   - observable: `R_total`

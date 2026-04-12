@@ -10,5 +10,7 @@ front-only BEMA 主要改变前窗背景与过渡区包络/斜率，是 front-si
 - fingerprint: `front background change + transition envelope/slope distortion`
 - interpretation: `front-interface transition-layer optical proxy`
 
+Structure cue: a front-side transition-layer proxy is inserted near the SAM/PVK interface.
+
 # 讲稿提示
 这里要特别强调它不是 gap。front-BEMA 的物理含义是前界面 intermixing / transition-layer proxy，所以它更像平滑地改背景、改过渡区斜率，而不是引入真实分离层后的强非线性结构重构。这一点和后面的 front-gap 要明确区分开。

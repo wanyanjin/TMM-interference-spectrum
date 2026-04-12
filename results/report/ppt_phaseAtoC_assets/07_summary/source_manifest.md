@@ -15,6 +15,9 @@
 - 直接复用图：无
 - 基于已有结论重绘：
   - `mechanism_summary_matrix.png`
+  - `mechanism_structure_overview.png/.svg`
+- 结构图实现方式：
+  - 程序绘制（matplotlib），未使用 imagegen 位图生成
 - 代表参数：
   - thickness: `650 / 750 / 850 nm`
   - rear-BEMA: `10 / 20 / 30 nm`

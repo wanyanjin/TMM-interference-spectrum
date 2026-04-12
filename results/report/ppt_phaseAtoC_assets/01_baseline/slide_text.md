@@ -9,5 +9,7 @@
 - 同一 baseline 被后续 thickness、BEMA 和 air-gap 五类机制共享，保证比较口径一致。
 - 三个窗口 `front / transition / rear` 为后续机制判别提供统一语言。
 
+Structure cue: pristine full-device baseline.
+
 # 讲稿提示
 这一页先把讨论对象固定下来：不是单层材料，也不是某个局部界面，而是完整器件在实验上真正可见的 `R_total`。后面所有单因素扫描都不再改 baseline 定义，只比较“在同一个 baseline 上加入某一个因素后，`R_total` 会怎样变化”。
