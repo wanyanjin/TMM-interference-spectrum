@@ -33,8 +33,9 @@
   - 已新增 `stepA1_pristine_baseline.py`，可严格基于 `aligned_full_stack_nk.csv` 和常数玻璃 `n=1.515, k=0` 生成 `R_front / R_stack / R_total` 的 pristine baseline decomposition，并输出三曲线图、三区图与标准日志
   - 已新增 `stepA1_1_pvk_seam_audit.py`，可围绕 `749/750 nm` 对 PVK seam 做局部 n-k/eps/导数审计、上游三源追溯、简化堆栈敏感性比较、Ag 终端边界对照与代码路径核查
   - 已新增 `stepA1_2_build_pvk_surrogate_v2.py`，可在不覆盖 v1 材料表的前提下，对 PVK 的 `740-780 nm` band-edge 区域执行局部 surrogate rebuild，并输出 `aligned_full_stack_nk_pvk_v2.csv`、候选过渡带指标表与 v1/v2 QA 图
-  - 已新增 `stepA1_2_rerun_pristine_with_pvk_v2.py`，可复用 Phase A-1 pristine decomposition 口径，用 `PVK surrogate v2` 重跑 `R_front / R_stack / R_total`，并输出 v1/v2 全谱与局部对照
-  - 已新增 `stepA2_pvk_thickness_scan.py`，可基于 `aligned_full_stack_nk_pvk_v2.csv` 扫描 `d_PVK = 500-900 nm`、输出 `R_stack / R_total / ΔR` 热力图、peak/valley tracking 与特征汇总表
+ - 已新增 `stepA1_2_rerun_pristine_with_pvk_v2.py`，可复用 Phase A-1 pristine decomposition 口径，用 `PVK surrogate v2` 重跑 `R_front / R_stack / R_total`，并输出 v1/v2 全谱与局部对照
+ - 已新增 `stepA2_pvk_thickness_scan.py`，可基于 `aligned_full_stack_nk_pvk_v2.csv` 扫描 `d_PVK = 500-900 nm`、输出 `R_stack / R_total / ΔR` 热力图、peak/valley tracking 与特征汇总表
+  - 已新增 `stepA_local_pvk_thickness_window.py`，可在同一 `PVK surrogate v2` 与 nominal 全器件几何下，仅扫描 `d_PVK = 675-725 nm / 1 nm`，输出局部厚度起伏对应的 `R_total / ΔR_total` 指纹图、基础三窗口 RMS 摘要与汇报资产
   - 已建立 `results/report/` 汇报资产层，并补齐 `Phase A-1.2` 与 `Phase A-2` 的精选 CSV / PNG / Markdown 报告
   - 已新增 `stepB1_rear_bema_sandbox.py`，可在 `PVK/C60` 后界面插入固定 `50/50` Bruggeman BEMA 层、执行厚度守恒扫描并与 `d_PVK` 指纹做对照
   - 已新增 `stepA2_1_pvk_uncertainty_ensemble.py`，可构建 `nominal / more_absorptive / less_absorptive` 三成员 PVK ensemble，重跑代表性 thickness / rear-BEMA 子集并输出 robustness summary
@@ -103,6 +104,7 @@ TMM-interference-spectrum/
 │       ├── stepA1_2_build_pvk_surrogate_v2.py
 │       ├── stepA1_2_rerun_pristine_with_pvk_v2.py
 │       ├── stepA2_pvk_thickness_scan.py
+│       ├── stepA_local_pvk_thickness_window.py
 │       ├── stepA2_1_pvk_uncertainty_ensemble.py
 │       ├── stepB1_rear_bema_sandbox.py
 │       ├── stepB2_front_bema_sandbox.py
@@ -122,6 +124,7 @@ TMM-interference-spectrum/
 │       ├── phaseA1/
 │       ├── phaseA1_2/
 │       ├── phaseA2/
+│       ├── phaseA_local/
 │       ├── phaseA2_1/
 │       ├── phaseB1/
 │       ├── phaseB2/
@@ -146,6 +149,7 @@ TMM-interference-spectrum/
 ├── results/
 │   ├── figures/
 │   │   ├── phaseA2/
+│   │   ├── phaseA_local/
 │   │   ├── phaseA2_1/
 │   │   ├── phaseB1/
 │   │   ├── phaseB2/
@@ -177,6 +181,7 @@ TMM-interference-spectrum/
 │   └── logs/
 │       ├── phase03_batch_fit/
 │       ├── phaseA2/
+│       ├── phaseA_local/
 │       ├── phaseA2_1/
 │       ├── phaseB1/
 │       ├── phaseB2/
@@ -202,6 +207,7 @@ TMM-interference-spectrum/
 │       ├── phaseA1_2_pvk_surrogate_and_pristine/
 │       ├── phaseA2_1_pvk_uncertainty_ensemble/
 │       ├── phaseA2_pvk_thickness_scan/
+│       ├── phaseA_local_thickness_window/
 │       ├── phaseB1_rear_bema_sandbox/
 │       ├── phaseB2_front_bema_sandbox/
 │       ├── phaseC1a_rear_air_gap_sandbox/
@@ -1643,6 +1649,32 @@ selected phase outputs
   - 还没有正式训练或比较分类器，当前数据库仍是算法讨论输入，不是最终识别器
   - composition variation 尚未纳入，因此当前 separability 仅覆盖 thickness / roughness / gap 三类结构机制
   - 仍是 specular TMM；散射、dual-gap、gap+BEMA 联合机制与实验噪声模型尚未引入
+
+### Phase A-local Update (2026-04-13)
+
+- Current Phase: `Phase A-local`
+- Update summary:
+  - 已新增 `src/scripts/stepA_local_pvk_thickness_window.py`，用于在 `PVK surrogate v2` 与 nominal 全器件结构下重绘更现实的局部厚度指纹图
+  - 已新增 `data/processed/phaseA_local/`、`results/figures/phaseA_local/`、`results/logs/phaseA_local/` 与 `results/report/phaseA_local_thickness_window/`
+  - 已生成 `phaseA_local_thickness_scan.csv`、`phaseA_local_thickness_feature_summary.csv`、`phaseA_local_deltaRtotal_heatmap.png`、`phaseA_local_selected_curves.png`、`phaseA_local_thickness_window.md` 与 `PHASE_A_LOCAL_REPORT.md`
+- Data flow:
+  - `resources/aligned_full_stack_nk_pvk_v2.csv`
+  - `src/core/full_stack_microcavity.py`
+  - `src/scripts/stepA1_pristine_baseline.py`
+  - `src/scripts/stepA_local_pvk_thickness_window.py`
+  - `data/processed/phaseA_local/phaseA_local_thickness_scan.csv`
+  - `data/processed/phaseA_local/phaseA_local_thickness_feature_summary.csv`
+  - `results/figures/phaseA_local/phaseA_local_deltaRtotal_heatmap.png`
+  - `results/figures/phaseA_local/phaseA_local_selected_curves.png`
+  - `results/logs/phaseA_local/phaseA_local_thickness_window.md`
+  - `results/report/phaseA_local_thickness_window/*`
+- Verified results:
+  - 扫描范围固定为 `d_PVK = 675-725 nm`，步长 `1 nm`，共 `51` 个 thickness cases
+  - `R_total` 的局部厚度响应在前窗最弱，在 `650-810 nm` 与 `810-1055 nm` 明显增强，其中 rear-window 最大 RMS `ΔR_total` 约为 `7.52%`
+  - `rear_peak_nm` 由 `922 nm` 平移到 `972 nm`，`rear_valley_nm` 由 `820 nm` 平移到 `871 nm`，说明局部 thickness 指纹主要表现为 rear-window fringe 的系统漂移
+- Risks / pending checks:
+  - 本轮仅作为局部厚度起伏字典，不含 roughness、air-gap、composition variation 与 feature engineering
+  - `500-900 nm` 的宽范围厚度图仍保留为全局趋势参考，但不应替代本轮局部厚度判别图
 
 ## 10. Recommended Next Actions
 
