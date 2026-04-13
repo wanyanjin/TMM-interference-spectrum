@@ -637,6 +637,108 @@ class OpticalStackTable:
 
         return reflectance
 
+    def calc_realistic_background_stack_reflectance(
+        self,
+        *,
+        d_pvk_nm: float,
+        d_bema_front_nm: float,
+        d_bema_rear_nm: float,
+        d_gap_front_nm: float,
+        d_gap_rear_nm: float,
+        use_constant_glass: bool = True,
+        constant_glass_nk: complex = DEFAULT_CONSTANT_GLASS_INDEX,
+        ag_boundary_mode: str = AG_BOUNDARY_FINITE_FILM,
+    ) -> tuple[np.ndarray, dict[str, float]]:
+        if d_pvk_nm <= 0.0:
+            raise ValueError(f"d_PVK 必须为正数，当前值 {d_pvk_nm}")
+        if d_bema_front_nm < 0.0:
+            raise ValueError(f"d_BEMA,front 必须非负，当前值 {d_bema_front_nm}")
+        if d_bema_rear_nm < 0.0:
+            raise ValueError(f"d_BEMA,rear 必须非负，当前值 {d_bema_rear_nm}")
+        if d_gap_front_nm < 0.0:
+            raise ValueError(f"d_gap,front 必须非负，当前值 {d_gap_front_nm}")
+        if d_gap_rear_nm < 0.0:
+            raise ValueError(f"d_gap,rear 必须非负，当前值 {d_gap_rear_nm}")
+
+        d_pvk_bulk_nm = float(d_pvk_nm - d_bema_front_nm - 0.5 * d_bema_rear_nm)
+        d_c60_bulk_nm = float(max(0.0, self.thicknesses.c60_nm - 0.5 * d_bema_rear_nm))
+        if d_pvk_bulk_nm <= 0.0:
+            raise ValueError(
+                "组合 realistic background 会导致 d_PVK,bulk 非正："
+                f"d_PVK={d_pvk_nm}, d_BEMA,front={d_bema_front_nm}, d_BEMA,rear={d_bema_rear_nm}"
+            )
+
+        normalized_ag_mode = self._normalize_ag_boundary_mode(ag_boundary_mode)
+        reflectance = np.empty_like(self.wavelength_nm, dtype=float)
+        if use_constant_glass:
+            glass_grid = np.full(self.wavelength_nm.shape, complex(constant_glass_nk), dtype=np.complex128)
+        else:
+            glass_grid = np.asarray(self.n_glass, dtype=np.complex128)
+
+        for index, wavelength_nm in enumerate(self.wavelength_nm):
+            glass_nk = complex(glass_grid[index])
+            ito_nk = complex(self.n_ito[index])
+            niox_nk = complex(self.n_niox[index])
+            pvk_nk = complex(self.n_pvk[index])
+            c60_nk = complex(self.n_c60[index])
+            ag_nk = complex(self.n_ag[index])
+            bema_front_nk = bruggeman_two_phase_index(
+                epsilon_a=niox_nk**2,
+                epsilon_b=pvk_nk**2,
+                volume_fraction_a=FRONT_BEMA_VOLUME_FRACTION,
+                seed_index=0.5 * (niox_nk + pvk_nk),
+            )
+            bema_rear_nk = bruggeman_two_phase_index(
+                epsilon_a=pvk_nk**2,
+                epsilon_b=c60_nk**2,
+                volume_fraction_a=REAR_BEMA_VOLUME_FRACTION,
+                seed_index=0.5 * (pvk_nk + c60_nk),
+            )
+
+            layers_nk: list[complex] = [glass_nk, ito_nk, niox_nk, SAM_INDEX]
+            layers_d: list[float] = [np.inf, self.thicknesses.ito_nm, self.thicknesses.niox_nm, self.thicknesses.sam_nm]
+
+            if d_gap_front_nm > THICKNESS_TOLERANCE_NM:
+                layers_nk.append(AIR_INDEX)
+                layers_d.append(float(d_gap_front_nm))
+            if d_bema_front_nm > THICKNESS_TOLERANCE_NM:
+                layers_nk.append(bema_front_nk)
+                layers_d.append(float(d_bema_front_nm))
+
+            layers_nk.append(pvk_nk)
+            layers_d.append(d_pvk_bulk_nm)
+
+            if d_bema_rear_nm > THICKNESS_TOLERANCE_NM:
+                layers_nk.append(bema_rear_nk)
+                layers_d.append(float(d_bema_rear_nm))
+            if d_gap_rear_nm > THICKNESS_TOLERANCE_NM:
+                layers_nk.append(AIR_INDEX)
+                layers_d.append(float(d_gap_rear_nm))
+            if d_c60_bulk_nm > THICKNESS_TOLERANCE_NM:
+                layers_nk.append(c60_nk)
+                layers_d.append(d_c60_bulk_nm)
+
+            if normalized_ag_mode == AG_BOUNDARY_FINITE_FILM:
+                layers_nk.extend((ag_nk, AIR_INDEX))
+                layers_d.extend((self.thicknesses.ag_nm, np.inf))
+            else:
+                layers_nk.append(ag_nk)
+                layers_d.append(np.inf)
+
+            result = coh_tmm("s", layers_nk, layers_d, th_0=0.0, lam_vac=float(wavelength_nm))
+            reflectance[index] = float(result["R"])
+
+        metadata = {
+            "d_PVK_input_nm": float(d_pvk_nm),
+            "d_BEMA_front_nm": float(d_bema_front_nm),
+            "d_BEMA_rear_nm": float(d_bema_rear_nm),
+            "d_gap_front_nm": float(d_gap_front_nm),
+            "d_gap_rear_nm": float(d_gap_rear_nm),
+            "d_PVK_bulk_nm": d_pvk_bulk_nm,
+            "d_C60_bulk_nm": d_c60_bulk_nm,
+        }
+        return reflectance, metadata
+
     def compute_pristine_baseline_decomposition(
         self,
         wavelengths_nm: np.ndarray | None = None,
@@ -884,6 +986,64 @@ class OpticalStackTable:
             "d_gap_front_nm": float(d_gap_front_nm),
         }
 
+    def compute_realistic_background_baseline_decomposition(
+        self,
+        *,
+        d_pvk_nm: float,
+        d_bema_front_nm: float,
+        d_bema_rear_nm: float,
+        d_gap_front_nm: float,
+        d_gap_rear_nm: float,
+        wavelengths_nm: np.ndarray | None = None,
+        use_constant_glass: bool = True,
+        constant_glass_nk: complex = DEFAULT_CONSTANT_GLASS_INDEX,
+        ag_boundary_mode: str = AG_BOUNDARY_FINITE_FILM,
+    ) -> dict[str, np.ndarray | float]:
+        if use_constant_glass:
+            glass_grid = np.full(self.wavelength_nm.shape, complex(constant_glass_nk), dtype=np.complex128)
+        else:
+            glass_grid = np.asarray(self.n_glass, dtype=np.complex128)
+
+        r_front = self.front_surface_reflectance_with_glass(glass_grid)
+        t_front = 1.0 - r_front
+        r_stack, metadata = self.calc_realistic_background_stack_reflectance(
+            d_pvk_nm=d_pvk_nm,
+            d_bema_front_nm=d_bema_front_nm,
+            d_bema_rear_nm=d_bema_rear_nm,
+            d_gap_front_nm=d_gap_front_nm,
+            d_gap_rear_nm=d_gap_rear_nm,
+            use_constant_glass=use_constant_glass,
+            constant_glass_nk=constant_glass_nk,
+            ag_boundary_mode=ag_boundary_mode,
+        )
+        denominator = 1.0 - r_front * r_stack
+        if np.any(np.isclose(denominator, 0.0)):
+            raise ValueError("Realistic background baseline 的强度级联分母接近 0。")
+        r_total = r_front + (t_front**2) * r_stack / denominator
+
+        if wavelengths_nm is None or np.array_equal(np.asarray(wavelengths_nm, dtype=float), self.wavelength_nm):
+            output_wavelength_nm = self.wavelength_nm.copy()
+            output_r_front = r_front
+            output_t_front = t_front
+            output_r_stack = r_stack
+            output_r_total = r_total
+        else:
+            query_wavelengths_nm = self._validate_query_wavelengths(wavelengths_nm)
+            output_wavelength_nm = query_wavelengths_nm
+            output_r_front = np.interp(query_wavelengths_nm, self.wavelength_nm, r_front)
+            output_t_front = np.interp(query_wavelengths_nm, self.wavelength_nm, t_front)
+            output_r_stack = np.interp(query_wavelengths_nm, self.wavelength_nm, r_stack)
+            output_r_total = np.interp(query_wavelengths_nm, self.wavelength_nm, r_total)
+
+        return {
+            "Wavelength_nm": output_wavelength_nm,
+            "R_front": output_r_front,
+            "T_front": output_t_front,
+            "R_stack": output_r_stack,
+            "R_total": output_r_total,
+            **metadata,
+        }
+
     def calc_macro_reflectance(
         self,
         mode: str,
@@ -1046,4 +1206,31 @@ def compute_pristine_baseline_decomposition(
         constant_glass_nk=constant_glass_nk,
         ag_boundary_mode=ag_boundary_mode,
         **kwargs,
+    )
+
+
+def compute_realistic_background_baseline_decomposition(
+    *,
+    d_pvk_nm: float,
+    d_bema_front_nm: float,
+    d_bema_rear_nm: float,
+    d_gap_front_nm: float,
+    d_gap_rear_nm: float,
+    wavelengths_nm: np.ndarray | None = None,
+    use_constant_glass: bool = True,
+    constant_glass_nk: complex = DEFAULT_CONSTANT_GLASS_INDEX,
+    ag_boundary_mode: str = AG_BOUNDARY_FINITE_FILM,
+) -> dict[str, np.ndarray | float]:
+    """Combined realistic-background baseline for Phase D-1 discrimination."""
+    model = load_default_optical_stack_table()
+    return model.compute_realistic_background_baseline_decomposition(
+        d_pvk_nm=d_pvk_nm,
+        d_bema_front_nm=d_bema_front_nm,
+        d_bema_rear_nm=d_bema_rear_nm,
+        d_gap_front_nm=d_gap_front_nm,
+        d_gap_rear_nm=d_gap_rear_nm,
+        wavelengths_nm=wavelengths_nm,
+        use_constant_glass=use_constant_glass,
+        constant_glass_nk=constant_glass_nk,
+        ag_boundary_mode=ag_boundary_mode,
     )

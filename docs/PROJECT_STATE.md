@@ -4,9 +4,9 @@
 
 ## 1. Current Snapshot
 
-- 更新时间：2026-04-12
-- 当前判断 Phase：`Phase C-1b`
-- 阶段定义：`建立 front air-gap only 指纹字典，完成 LOD 粗评估、uncertainty spot-check，并补齐 thickness / rear-BEMA / front-BEMA / rear-gap / front-gap 五机制对照`
+- 更新时间：2026-04-13
+- 当前判断 Phase：`Phase D-1`
+- 阶段定义：`建立 realistic thickness + roughness background 下的 air-gap discrimination database，统一整理 thickness / roughness / front-gap / rear-gap 的 R_total 判别输入`
 - 当前可用能力：
   - 已有 `step01_absolute_calibration.py`，可将样品与银镜原始计数转换为绝对反射率
   - 已有 `step01b_cauchy_extrapolation.py`，可基于 [LIT-0001] 的 `ITO/CsFAPI` 数字化折射率曲线生成 `750-1100 nm` 的 CsFAPI 扩展 `n-k` 中间件
@@ -42,6 +42,7 @@
   - 已新增 `stepC1a_rear_air_gap_sandbox.py`，可在 `PVK/C60` 后界面插入真实 air gap，输出 low-gap 高分辨主扫描、LOD 粗评估、branch-aware tracking 和与 thickness / rear-BEMA / front-BEMA 的四机制对照
   - 已新增 `stepC1b_front_air_gap_sandbox.py`，可在 `SAM/PVK` 前界面插入真实 air gap，输出 low-gap 高分辨主扫描、前/过渡/后窗分窗响应、LOD 粗评估、uncertainty spot-check 与五机制对照
   - 已新增 `stepPPT_phaseAtoC_assets.py`，可基于现有 `data/processed` 结果重绘一套统一风格的 `R_total-only` PPT 汇报资产，并同步生成每页 `slide_text.md / source_manifest.md`
+  - 已新增 `stepD1_airgap_discrimination_database.py`，可在 realistic `d_PVK + front/rear roughness` 背景上统一构建 `thickness nuisance / roughness nuisance / front-gap overlay / rear-gap overlay` 的 `R_total / Delta_R_total` 判别数据库，并输出 rear shift analysis、feature atlas 与算法讨论用 report 资产
   - 已产出标准中间文件 `data/processed/target_reflectance.csv` 与 `data/processed/CsFAPI_nk_extended.csv`
   - 已完成 Phase 02 形状畸变诊断，当前证据指向：ITO 近红外吸收失真是长波端托平与整体形状失配的主导因素
   - 已完成 Phase 04 空气隙前向预测，当前基线下 `d_air = 2 nm` 与 `5 nm` 的 `max(|ΔR|)` 分别约为 `0.538%` 与 `1.347%`，均高于 `0.2%` 典型噪声线
@@ -62,6 +63,7 @@
   - `Phase A-2.1` 已完成 first-pass uncertainty propagation，但尚未扩展到更高维的 surrogate family 或参数化介电函数不确定性
   - `Phase B-2` 当前仍是 front-side optical proxy，而不是完整化学界面模型
   - `Phase C-1a / C-1b` 当前仍是单侧 gap only 的 specular TMM 模型，不含散射、dual-gap 或 gap+BEMA 耦合
+  - `Phase D-1` 当前仅覆盖 thickness / roughness / gap 三类结构机制，尚未纳入 composition variation、实验噪声模型与真实分类器训练
   - `constant-glass vs dispersive-glass` 与参数化 band-edge dielectric model 仍未展开
 
 ## 2. Current Directory Tree
@@ -105,7 +107,8 @@ TMM-interference-spectrum/
 │       ├── stepB1_rear_bema_sandbox.py
 │       ├── stepB2_front_bema_sandbox.py
 │       ├── stepC1a_rear_air_gap_sandbox.py
-│       └── stepC1b_front_air_gap_sandbox.py
+│       ├── stepC1b_front_air_gap_sandbox.py
+│       └── stepD1_airgap_discrimination_database.py
 ├── data/
 │   └── processed/
 │       ├── CsFAPI_nk_extended.csv
@@ -124,6 +127,7 @@ TMM-interference-spectrum/
 │       ├── phaseB2/
 │       ├── phaseC1a/
 │       ├── phaseC1b/
+│       ├── phaseD1/
 │       ├── phaseA1_seam_audit/
 │       └── target_reflectance.csv
 ├── resources/
@@ -178,6 +182,7 @@ TMM-interference-spectrum/
 │       ├── phaseB2/
 │       ├── phaseC1a/
 │       ├── phaseC1b/
+│       ├── phaseD1/
 │       ├── phaseA1_2/
 │       ├── phaseA1_seam_audit/
 │       ├── phaseA1/
@@ -201,6 +206,7 @@ TMM-interference-spectrum/
 │       ├── phaseB2_front_bema_sandbox/
 │       ├── phaseC1a_rear_air_gap_sandbox/
 │       ├── phaseC1b_front_air_gap_sandbox/
+│       ├── phaseD1_airgap_discrimination_database/
 │       └── ppt_phaseAtoC_assets/
 ├── test_data/
 │   ├── sample.csv
@@ -1004,6 +1010,47 @@ TMM-interference-spectrum/
 - `results/report/ppt_phaseAtoC_assets/07_summary/*`
 - `results/report/ppt_phaseAtoC_assets/appendix_pvk_surrogate_fix/*`
 
+### 4.26 `stepD1_airgap_discrimination_database.py`
+
+- 文件位置：`src/scripts/stepD1_airgap_discrimination_database.py`
+- 主要职责：在 realistic `d_PVK + front/rear roughness` 背景上统一建立 `thickness nuisance / roughness nuisance / front-gap overlay / rear-gap overlay` 的 `R_total` 判别数据库，为后续 air-gap 识别算法比较提供结构化输入
+
+输入：
+- `resources/aligned_full_stack_nk_pvk_v2.csv`
+- `results/report/phaseA2_pvk_thickness_scan/PHASE_A2_REPORT.md`
+- `results/report/phaseA2_1_pvk_uncertainty_ensemble/PHASE_A2_1_REPORT.md`
+- `results/report/phaseB1_rear_bema_sandbox/PHASE_B1_REPORT.md`
+- `results/report/phaseB2_front_bema_sandbox/PHASE_B2_REPORT.md`
+- `results/report/phaseC1a_rear_air_gap_sandbox/PHASE_C1A_REPORT.md`
+- `results/report/phaseC1b_front_air_gap_sandbox/PHASE_C1B_REPORT.md`
+
+核心处理流程：
+- 复用 `full_stack_microcavity.py` 的组合入口，在同一 coherent stack 中统一加入 `d_PVK`、front/rear BEMA background 与单侧 gap overlay
+- 设定 realistic baseline：`d_PVK=700 nm, d_BEMA_front=10 nm, d_BEMA_rear=20 nm, no gap`
+- 构建五类 logical family：
+  - `thickness_nuisance`
+  - `front_roughness_nuisance`
+  - `rear_roughness_nuisance`
+  - `front_gap_on_background`
+  - `rear_gap_on_background`
+- 额外保留 `background_anchor` 作为 reference tracking family
+- 对每个 logical case 输出：
+  - `R_total`
+  - `Delta_R_total_vs_reference`
+  - front / transition / rear 窗口特征
+  - rear-window shift matching
+  - peak/valley 工程摘要
+- 进一步生成 feature scatter / boxplots / discrimination atlas，并同步写出 report 层资产
+
+输出：
+- `data/processed/phaseD1/phaseD1_case_manifest.csv`
+- `data/processed/phaseD1/phaseD1_rtotal_database.csv`
+- `data/processed/phaseD1/phaseD1_feature_database.csv`
+- `data/processed/phaseD1/phaseD1_discrimination_summary.csv`
+- `results/figures/phaseD1/*.png`
+- `results/logs/phaseD1/phaseD1_airgap_discrimination_database.md`
+- `results/report/phaseD1_airgap_discrimination_database/`
+
 ## 5. Data Flow
 
 当前项目主数据流如下：
@@ -1581,21 +1628,21 @@ selected phase outputs
 
 ## 9. Recent Update Summary
 
-- 更新时间：`2026-04-12`
-- 当前 Phase：`Phase C-1b`
+- 更新时间：`2026-04-13`
+- 当前 Phase：`Phase D-1`
 - 本次新增/修改：
-  - 新增 `src/scripts/stepPPT_phaseAtoC_assets.py`，把 `Phase A-1.2 → Phase C-1b` 的既有结果重绘为统一风格的 `R_total-only` PPT 资产
-  - 新增 `results/report/ppt_phaseAtoC_assets/`，按 baseline / five mechanisms / summary / appendix 组织明日 PPT 素材
-  - 为每一页同步写出 `slide_text.md` 与 `source_manifest.md`，便于直接做汇报与回查来源
-  - 更新 `results/report/README.md`、`report_manifest.csv` 与 `PROJECT_STATE.md`，登记新的汇报资产入口
+  - 新增 `src/scripts/stepD1_airgap_discrimination_database.py`，基于 realistic `d_PVK + front/rear roughness` 背景统一生成 `R_total` 判别数据库
+  - 在 `src/core/full_stack_microcavity.py` 新增组合前向入口，允许在同一 coherent stack 中叠加 `front/rear BEMA background` 与单侧 `front-gap / rear-gap`
+  - 新增 `data/processed/phaseD1/`、`results/figures/phaseD1/`、`results/logs/phaseD1/` 与 `results/report/phaseD1_airgap_discrimination_database/`
+  - 产出 case manifest、全谱库、窗口特征库、rear shift analysis、family summary 和 discrimination atlas
 - 已验证结论：
-  - 已形成面向 PPT 的 baseline → thickness → rear-BEMA → front-BEMA → rear-gap → front-gap 主叙事线
-  - 主汇报图现已统一为 `R_total-only` 口径，不再把 `R_stack` 混入正文资产
-  - 各页均已补齐可直接复用的短文案与来源说明，适合快速装配组会或阶段总结幻灯片
+  - 局部 thickness nuisance 在 realistic background 上仍主要表现为 rear-window fringe 的高可解释 shift
+  - front / rear roughness 更像 envelope / amplitude perturbation，而不是 rigid shift
+  - front-gap / rear-gap 叠加 roughness background 后，仍保留不同的窗口分布与非刚性 residual 指纹
 - 仍待验证：
-  - gap vs BEMA coupled comparison 尚未展开，当前还没有 gap+BEMA 的耦合图谱
-  - front-gap / rear-gap 的对称性与可分性尚未做系统归一化比较
-  - `constant-glass vs dispersive-glass` 与参数化 band-edge dielectric model 仍未展开
+  - 还没有正式训练或比较分类器，当前数据库仍是算法讨论输入，不是最终识别器
+  - composition variation 尚未纳入，因此当前 separability 仅覆盖 thickness / roughness / gap 三类结构机制
+  - 仍是 specular TMM；散射、dual-gap、gap+BEMA 联合机制与实验噪声模型尚未引入
 
 ## 10. Recommended Next Actions
 

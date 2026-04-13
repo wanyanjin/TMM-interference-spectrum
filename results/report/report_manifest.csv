@@ -7,3 +7,4 @@ phaseB2_front_bema_sandbox,Phase B-2,front-only NiOx/PVK proxy BEMA sandbox,phas
 phaseC1a_rear_air_gap_sandbox,Phase C-1a,rear air-gap only sandbox,phaseC1a_rear_air_gap_sandbox/PHASE_C1A_REPORT.md
 phaseC1b_front_air_gap_sandbox,Phase C-1b,front air-gap only sandbox,phaseC1b_front_air_gap_sandbox/PHASE_C1B_REPORT.md
 ppt_phaseAtoC_assets,Phase A→C,PPT-ready R_total-only asset pack,ppt_phaseAtoC_assets/00_manifest.md
+phaseD1_airgap_discrimination_database,Phase D-1,Air-gap discrimination database on realistic thickness plus roughness background,phaseD1_airgap_discrimination_database/PHASE_D1_REPORT.md

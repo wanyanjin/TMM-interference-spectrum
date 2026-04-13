@@ -83,3 +83,11 @@
   - 基于既有 `data/processed` 结果重绘的 `R_total-only` 主汇报图
   - 每页的 `slide_text.md` 与 `source_manifest.md`
   - 一份总 `00_manifest.md` 用于快速组装明日 PPT
+
+### `phaseD1_airgap_discrimination_database/`
+
+- 主题：realistic thickness + roughness background 下的 air-gap 判别数据库
+- 主要内容：
+  - case manifest、`R_total / Delta_R_total` 全谱数据库与窗口特征数据库
+  - rear shift matching、family summary 与 discrimination atlas
+  - 面向后续算法比较的阶段总结文档 `PHASE_D1_REPORT.md`
