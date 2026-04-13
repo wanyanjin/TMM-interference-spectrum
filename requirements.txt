@@ -6,3 +6,6 @@ lmfit
 beautifulsoup4
 PyMuPDF
 tmm
+PyWavelets
+scikit-learn
+umap-learn

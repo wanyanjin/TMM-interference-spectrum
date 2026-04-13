@@ -58,9 +58,9 @@ TRANSITION_SUMMARY_WINDOW = (650.0, 810.0)
 REAR_SUMMARY_WINDOW = (810.0, 1055.0)
 
 ZONE_SHADES = (
-    (FRONT_WINDOW_SHADE, "#e8f3ec", "front"),
-    (TRANSITION_WINDOW_SHADE, "#fff2cc", "transition"),
-    (REAR_WINDOW_SHADE, "#e7f0fa", "rear"),
+    (FRONT_WINDOW_SHADE, "#efe4cf", "front"),
+    (TRANSITION_WINDOW_SHADE, "#d7e2f1", "transition"),
+    (REAR_WINDOW_SHADE, "#dfeadf", "rear"),
 )
 
 
@@ -238,30 +238,25 @@ def add_window_shading(axis: plt.Axes) -> None:
 def plot_selected_curves(scan_frame: pd.DataFrame, outputs: Outputs) -> None:
     fig, ax = plt.subplots(figsize=(11.6, 5.8), dpi=320)
     add_window_shading(ax)
-    colors = {
-        675.0: "#1f4e79",
-        690.0: "#2e75b6",
-        700.0: "#111111",
-        710.0: "#c55a11",
-        725.0: "#8b0000",
-    }
-    for thickness_nm in SELECTED_THICKNESSES_NM:
+    colors = plt.cm.viridis(np.linspace(0.12, 0.90, len(SELECTED_THICKNESSES_NM)))
+    for color, thickness_nm in zip(colors, SELECTED_THICKNESSES_NM):
         subset = scan_frame.loc[np.isclose(scan_frame["d_PVK_nm"], thickness_nm)]
         ax.plot(
             subset["Wavelength_nm"].to_numpy(dtype=float),
             subset["R_total"].to_numpy(dtype=float) * 100.0,
-            linewidth=2.0 if np.isclose(thickness_nm, 700.0) else 1.8,
-            color=colors[float(thickness_nm)],
+            linewidth=1.9,
+            color=color,
             label=f"{int(thickness_nm)} nm",
         )
 
     ax.set_xlim(400.0, 1100.0)
     ax.set_xlabel("Wavelength (nm)", fontsize=12)
     ax.set_ylabel("R_total (%)", fontsize=12)
-    ax.set_title("Phase A-local Selected R_total Curves", fontsize=13)
+    ax.set_title("Selected R_total curves under local PVK thickness variation", fontsize=13)
     ax.grid(True, linestyle="--", alpha=0.25)
     ax.tick_params(labelsize=10.5)
-    ax.legend(loc="best", fontsize=10.5, frameon=True)
+    legend = ax.legend(loc="lower right", fontsize=10.0, frameon=True, ncol=2, title="d_PVK")
+    legend.get_title().set_fontsize(10.0)
     fig.tight_layout()
     fig.savefig(outputs.curves_png, dpi=320, bbox_inches="tight")
     plt.close(fig)
