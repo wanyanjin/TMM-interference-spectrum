@@ -103,6 +103,26 @@ def plot_outputs(result: dict, config: RuntimeConfig) -> dict[str, str]:
     paths: dict[str, str] = {}
     review_min_nm = 500.0
     review_max_nm = 750.0
+    review_mask = (wl >= review_min_nm) & (wl <= review_max_nm)
+
+    def adaptive_ylim(series_list: list[np.ndarray], fallback: tuple[float, float]) -> tuple[float, float]:
+        values: list[np.ndarray] = []
+        for s in series_list:
+            part = np.asarray(s, dtype=float)[review_mask]
+            finite = part[np.isfinite(part)]
+            if finite.size > 0:
+                values.append(finite)
+        if not values:
+            return fallback
+        merged = np.concatenate(values)
+        vmin = float(np.min(merged))
+        vmax = float(np.max(merged))
+        if np.isclose(vmin, vmax):
+            pad = max(0.02, 0.1 * max(abs(vmin), 1.0))
+            return vmin - pad, vmax + pad
+        span = vmax - vmin
+        pad = max(0.01, 0.12 * span)
+        return vmin - pad, vmax + pad
 
     raw_counts_path = config.output_figures_dir / "phase08_0429_raw_counts.png"
     plt.figure(figsize=(12, 6), dpi=200)
@@ -139,6 +159,8 @@ def plot_outputs(result: dict, config: RuntimeConfig) -> dict[str, str]:
     plt.ylabel("Reflectance (0-1)")
     plt.title("TMM Reference Reflectance: Glass/Ag")
     plt.xlim(review_min_nm, review_max_nm)
+    ymin, ymax = adaptive_ylim([r_tmm_glass_ag], (0.0, 1.0))
+    plt.ylim(ymin, ymax)
     plt.legend()
     plt.grid(alpha=0.3)
     plt.savefig(glass_ag_theory_path)
@@ -163,6 +185,8 @@ def plot_outputs(result: dict, config: RuntimeConfig) -> dict[str, str]:
     plt.ylabel("Reflectance (0-1)")
     plt.title("Experimental vs TMM Reflectance")
     plt.xlim(review_min_nm, review_max_nm)
+    ymin, ymax = adaptive_ylim([r_exp_plot, r_fixed_plot, r_best_plot], (0.0, 1.0))
+    plt.ylim(ymin, ymax)
     plt.legend()
     plt.grid(alpha=0.3)
     plt.savefig(exp_vs_tmm_path)
@@ -180,6 +204,8 @@ def plot_outputs(result: dict, config: RuntimeConfig) -> dict[str, str]:
     plt.ylabel("Residual")
     plt.title("Residual Diagnostics")
     plt.xlim(review_min_nm, review_max_nm)
+    ymin, ymax = adaptive_ylim([residual_fixed, residual_best], (-0.2, 0.2))
+    plt.ylim(ymin, ymax)
     plt.legend()
     plt.grid(alpha=0.3)
     plt.savefig(residual_path)
