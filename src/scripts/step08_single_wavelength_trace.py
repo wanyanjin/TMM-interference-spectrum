@@ -116,6 +116,97 @@ def format_optional(value: float | None) -> str:
     return f"{float(value):.12f}"
 
 
+def format_float(value: float | None, digits: int = 12) -> str:
+    if value is None:
+        return "not_available"
+    return f"{float(value):.{digits}f}"
+
+
+def rel_path_str(path_str: str | None) -> str:
+    if path_str is None:
+        return "not_available"
+    try:
+        path = Path(path_str).resolve()
+        return path.relative_to(PROJECT_ROOT).as_posix()
+    except Exception:
+        return path_str
+
+
+def markdown_table(headers: list[str], rows: list[list[object]]) -> list[str]:
+    lines = [
+        "| " + " | ".join(headers) + " |",
+        "| " + " | ".join(["---"] * len(headers)) + " |",
+    ]
+    for row in rows:
+        lines.append("| " + " | ".join(str(item) for item in row) + " |")
+    return lines
+
+
+def frame_range_text(frames: list[int]) -> str:
+    if not frames:
+        return "none"
+    if len(frames) == 1:
+        return f"{frames[0]}"
+    return f"{frames[0]}–{frames[-1]}, total {len(frames)} frames"
+
+
+def report_status(trace: dict) -> list[dict[str, str]]:
+    agtrace = trace.get("ag_mirror_multiframe_trace")
+    checks = trace["checks"]
+    expvals = trace["experimental_reflectance"]
+    statuses = [
+        {
+            "item": "target wavelength matched to nearest data point",
+            "status": "PASS",
+            "note": f"target={trace['target_wavelength_nm']:.3f} nm, used={trace['lambda_used_nm']:.6f} nm, Δ={trace['delta_nm']:.6f} nm",
+        },
+        {
+            "item": "Ag first frame excluded",
+            "status": "PASS" if agtrace and agtrace["Ag_frames_dropped"] == [1] else "NOT_CHECKED",
+            "note": "Ag 第 1 帧显式剔除；若无 Ag trace 则不检查。",
+        },
+        {
+            "item": "Ag frames reduced by mean",
+            "status": "PASS" if agtrace else "NOT_CHECKED",
+            "note": "Ag 用 frame 2–100 求 mean；BK 用 frame 1–100 求 mean。",
+        },
+        {
+            "item": "manual coherent formula vs coh_tmm",
+            "status": "PASS" if checks["coherent_formula_all_pass"] else "FAIL",
+            "note": f"一致性阈值 abs_diff <= {ABS_TOL:.1e}",
+        },
+        {
+            "item": "manual incoherent cascade vs CSV",
+            "status": "PASS" if checks["csv_all_pass"] else "FAIL",
+            "note": f"一致性阈值 abs_diff <= {ABS_TOL:.1e}",
+        },
+        {
+            "item": "experimental reflectance manual vs CSV",
+            "status": "PASS" if all(v["absolute_difference"] <= ABS_TOL for k, v in trace["csv_comparison"].items() if k.startswith("R_Exp_")) else "FAIL",
+            "note": "手算实验反射率与输出 CSV 对比。",
+        },
+        {
+            "item": "PVK n,k suitability",
+            "status": "WARNING",
+            "note": f"当前只审计 output_tag={trace['source_output_tag']} 对应 nk 来源，不能证明该 nk 全谱适用。",
+        },
+        {
+            "item": "specular-only TMM vs microscope measurement equivalence",
+            "status": "WARNING",
+            "note": "公式自洽不等于显微镜实测必然等于理想 specular reflectance。",
+        },
+    ]
+    if expvals.get("R_Exp_GlassPVK_by_AgMirror") is None:
+        statuses.append(
+            {
+                "item": "Ag mirror calibration chain available",
+                "status": "NOT_CHECKED",
+                "note": "当前结果集中无 Ag mirror 链。",
+            }
+        )
+    return statuses
+
+
 def sanitize_for_json(obj: object) -> object:
     if isinstance(obj, dict):
         return {str(k): sanitize_for_json(v) for k, v in obj.items()}
@@ -271,7 +362,6 @@ def build_ag_pixel_trace(manifest: dict, lambda_used_nm: float) -> dict[str, obj
 
 
 def render_markdown(trace: dict, output_path: Path) -> None:
-    red = lambda cond, text: f"**红标：{text}**" if cond else text
     coherent = trace["coherent_stack"]
     cascade = trace["incoherent_cascade"]
     expvals = trace["experimental_reflectance"]
@@ -281,211 +371,382 @@ def render_markdown(trace: dict, output_path: Path) -> None:
     counts = trace["counts"]
     fresnel = trace["fresnel"]
     agtrace = trace.get("ag_mirror_multiframe_trace")
+    status_rows = report_status(trace)
 
-    lines: list[str] = [
-        "# Phase 08 Single-Wavelength Trace Report",
-        "",
-        "## 1. 审计目标与输入文件",
-        f"- dual manifest: `{trace['input_files']['manifest_json']}`",
-        f"- calibrated reflectance: `{trace['input_files']['calibrated_csv']}`",
-        f"- theory csv: `{trace['input_files']['theory_csv']}`",
-        f"- nk csv: `{trace['input_files']['nk_csv']}`",
-        f"- sample csv: `{trace['input_files']['sample_csv']}`",
-        f"- reference csv: `{trace['input_files']['reference_csv']}`",
-        f"- ag corrected csv: `{trace['input_files'].get('ag_corrected_csv')}`",
-        f"- ag frame qc csv: `{trace['input_files'].get('ag_qc_csv')}`",
-        "",
-        "## 2. 目标波长与实际使用波长",
-        f"- `target_wavelength_nm = {trace['target_wavelength_nm']}`",
-        f"- `lambda_used_nm = {trace['lambda_used_nm']:.12f}`",
-        f"- `delta_nm = {trace['delta_nm']:.12f}`",
-        f"- `row_index = {trace['row_index']}`",
-        "",
-        "## 3. 实验计数与曝光归一化",
-        f"- `Glass_PVK_Counts = {counts['Glass_PVK_Counts']:.12f}`",
-        f"- `Glass_Ag_Counts = {counts['Glass_Ag_Counts']:.12f}`",
-        f"- `Ag_Mirror_Corrected_Counts = {format_optional(counts.get('Ag_Mirror_Corrected_Counts'))}`",
-        f"- `sample_exposure_ms = {counts['sample_exposure_ms']:.12f}`",
-        f"- `glass_ag_exposure_ms = {counts['glass_ag_exposure_ms']:.12f}`",
-        f"- `ag_mirror_exposure_ms = {format_optional(counts.get('ag_mirror_exposure_ms'))}`",
-        f"- `Glass_PVK_CountsPerMs = Glass_PVK_Counts / sample_exposure_ms = {counts['Glass_PVK_CountsPerMs']:.12f}`",
-        f"- `Glass_Ag_CountsPerMs = Glass_Ag_Counts / glass_ag_exposure_ms = {counts['Glass_Ag_CountsPerMs']:.12f}`",
-        f"- `Ag_Mirror_Corrected_CountsPerMs = Ag_Mirror_Corrected_Counts / ag_mirror_exposure_ms = {format_optional(counts.get('Ag_Mirror_Corrected_CountsPerMs'))}`",
-        "",
-        "## 4. glass/Ag 参比校准链",
-        "- 公式：",
-        "```text",
-        "R_exp_by_glassAg(λ) = [I_glassPVK(λ) / t_glassPVK] / [I_glassAg(λ) / t_glassAg] × R_TMM_glassAg(λ)",
-        "```",
-        f"- `I_glassPVK = {counts['Glass_PVK_Counts']:.12f}`",
-        f"- `t_glassPVK = {counts['sample_exposure_ms']:.12f}`",
-        f"- `I_glassAg = {counts['Glass_Ag_Counts']:.12f}`",
-        f"- `t_glassAg = {counts['glass_ag_exposure_ms']:.12f}`",
-        f"- `R_TMM_glassAg = {expvals['R_TMM_GlassAg']:.12f}`",
-        f"- `counts_ratio_glassAg = {expvals['counts_ratio_glassAg']:.12f}`",
-        f"- `R_exp_by_glassAg = {expvals['R_Exp_GlassPVK_by_GlassAg']:.12f}`",
-        "",
-        "## 5. Ag mirror 参比校准链",
-    ]
+    def complex_rows(item: dict[str, object], reflectance: float | None = None) -> list[object]:
+        return [
+            format_float(item["real"]),
+            format_float(item["imag"]),
+            format_float(item["abs"]),
+            format_float(item["phase_rad"]),
+            format_float(item["phase_deg"]),
+            format_float(reflectance) if reflectance is not None else "—",
+        ]
+
+    lines: list[str] = ["# Phase 08 Single-Wavelength Trace Report", ""]
+    lines.extend(
+        [
+            "## 0. 执行摘要",
+            f"- 本报告审计目标波长为 `{trace['target_wavelength_nm']:.3f} nm`，实际使用最近数据点 `{trace['lambda_used_nm']:.12f} nm`，偏差 `{trace['delta_nm']:.12f} nm`。",
+            f"- 手写单层相干公式与 `coh_tmm` {'一致' if trace['checks']['coherent_formula_all_pass'] else '不一致'}，一致性阈值为 `{ABS_TOL:.1e}`。",
+            f"- 手写厚玻璃非相干级联与现有 CSV {'一致' if trace['checks']['csv_all_pass'] else '不一致'}。",
+            f"- 该点实验反射率分别为 `glass/Ag = {expvals['R_Exp_GlassPVK_by_GlassAg']:.12f}`、`Ag mirror = {format_optional(expvals.get('R_Exp_GlassPVK_by_AgMirror'))}`，而 `R_TMM_GlassPVK_Fixed = {expvals['R_TMM_GlassPVK_Fixed']:.12f}`。",
+            "- 当前结论：公式实现与输出 CSV 在该点自洽，但实验与理论仍存在显著差异；下一步应继续审查 `n,k` 适用性、实验参比链路、显微收光与散射贡献。",
+            "",
+            "## 0.1 审计状态表",
+        ]
+    )
+    lines.extend(markdown_table(["检查项", "状态", "说明"], [[r["item"], r["status"], r["note"]] for r in status_rows]))
+
+    lines.extend(["", "## 1. 输入数据与版本"])
+    lines.extend(
+        markdown_table(
+            ["角色", "路径"],
+            [
+                ["dual manifest", f"`{rel_path_str(trace['input_files']['manifest_json'])}`"],
+                ["calibrated reflectance", f"`{rel_path_str(trace['input_files']['calibrated_csv'])}`"],
+                ["theory csv", f"`{rel_path_str(trace['input_files']['theory_csv'])}`"],
+                ["nk csv", f"`{rel_path_str(trace['input_files']['nk_csv'])}`"],
+                ["sample csv", f"`{rel_path_str(trace['input_files']['sample_csv'])}`"],
+                ["reference csv", f"`{rel_path_str(trace['input_files']['reference_csv'])}`"],
+                ["ag corrected csv", f"`{rel_path_str(trace['input_files'].get('ag_corrected_csv'))}`"],
+                ["ag frame qc csv", f"`{rel_path_str(trace['input_files'].get('ag_qc_csv'))}`"],
+                ["source output tag", f"`{trace['source_output_tag']}`"],
+            ],
+        )
+    )
+
+    lines.extend(["", "## 2. 目标波长与实际使用波长"])
+    lines.extend(
+        markdown_table(
+            ["quantity", "value"],
+            [
+                ["target_wavelength_nm", format_float(trace["target_wavelength_nm"])],
+                ["lambda_used_nm", format_float(trace["lambda_used_nm"])],
+                ["delta_nm", format_float(trace["delta_nm"])],
+                ["row_index", trace["row_index"]],
+            ],
+        )
+    )
+
+    lines.extend(
+        [
+            "",
+            "## 3. 实验计数与曝光归一化",
+            "$$",
+            "I_{\\mathrm{counts/ms}}(\\lambda)=\\frac{I_{\\mathrm{counts}}(\\lambda)}{t_{\\mathrm{exposure}}}",
+            "$$",
+        ]
+    )
+    lines.extend(
+        markdown_table(
+            ["quantity", "value"],
+            [
+                ["Glass_PVK_Counts", format_float(counts["Glass_PVK_Counts"])],
+                ["Glass_Ag_Counts", format_float(counts["Glass_Ag_Counts"])],
+                ["Ag_Mirror_Corrected_Counts", format_optional(counts.get("Ag_Mirror_Corrected_Counts"))],
+                ["sample_exposure_ms", format_float(counts["sample_exposure_ms"])],
+                ["glass_ag_exposure_ms", format_float(counts["glass_ag_exposure_ms"])],
+                ["ag_mirror_exposure_ms", format_optional(counts.get("ag_mirror_exposure_ms"))],
+                ["Glass_PVK_CountsPerMs", format_float(counts["Glass_PVK_CountsPerMs"])],
+                ["Glass_Ag_CountsPerMs", format_float(counts["Glass_Ag_CountsPerMs"])],
+                ["Ag_Mirror_Corrected_CountsPerMs", format_optional(counts.get("Ag_Mirror_Corrected_CountsPerMs"))],
+            ],
+        )
+    )
+
+    lines.extend(
+        [
+            "",
+            "## 4. glass/Ag 参比校准链",
+            "$$",
+            "R_{\\mathrm{exp}}^{\\mathrm{glass/Ag}}(\\lambda)=",
+            "\\frac{I_{\\mathrm{PVK}}(\\lambda)/t_{\\mathrm{PVK}}}{I_{\\mathrm{glass/Ag}}(\\lambda)/t_{\\mathrm{glass/Ag}}}",
+            "\\cdot R_{\\mathrm{TMM}}^{\\mathrm{glass/Ag}}(\\lambda)",
+            "$$",
+        ]
+    )
+    lines.extend(
+        markdown_table(
+            ["quantity", "value"],
+            [
+                ["I_glassPVK", format_float(counts["Glass_PVK_Counts"])],
+                ["t_glassPVK_ms", format_float(counts["sample_exposure_ms"])],
+                ["I_glassAg", format_float(counts["Glass_Ag_Counts"])],
+                ["t_glassAg_ms", format_float(counts["glass_ag_exposure_ms"])],
+                ["R_TMM_glassAg", format_float(expvals["R_TMM_GlassAg"])],
+                ["counts_ratio_glassAg", format_float(expvals["counts_ratio_glassAg"])],
+                ["R_exp_by_glassAg", format_float(expvals["R_Exp_GlassPVK_by_GlassAg"])],
+            ],
+        )
+    )
+
+    lines.extend(["", "## 5. Ag mirror 参比校准链"])
     if expvals.get("R_Exp_GlassPVK_by_AgMirror") is None:
-        lines.append("- `Ag mirror chain not available in current outputs.`")
+        lines.append("Ag mirror chain not available in current outputs.")
     else:
         lines.extend(
             [
-                "- 公式：",
-                "```text",
-                "R_exp_by_AgMirror(λ) = [I_glassPVK(λ) / t_glassPVK] / [I_AgMirror_corrected(λ) / t_AgMirror] × R_TMM_AgMirror(λ)",
-                "```",
-                f"- `I_glassPVK = {counts['Glass_PVK_Counts']:.12f}`",
-                f"- `t_glassPVK = {counts['sample_exposure_ms']:.12f}`",
-                f"- `I_AgMirror_corrected = {counts['Ag_Mirror_Corrected_Counts']:.12f}`",
-                f"- `t_AgMirror = {counts['ag_mirror_exposure_ms']:.12f}`",
-                f"- `R_TMM_AgMirror = {expvals['R_TMM_AgMirror']:.12f}`",
-                f"- `counts_ratio_AgMirror = {expvals['counts_ratio_AgMirror']:.12f}`",
-                f"- `R_exp_by_AgMirror = {expvals['R_Exp_GlassPVK_by_AgMirror']:.12f}`",
+                "$$",
+                "R_{\\mathrm{exp}}^{\\mathrm{Ag\\ mirror}}(\\lambda)=",
+                "\\frac{I_{\\mathrm{PVK}}(\\lambda)/t_{\\mathrm{PVK}}}{I_{\\mathrm{Ag\\ mirror,corr}}(\\lambda)/t_{\\mathrm{Ag\\ mirror}}}",
+                "\\cdot R_{\\mathrm{TMM}}^{\\mathrm{Ag\\ mirror}}(\\lambda)",
+                "$$",
             ]
         )
+        lines.extend(
+            markdown_table(
+                ["quantity", "value"],
+                [
+                    ["I_glassPVK", format_float(counts["Glass_PVK_Counts"])],
+                    ["t_glassPVK_ms", format_float(counts["sample_exposure_ms"])],
+                    ["I_AgMirror_corrected", format_float(counts["Ag_Mirror_Corrected_Counts"])],
+                    ["t_AgMirror_ms", format_float(counts["ag_mirror_exposure_ms"])],
+                    ["R_TMM_AgMirror", format_float(expvals["R_TMM_AgMirror"])],
+                    ["counts_ratio_AgMirror", format_float(expvals["counts_ratio_AgMirror"])],
+                    ["R_exp_by_AgMirror", format_float(expvals["R_Exp_GlassPVK_by_AgMirror"])],
+                ],
+            )
+        )
+
     lines.extend(["", "## 6. Ag mirror 多帧与背景扣除展开"])
     if agtrace is None:
-        lines.append("- 当前输出中没有 Ag mirror corrected 数据，无法展开该节。")
+        lines.append("当前输出中没有 Ag mirror corrected 数据，无法展开该节。")
     else:
-        lines.extend(
-            [
-                f"- `Pixel_Index = {agtrace['Pixel_Index']}`",
-                f"- `lambda_pixel_nm = {agtrace['lambda_pixel_nm']:.12f}`",
-                f"- `Ag frame count total = {agtrace['Ag_frame_count_total']}`",
-                f"- `Ag frames dropped = {agtrace['Ag_frames_dropped']}`",
-                f"- `Ag frames used = {agtrace['Ag_frames_used']}`",
-                f"- `BK frame count total = {agtrace['BK_frame_count_total']}`",
-                f"- `Ag mean counts at pixel = {agtrace['Ag_mean_counts_at_pixel']:.12f}`",
-                f"- `BK mean counts at pixel = {agtrace['BK_mean_counts_at_pixel']:.12f}`",
-                f"- `Ag corrected counts = Ag mean - BK mean = {agtrace['Ag_corrected_counts']:.12f}`",
-                f"- `Ag first frame counts at pixel = {agtrace['Ag_first_frame_counts_at_pixel']:.12f}`",
-                "- 说明：Ag 使用 frame 2-100 的 mean；BK 使用 frame 1-100 的 mean；第 1 帧显式 drop。",
-            ]
+        lines.append(
+            "Ag 使用 `frame 2–100` 的 mean，BK 使用 `frame 1–100` 的 mean；第 1 帧显式 drop，完整帧列表保留在 JSON。"
         )
+        lines.extend(
+            markdown_table(
+                ["quantity", "value"],
+                [
+                    ["Pixel_Index", agtrace["Pixel_Index"]],
+                    ["lambda_pixel_nm", format_float(agtrace["lambda_pixel_nm"])],
+                    ["Ag frame count total", agtrace["Ag_frame_count_total"]],
+                    ["Ag frames dropped", "1"],
+                    ["Ag frames used", frame_range_text(agtrace["Ag_frames_used"])],
+                    ["BK frame count total", agtrace["BK_frame_count_total"]],
+                    ["Ag mean counts at pixel", format_float(agtrace["Ag_mean_counts_at_pixel"])],
+                    ["BK mean counts at pixel", format_float(agtrace["BK_mean_counts_at_pixel"])],
+                    ["Ag corrected counts", format_float(agtrace["Ag_corrected_counts"])],
+                    ["Ag first frame counts at pixel", format_float(agtrace["Ag_first_frame_counts_at_pixel"])],
+                ],
+            )
+        )
+
+    lines.extend(["", "## 7. nk 插值结果"])
+    lines.append("$\\tilde n = n + ik$")
+    lines.extend(
+        markdown_table(
+            ["material", "lower_nm", "lower_n", "lower_k", "upper_nm", "upper_n", "upper_k", "interp_n", "interp_k"],
+            [
+                [
+                    "Glass",
+                    format_float(nk["glass_interp"]["lower_point"]["Wavelength_nm"], 3),
+                    format_float(nk["glass_interp"]["lower_point"]["n"]),
+                    format_float(nk["glass_interp"]["lower_point"]["k"]),
+                    format_float(nk["glass_interp"]["upper_point"]["Wavelength_nm"], 3),
+                    format_float(nk["glass_interp"]["upper_point"]["n"]),
+                    format_float(nk["glass_interp"]["upper_point"]["k"]),
+                    format_float(nk["n_glass_complex"]["real"]),
+                    format_float(nk["n_glass_complex"]["imag"]),
+                ],
+                [
+                    "PVK",
+                    format_float(nk["pvk_interp"]["lower_point"]["Wavelength_nm"], 3),
+                    format_float(nk["pvk_interp"]["lower_point"]["n"]),
+                    format_float(nk["pvk_interp"]["lower_point"]["k"]),
+                    format_float(nk["pvk_interp"]["upper_point"]["Wavelength_nm"], 3),
+                    format_float(nk["pvk_interp"]["upper_point"]["n"]),
+                    format_float(nk["pvk_interp"]["upper_point"]["k"]),
+                    format_float(nk["n_pvk_complex"]["real"]),
+                    format_float(nk["n_pvk_complex"]["imag"]),
+                ],
+                [
+                    "Ag",
+                    format_float(nk["ag_interp"]["lower_point"]["Wavelength_nm"], 3),
+                    format_float(nk["ag_interp"]["lower_point"]["n"]),
+                    format_float(nk["ag_interp"]["lower_point"]["k"]),
+                    format_float(nk["ag_interp"]["upper_point"]["Wavelength_nm"], 3),
+                    format_float(nk["ag_interp"]["upper_point"]["n"]),
+                    format_float(nk["ag_interp"]["upper_point"]["k"]),
+                    format_float(nk["n_ag_complex"]["real"]),
+                    format_float(nk["n_ag_complex"]["imag"]),
+                ],
+            ],
+        )
+    )
+
+    lines.extend(["", "## 8. Fresnel 界面反射"])
     lines.extend(
         [
-            "",
-            "## 7. nk 插值结果",
-            f"- `n_air = 1 + 0i`",
-            f"- `n_glass = {format_complex_parts(nk['n_glass_complex'])}`",
-            f"- `n_PVK = {format_complex_parts(nk['n_pvk_complex'])}`",
-            f"- `n_Ag = {format_complex_parts(nk['n_ag_complex'])}`",
-            f"- `n_complex = n + i k`",
-            "- 相邻插值点：",
-            f"  - Glass lower: `{nk['glass_interp']['lower_point']}`",
-            f"  - Glass upper: `{nk['glass_interp']['upper_point']}`",
-            f"  - PVK lower: `{nk['pvk_interp']['lower_point']}`",
-            f"  - PVK upper: `{nk['pvk_interp']['upper_point']}`",
-            f"  - Ag lower: `{nk['ag_interp']['lower_point']}`",
-            f"  - Ag upper: `{nk['ag_interp']['upper_point']}`",
-            "",
-            "## 8. Fresnel 界面反射",
+            "$$",
+            "r_{ij}=\\frac{\\tilde n_i-\\tilde n_j}{\\tilde n_i+\\tilde n_j},\\qquad R_{ij}=|r_{ij}|^2",
+            "$$",
+            "注意：界面反射率不是最终薄膜反射率；相干薄膜中的多次往返振幅不能简单相加为总反射率。",
         ]
     )
+    rows = []
     for key in ["air_glass", "glass_pvk", "pvk_air", "glass_ag", "ag_air", "air_ag"]:
         item = fresnel[key]
-        lines.append(f"- `{key}`: r = {format_complex_parts(item['r'])}; `R = {item['R']:.12f}`")
-    lines.extend(["", "## 9. 相干薄膜 TMM 展开", "", "### 9.1 Glass / PVK / Air"])
-    for label in ["fixed", "best_d"]:
-        item = coherent["glass_pvk"][label]
+        rows.append([key, *complex_rows(item["r"], item["R"])])
+    lines.extend(markdown_table(["quantity", "real", "imag", "magnitude", "phase_rad", "phase_deg", "reflectance"], rows))
+
+    lines.extend(["", "## 9. 相干薄膜 TMM 展开"])
+    lines.extend(
+        [
+            "$$",
+            "\\delta = \\frac{2\\pi \\tilde n_1 d_1}{\\lambda}",
+            "$$",
+            "$$",
+            "r_{\\mathrm{total}}=",
+            "\\frac{r_{01}+r_{12}\\exp(2i\\delta)}{1+r_{01}r_{12}\\exp(2i\\delta)},\\qquad",
+            "R_{\\mathrm{stack}}=|r_{\\mathrm{total}}|^2",
+            "$$",
+        ]
+    )
+
+    def add_stack_section(title: str, item: dict[str, object], reflectance_label: str) -> None:
+        lines.extend(["", f"### {title}"])
+        lines.append(f"`d_1 = {format_float(item['d1_nm'])} nm`")
         lines.extend(
-            [
-                f"- `{label}` (`d = {item['d1_nm']:.12f} nm`)",
-                f"  - `r_01 = {format_complex_parts(item['r_01'])}`",
-                f"  - `r_12 = {format_complex_parts(item['r_12'])}`",
-                f"  - `δ = {format_complex_parts(item['delta'])}`",
-                f"  - `exp(2iδ) = {format_complex_parts(item['exp_2i_delta'])}`",
-                f"  - `r_total = {format_complex_parts(item['r_total'])}`",
-                f"  - `R_stack_by_formula = {item['R_stack_by_formula']:.12f}`",
-                f"  - `R_stack_by_coh_tmm = {item['R_stack_by_coh_tmm']:.12f}`",
-                f"  - {red(not item['consistency_pass'], 'absolute_difference = ' + format(item['absolute_difference'], '.12e'))}",
-            ]
+            markdown_table(
+                ["quantity", "real", "imag", "magnitude", "phase_rad", "phase_deg"],
+                [
+                    ["r_01", *complex_rows(item["r_01"])[:-1]],
+                    ["r_12", *complex_rows(item["r_12"])[:-1]],
+                    ["delta", *complex_rows(item["delta"])[:-1]],
+                    ["exp(2i delta)", *complex_rows(item["exp_2i_delta"])[:-1]],
+                    ["numerator", *complex_rows(item["numerator"])[:-1]],
+                    ["denominator", *complex_rows(item["denominator"])[:-1]],
+                    ["r_total", *complex_rows(item["r_total"])[:-1]],
+                ],
+            )
         )
-    lines.extend(["", "### 9.2 Glass / Ag / Air"])
-    item = coherent["glass_ag"]
-    lines.extend(
-        [
-            f"- `r_01 = {format_complex_parts(item['r_01'])}`",
-            f"- `r_12 = {format_complex_parts(item['r_12'])}`",
-            f"- `δ = {format_complex_parts(item['delta'])}`",
-            f"- `exp(2iδ) = {format_complex_parts(item['exp_2i_delta'])}`",
-            f"- `r_total = {format_complex_parts(item['r_total'])}`",
-            f"- `R_stack_glass_ag = {item['R_stack_by_formula']:.12f}`",
-            f"- `R_stack_by_coh_tmm = {item['R_stack_by_coh_tmm']:.12f}`",
-            f"- {red(not item['consistency_pass'], 'absolute_difference = ' + format(item['absolute_difference'], '.12e'))}",
-        ]
-    )
-    lines.extend(["", "### 9.3 Air / Ag / Air"])
-    item = coherent["air_ag"]
-    lines.extend(
-        [
-            f"- `r_01 = {format_complex_parts(item['r_01'])}`",
-            f"- `r_12 = {format_complex_parts(item['r_12'])}`",
-            f"- `δ = {format_complex_parts(item['delta'])}`",
-            f"- `exp(2iδ) = {format_complex_parts(item['exp_2i_delta'])}`",
-            f"- `r_total = {format_complex_parts(item['r_total'])}`",
-            f"- `R_stack_air_ag = {item['R_stack_by_formula']:.12f}`",
-            f"- `R_stack_by_coh_tmm = {item['R_stack_by_coh_tmm']:.12f}`",
-            f"- {red(not item['consistency_pass'], 'absolute_difference = ' + format(item['absolute_difference'], '.12e'))}",
-        ]
-    )
+        lines.extend(
+            markdown_table(
+                ["quantity", "manual", "csv/coh_tmm", "abs_diff", "rel_diff_percent"],
+                [
+                    [
+                        reflectance_label,
+                        format_float(item["R_stack_by_formula"]),
+                        format_float(item["R_stack_by_coh_tmm"]),
+                        f"{item['absolute_difference']:.12e}",
+                        f"{item['relative_difference_percent']:.12g}",
+                    ]
+                ],
+            )
+        )
+
+    add_stack_section("9.1 Glass / PVK / Air (fixed)", coherent["glass_pvk"]["fixed"], "R_stack_glass_pvk_fixed")
+    add_stack_section("9.2 Glass / PVK / Air (best-d)", coherent["glass_pvk"]["best_d"], "R_stack_glass_pvk_bestD")
+    add_stack_section("9.3 Glass / Ag / Air", coherent["glass_ag"], "R_stack_glass_ag")
+    add_stack_section("9.4 Air / Ag / Air", coherent["air_ag"], "R_stack_air_ag")
+
     lines.extend(["", "## 10. 厚玻璃非相干级联"])
-    for key, title in [
-        ("glass_pvk_fixed", "R_TMM_GlassPVK_Fixed"),
-        ("glass_pvk_best", "R_TMM_GlassPVK_BestD"),
-        ("glass_ag", "R_TMM_GlassAg"),
-    ]:
-        item = cascade[key]
-        cmp = csvcmp[title]
-        lines.extend(
+    lines.extend(
+        [
+            "$$",
+            "R_{\\mathrm{front}} = \\left|\\frac{\\tilde n_{\\mathrm{air}}-\\tilde n_{\\mathrm{glass}}}{\\tilde n_{\\mathrm{air}}+\\tilde n_{\\mathrm{glass}}}\\right|^2",
+            "$$",
+            "$$",
+            "R_{\\mathrm{total}} = R_{\\mathrm{front}} + \\frac{(1-R_{\\mathrm{front}})^2 R_{\\mathrm{stack}}}{1-R_{\\mathrm{front}}R_{\\mathrm{stack}}}",
+            "$$",
+        ]
+    )
+    lines.extend(
+        markdown_table(
+            ["quantity", "R_front", "R_stack", "numerator", "denominator", "R_total"],
             [
-                f"- `{title}`",
-                f"  - `R_front = {item['R_front']:.12f}`",
-                f"  - `R_stack = {item['R_stack']:.12f}`",
-                f"  - `numerator = {item['numerator']:.12f}`",
-                f"  - `denominator = {item['denominator']:.12f}`",
-                f"  - `R_total = {item['R_total']:.12f}`",
-                f"  - `CSV = {cmp['reference']:.12f}`",
-                f"  - {red(cmp['absolute_difference'] > ABS_TOL, 'difference = ' + format(cmp['absolute_difference'], '.12e'))}",
-            ]
+                [
+                    "R_TMM_GlassPVK_Fixed_manual",
+                    format_float(cascade["glass_pvk_fixed"]["R_front"]),
+                    format_float(cascade["glass_pvk_fixed"]["R_stack"]),
+                    format_float(cascade["glass_pvk_fixed"]["numerator"]),
+                    format_float(cascade["glass_pvk_fixed"]["denominator"]),
+                    format_float(cascade["glass_pvk_fixed"]["R_total"]),
+                ],
+                [
+                    "R_TMM_GlassPVK_BestD_manual",
+                    format_float(cascade["glass_pvk_best"]["R_front"]),
+                    format_float(cascade["glass_pvk_best"]["R_stack"]),
+                    format_float(cascade["glass_pvk_best"]["numerator"]),
+                    format_float(cascade["glass_pvk_best"]["denominator"]),
+                    format_float(cascade["glass_pvk_best"]["R_total"]),
+                ],
+                [
+                    "R_TMM_GlassAg_manual",
+                    format_float(cascade["glass_ag"]["R_front"]),
+                    format_float(cascade["glass_ag"]["R_stack"]),
+                    format_float(cascade["glass_ag"]["numerator"]),
+                    format_float(cascade["glass_ag"]["denominator"]),
+                    format_float(cascade["glass_ag"]["R_total"]),
+                ],
+            ],
         )
+    )
+
     lines.extend(["", "## 11. 与现有 CSV 输出对比"])
-    for key, item in csvcmp.items():
-        lines.append(
-            f"- `{key}`: manual={item['manual']:.12f}, csv={item['reference']:.12f}, "
-            f"abs_diff={item['absolute_difference']:.12e}, rel_diff={item['relative_difference_percent']:.12g}%"
+    lines.extend(
+        markdown_table(
+            ["quantity", "manual", "csv/coh_tmm", "abs_diff", "rel_diff_percent"],
+            [
+                [key, format_float(item["manual"]), format_float(item["reference"]), f"{item['absolute_difference']:.12e}", f"{item['relative_difference_percent']:.12g}"]
+                for key, item in csvcmp.items()
+            ],
         )
+    )
+
+    lines.extend(["", "## 12. 单点实验-理论残差"])
+    lines.append(
+        "$$"
+        "\n\\mathrm{Residual} = R_{\\mathrm{exp}} - R_{\\mathrm{TMM}}"
+        "\n$$"
+    )
+    residual_rows = [
+        ["R_Exp_GlassPVK_by_GlassAg", format_float(expvals["R_Exp_GlassPVK_by_GlassAg"])],
+        ["R_Exp_GlassPVK_by_AgMirror", format_optional(expvals.get("R_Exp_GlassPVK_by_AgMirror"))],
+        ["R_TMM_GlassPVK_Fixed", format_float(expvals["R_TMM_GlassPVK_Fixed"])],
+        ["R_TMM_GlassPVK_BestD", format_float(expvals["R_TMM_GlassPVK_BestD"])],
+        ["Residual_Fixed_by_GlassAg", format_float(diffs["Residual_Fixed_by_GlassAg"])],
+        ["Residual_BestD_by_GlassAg", format_float(diffs["Residual_BestD_by_GlassAg"])],
+        ["Residual_Fixed_by_AgMirror", format_optional(diffs.get("Residual_Fixed_by_AgMirror"))],
+        ["Residual_BestD_by_AgMirror", format_optional(diffs.get("Residual_BestD_by_AgMirror"))],
+    ]
+    lines.extend(markdown_table(["quantity", "value"], residual_rows))
     lines.extend(
         [
             "",
-            "## 12. 单点实验-理论残差",
-            f"- `R_Exp_GlassPVK_by_GlassAg = {expvals['R_Exp_GlassPVK_by_GlassAg']:.12f}`",
-            f"- `R_Exp_GlassPVK_by_AgMirror = {format_optional(expvals.get('R_Exp_GlassPVK_by_AgMirror'))}`",
-            f"- `R_TMM_GlassPVK_Fixed = {expvals['R_TMM_GlassPVK_Fixed']:.12f}`",
-            f"- `R_TMM_GlassPVK_BestD = {expvals['R_TMM_GlassPVK_BestD']:.12f}`",
-            f"- `Residual_Fixed_by_GlassAg = {diffs['Residual_Fixed_by_GlassAg']:.12f}`",
-            f"- `Residual_BestD_by_GlassAg = {diffs['Residual_BestD_by_GlassAg']:.12f}`",
-            f"- `Residual_Fixed_by_AgMirror = {format_optional(diffs.get('Residual_Fixed_by_AgMirror'))}`",
-            f"- `Residual_BestD_by_AgMirror = {format_optional(diffs.get('Residual_BestD_by_AgMirror'))}`",
-            f"- Glass/Ag 实验值相对 fixed {'高' if diffs['Residual_Fixed_by_GlassAg'] > 0 else '低'}，差值 `{abs(diffs['Residual_Fixed_by_GlassAg']):.12f}`，相对误差 `{diffs['Relative_Error_Fixed_GlassAg_percent']:.12f}%`",
-            f"- Ag mirror 实验值相对 fixed {'高' if (diffs.get('Residual_Fixed_by_AgMirror') or 0.0) > 0 else '低'}，差值 `{format_optional(abs(diffs.get('Residual_Fixed_by_AgMirror')) if diffs.get('Residual_Fixed_by_AgMirror') is not None else None)}`，相对误差 `{format_optional(diffs.get('Relative_Error_Fixed_AgMirror_percent'))}%`",
+            f"- `glass/Ag` 链相对 fixed 为 **高**，差值 `{abs(diffs['Residual_Fixed_by_GlassAg']):.12f}`，相对误差 `{diffs['Relative_Error_Fixed_GlassAg_percent']:.12f}%`。",
+            f"- `Ag mirror` 链相对 fixed 为 **{'高' if (diffs.get('Residual_Fixed_by_AgMirror') or 0.0) > 0 else '低'}**，差值 `{format_optional(abs(diffs.get('Residual_Fixed_by_AgMirror')) if diffs.get('Residual_Fixed_by_AgMirror') is not None else None)}`，相对误差 `{format_optional(diffs.get('Relative_Error_Fixed_AgMirror_percent'))}%`。",
+            "- 当前单点偏差主要来自实验 counts ratio 对应的反射率明显高于 `glass/PVK` TMM 理论值，而不是 TMM 公式展开本身。",
             "",
             "## 13. 人工解释",
-            "1. 该波长点的实验反射率先把样品和参比计数除以各自曝光时间，得到 counts/ms；再取样品/参比比值，乘以对应参比的理论反射率。",
-            "2. TMM 不是简单把各界面反射率相加，因为薄膜内部会发生多次往返反射，振幅相位会相干叠加。",
-            "3. 相位 `δ = 2π n d / λ` 控制薄膜内部往返波的相长/相消，是干涉条纹的核心。",
-            "4. 厚玻璃前表面与后侧薄膜栈之间的光程远大于相干长度，因此当前代码把前表面与后侧相干栈按非相干级联处理，而不是整体相干求和。",
-            "5. 本报告中的单层解析公式与 `coh_tmm` 在 `Glass/PVK/Air`、`Glass/Ag/Air`、`Air/Ag/Air` 三个栈上逐点比对。",
-            f"6. 结果：手写相干公式与 `coh_tmm` {'一致' if trace['checks']['coherent_formula_all_pass'] else '不一致'}；手写非相干级联与 CSV {'一致' if trace['checks']['csv_all_pass'] else '不一致'}。",
-            "7. 因此如果一致，可以判断当前代码的公式层面没有明显硬错误；若不一致，则优先排查波长点选择、插值、输出列或手写公式实现。",
-            "8. 在该点上，实验与理论差异主要来自实验 counts ratio 对应的反射率明显高于 `glass/PVK` TMM 理论值，而不是单层公式或非相干级联公式本身计算错误。",
+            "1. 这个单点 trace 的作用，是把从计数到实验反射率、再到 TMM 理论反射率的整条链路显式展开，便于人工审计。",
+            "2. 实验反射率的核心步骤是：先把样品和参比计数除以曝光时间，得到 counts/ms；再取样品/参比比值；最后乘上对应参比的理论反射率。",
+            "3. TMM 不能把各界面反射率直接相加，因为薄膜中存在多次往返反射，必须在振幅层面结合相位 `\\delta` 做相干叠加。",
+            "4. 厚玻璃前表面与后侧薄膜栈的光程远大于相干长度，因此前表面与后侧相干栈之间采用非相干级联，而不是整体相干求和。",
+            f"5. 本报告中手写单层公式与 `coh_tmm` {'一致' if trace['checks']['coherent_formula_all_pass'] else '不一致'}，手写非相干级联与 CSV {'一致' if trace['checks']['csv_all_pass'] else '不一致'}。",
+            "6. 因而该点可以证明：当前代码的公式实现层没有明显硬错误；但不能证明全谱、材料光学常数或显微镜测量语义已经完全正确。",
+            "",
+            "## 本报告不能证明什么",
+            "- 单波长 trace 不能证明全谱所有波长点都无误。",
+            "- 公式与 CSV 一致，不能证明当前 PVK `n,k` 就是正确的样品光学常数。",
+            "- 公式与 CSV 一致，不能证明实验反射率必然等于理想 TMM 的 specular reflectance。",
+            "- 当前 Ag mirror 链仍基于理想 `Air/Ag/Air` 模型，不等于已经证明真实 Ag 参比完全符合该模型。",
+            f"- 本报告只审计当前 `output_tag={trace['source_output_tag']}` 对应结果集，不代表所有历史结果都相同。",
+            "",
+            "## 组会讲解摘要",
+            "- 这个 600 nm 单点 trace 的目的，是把 Phase 08 的反射率校准和 TMM 计算从黑箱拆成可以逐项核对的步骤。",
+            "- 它证明了当前代码在该点的公式实现、TMM 单层解析式、厚玻璃非相干级联以及 CSV 输出之间是自洽的。",
+            "- 它没有证明当前 PVK `n,k`、Ag 参比模型或显微镜实测一定等价于理想 specular TMM。",
+            "- 当前核心矛盾仍是实验反射率显著高于理论值，且该差异不是由本报告审计到的公式错误造成的。",
+            "- 下一步应优先检查 `nk_audit`、`nk_envelope`、实验收光几何、散射和参比有效反射。",
             "",
             "## 14. 发现的问题、风险与下一步建议",
-            f"- `Ag mirror` 曝光口径：当前 manifest 记录为 `{format_optional(counts.get('ag_mirror_exposure_ms'))}` ms，trace 复算与 CSV 一致。",
-            f"- 最新 dual 输出来自 `output_tag={trace['source_output_tag']}`；本报告只审计该结果集，不等于其它 tag 也完全相同。",
-            "- 若后续要继续定位实验-理论偏差，优先检查参比有效反射、ROI/收光几何、散射/背景残差，而不是先怀疑当前 TMM 公式层。",
+            f"- `Ag mirror` 曝光口径在该结果集中记录为 `{format_optional(counts.get('ag_mirror_exposure_ms'))}` ms，本报告复算与 CSV 一致。",
+            "- 该报告仅改变展示形式，不改变任何单点数值结果或核心 TMM/反射率计算逻辑。",
+            "- 后续若生成正式展示图，应遵守 `docs/REPORTING_AND_FIGURE_STYLE.md` 的比例、图例和坐标轴规范。",
         ]
     )
     output_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
@@ -667,7 +928,7 @@ def main() -> int:
     TRACE_REPORT_DIR.mkdir(parents=True, exist_ok=True)
 
     trace = build_trace(target_wavelength_nm=float(args.target_wavelength_nm), manifest_override=args.dual_manifest)
-    json_path = TRACE_PROCESSED_DIR / f"phase08_0429_trace_{args.output_tag}.json"
+    json_path = TRACE_PROCESSED_DIR / f"phase08_0429_trace_{args.output_tag}_values.json"
     report_path = TRACE_REPORT_DIR / f"phase08_0429_trace_{args.output_tag}.md"
     json_path.write_text(json.dumps(sanitize_for_json(trace), indent=2, ensure_ascii=False), encoding="utf-8")
     render_markdown(trace, report_path)

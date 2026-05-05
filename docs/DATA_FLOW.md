@@ -173,5 +173,7 @@ raw / processed input
 -> 自动选择最新 dual-reference 结果集
 -> 选取 `target_wavelength_nm` 最近的实际波长点
 -> 展开 counts/ms、参比校准、`nk` 插值、Fresnel、单层相干公式、厚玻璃非相干级联
--> `data/processed/phase08/reference_comparison_trace/*.json`
+-> `data/processed/phase08/reference_comparison_trace/*_values.json`
 -> `results/report/phase08_reference_comparison_trace/*.md`
+
+该 trace 输出用于人工审计与组会说明，不改变主结果 CSV，也不替代全谱验证。
