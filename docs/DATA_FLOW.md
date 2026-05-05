@@ -110,3 +110,24 @@
 
 跨脚本共享数据必须优先落在 `data/processed/`，禁止仅依赖会话状态。
 
+---
+
+## 6. CLI 工具层数据流
+
+标准方向：
+
+```text
+raw / processed input
+  -> CLI 参数解析与输入验证
+  -> core / workflow / storage
+  -> data/processed 标准中间产物
+  -> results/figures QA 图
+  -> results/logs 或 results/report 摘要
+  -> manifest-like summary
+```
+
+约束：
+
+- CLI 不应绕开 `data/processed` 中间层直接做隐式内存串联。
+- CLI 不应绕开 `results/figures`、`results/logs`、`results/report` 的结果目录规范。
+- CLI 应将关键运行元信息写入 manifest 或 manifest-like summary，保证后续可追溯。

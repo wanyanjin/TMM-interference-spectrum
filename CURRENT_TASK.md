@@ -35,5 +35,6 @@
 
 ## 立即下一步
 
-开始执行文档一致性检查，生成提交候选文件清单并展示 `git status --short` 与 `git diff --stat`。
-
+- 建立 CLI 文档索引与模板
+- 准备 Phase 08 `glass/PVK` 参比比较 CLI
+- 后续高频功能先 CLI 化，再考虑 GUI
