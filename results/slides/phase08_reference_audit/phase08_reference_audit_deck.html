@@ -60,11 +60,23 @@
           </div>
           <div class="stack-col">
             <div class="card diagram-card">
-              <div class="mermaid">
-flowchart LR
-  A["Air / Glass front surface<br/>R_front = 0.041931"] --> B["1 mm glass<br/>treated as incoherent spacer"]
-  B --> C["Glass / PVK / Air coherent stack<br/>R_stack = 0.094224"]
-  C --> D["Total reflectance<br/>R_total = 0.128762"]
+              <div class="cascade-diagram">
+                <div class="cascade-node">
+                  <div class="cascade-node-title">Air / Glass</div>
+                  <div class="cascade-node-note">前表面 Fresnel</div>
+                  <div class="cascade-node-note">R_front = 0.041931</div>
+                </div>
+                <div class="arrow">→</div>
+                <div class="cascade-node mid">
+                  <div class="cascade-node-title">1 mm glass</div>
+                  <div class="cascade-node-note">只作为非相干隔离层</div>
+                </div>
+                <div class="arrow">→</div>
+                <div class="cascade-node end">
+                  <div class="cascade-node-title">Glass / PVK / Air</div>
+                  <div class="cascade-node-note">后侧相干薄膜栈</div>
+                  <div class="cascade-node-note">R_stack = 0.094224</div>
+                </div>
               </div>
               <div class="diagram-caption">前表面只贡献 Fresnel 强度，后侧薄膜条纹在 <span class="en">R_stack</span> 中处理。</div>
             </div>
@@ -190,14 +202,28 @@ flowchart LR
 
       <section data-qa-watch="slide-4">
         <h1 class="slide-title">TMM Calculation Flow</h1>
-        <p class="slide-subtitle">把原来偏小且右侧有截断风险的图改成横向大卡片，每步都说清楚输入与物理含义。</p>
-        <div class="step-flow">
-          <div class="step-box blue"><div class="step-index">01</div><div class="step-name">nk table</div><div class="step-note">读取对齐后的 Glass、PVK、Ag 光学常数表，并锁定同一波长采样。</div></div>
-          <div class="step-box cyan"><div class="step-index">02</div><div class="step-name">complex n(λ)+ik(λ)</div><div class="step-note">把每种材料写成复折射率，显式保留吸收项，而不是只看 n。</div></div>
-          <div class="step-box purple"><div class="step-index">03</div><div class="step-name">coherent stack</div><div class="step-note">在 Glass/PVK/Air 后侧薄膜栈中计算相位延迟与振幅叠加。</div></div>
-          <div class="step-box gold"><div class="step-index">04</div><div class="step-name">front-surface Fresnel</div><div class="step-note">单独求 Air/Glass 前表面 Fresnel 反射，保持与薄膜干涉层分离。</div></div>
-          <div class="step-box green"><div class="step-index">05</div><div class="step-name">incoherent cascade</div><div class="step-note">把 1 mm 玻璃当作非相干隔离层，用强度级联组合前后两部分。</div></div>
-          <div class="step-box blue"><div class="step-index">06</div><div class="step-name">R_TMM(λ)</div><div class="step-note">输出可与实验反射率逐点对比的理论曲线。</div></div>
+        <p class="slide-subtitle">这一页同时解决两件事：上半页讲计算流程，下半页说明 600 nm 单点 trace 的数值到底从哪条曲线、哪张材料表取来。</p>
+        <div class="flow-slide-grid">
+          <div class="step-flow">
+            <div class="step-box blue"><div class="step-index">01</div><div class="step-name">nk table</div><div class="step-note">读取对齐后的 Glass、PVK、Ag 光学常数表，并锁定同一波长采样。</div></div>
+            <div class="step-box cyan"><div class="step-index">02</div><div class="step-name">complex n(λ)+ik(λ)</div><div class="step-note">把每种材料写成复折射率，显式保留吸收项，而不是只看 n。</div></div>
+            <div class="step-box purple"><div class="step-index">03</div><div class="step-name">coherent stack</div><div class="step-note">在 Glass/PVK/Air 后侧薄膜栈中计算相位延迟与振幅叠加。</div></div>
+            <div class="step-box gold"><div class="step-index">04</div><div class="step-name">front-surface Fresnel</div><div class="step-note">单独求 Air/Glass 前表面 Fresnel 反射，保持与薄膜干涉层分离。</div></div>
+            <div class="step-box green"><div class="step-index">05</div><div class="step-name">incoherent cascade</div><div class="step-note">把 1 mm 玻璃当作非相干隔离层，用强度级联组合前后两部分。</div></div>
+            <div class="step-box blue"><div class="step-index">06</div><div class="step-name">R_TMM(λ)</div><div class="step-note">输出可与实验反射率逐点对比的理论曲线。</div></div>
+          </div>
+          <div class="source-grid">
+            <div class="card source-card">
+              <h2 class="card-title">取值来源：反射率曲线</h2>
+              <img src="assets/value_locator_reflectance.svg" alt="reflectance locator" />
+              <div class="source-caption">虚线固定在 <span class="en">599.987 nm</span>，对应单点 trace 中使用的最近数据点，而不是人为挑选的“好看位置”。</div>
+            </div>
+            <div class="card source-card">
+              <h2 class="card-title">取值来源：n,k 材料表</h2>
+              <img src="assets/value_locator_nk.svg" alt="nk locator" />
+              <div class="source-caption">同一根虚线在材料表上也落到相同波长，保证代入的 <span class="en">PVK n,k</span> 与反射率 trace 来自同一数据口径。</div>
+            </div>
+          </div>
         </div>
       </section>
 

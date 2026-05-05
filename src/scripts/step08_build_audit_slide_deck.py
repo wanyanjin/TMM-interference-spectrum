@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import os
 from pathlib import Path
+import csv
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
@@ -19,6 +20,8 @@ MANIFEST_JSON = PROJECT_ROOT / "data" / "processed" / "phase08" / "reference_com
 REFLECTANCE_PNG = PROJECT_ROOT / "results" / "figures" / "phase08" / "reference_comparison" / "phase08_0429_dual_reference_reflectance_exp_vs_tmm_pvk_x01.png"
 RESIDUAL_PNG = PROJECT_ROOT / "results" / "figures" / "phase08" / "reference_comparison" / "phase08_0429_residual_pvk_x01.png"
 QC_PNG = PROJECT_ROOT / "results" / "figures" / "phase08" / "reference_comparison" / "phase08_0429_ag_bk_qc_pvk_x01.png"
+VALUE_LOCATOR_REFLECTANCE_SVG = SLIDE_DIR / "assets" / "value_locator_reflectance.svg"
+VALUE_LOCATOR_NK_SVG = SLIDE_DIR / "assets" / "value_locator_nk.svg"
 
 
 def rel(path: Path) -> str:
@@ -27,6 +30,103 @@ def rel(path: Path) -> str:
 
 def project_rel(path: Path) -> str:
     return path.relative_to(PROJECT_ROOT).as_posix()
+
+
+def read_csv_rows(path: Path) -> tuple[list[str], list[dict[str, str]]]:
+    with path.open(newline="", encoding="utf-8") as handle:
+        reader = csv.DictReader(handle)
+        rows = list(reader)
+        return reader.fieldnames or [], rows
+
+
+def float_or_none(value: str) -> float | None:
+    if value is None or value == "":
+        return None
+    return float(value)
+
+
+def svg_line_plot(
+    path: Path,
+    title: str,
+    x_values: list[float],
+    series: list[dict[str, object]],
+    x_marker: float,
+    note: str,
+    y_min: float | None = None,
+    y_max: float | None = None,
+) -> None:
+    width, height = 860, 360
+    margin = {"l": 74, "r": 28, "t": 48, "b": 54}
+    plot_w = width - margin["l"] - margin["r"]
+    plot_h = height - margin["t"] - margin["b"]
+    finite_values = [y for item in series for y in item["y_values"] if y is not None]
+    ymin = y_min if y_min is not None else min(finite_values)
+    ymax = y_max if y_max is not None else max(finite_values)
+    if ymax == ymin:
+        ymax = ymin + 1.0
+    x0, x1 = min(x_values), max(x_values)
+
+    def sx(x: float) -> float:
+        return margin["l"] + (x - x0) / (x1 - x0) * plot_w
+
+    def sy(y: float) -> float:
+        return margin["t"] + (1 - (y - ymin) / (ymax - ymin)) * plot_h
+
+    grid = []
+    for frac in (0.0, 0.25, 0.5, 0.75, 1.0):
+        yv = ymin + (ymax - ymin) * frac
+        y = sy(yv)
+        grid.append(f'<line x1="{margin["l"]}" y1="{y:.2f}" x2="{width - margin["r"]}" y2="{y:.2f}" stroke="#e4e7ec" stroke-width="1"/>')
+        grid.append(f'<text x="{margin["l"] - 12}" y="{y + 5:.2f}" text-anchor="end" font-size="13" fill="#475467">{yv:.3f}</text>')
+
+    paths = []
+    labels = []
+    for idx, item in enumerate(series):
+        points = []
+        last = None
+        for x, y in zip(x_values, item["y_values"]):
+            if y is None:
+                if points:
+                    paths.append(
+                        f'<polyline fill="none" stroke="{item["color"]}" stroke-width="3" points="{" ".join(points)}"/>'
+                    )
+                    points = []
+                continue
+            p = f"{sx(x):.2f},{sy(y):.2f}"
+            points.append(p)
+            last = (x, y)
+        if points:
+            paths.append(f'<polyline fill="none" stroke="{item["color"]}" stroke-width="3" points="{" ".join(points)}"/>')
+        if last is not None:
+            labels.append(
+                f'<text x="{sx(last[0]) - 6:.2f}" y="{sy(last[1]) - 10 - idx * 18:.2f}" text-anchor="end" font-size="14" font-weight="700" fill="{item["color"]}">{item["label"]}</text>'
+            )
+
+    x_line = sx(x_marker)
+    marker = [
+        f'<line x1="{x_line:.2f}" y1="{margin["t"]}" x2="{x_line:.2f}" y2="{height - margin["b"]}" stroke="#344054" stroke-dasharray="8 6" stroke-width="2.5"/>',
+        f'<text x="{x_line + 8:.2f}" y="{margin["t"] + 16:.2f}" font-size="14" font-weight="700" fill="#344054">λ = {x_marker:.3f} nm</text>',
+    ]
+    x_ticks = []
+    for tick in [400, 500, 600, 700, 800, 900]:
+        if x0 <= tick <= x1:
+            x = sx(float(tick))
+            x_ticks.append(f'<line x1="{x:.2f}" y1="{height - margin["b"]}" x2="{x:.2f}" y2="{height - margin["b"] + 6}" stroke="#98a2b3" stroke-width="1"/>')
+            x_ticks.append(f'<text x="{x:.2f}" y="{height - margin["b"] + 24}" text-anchor="middle" font-size="13" fill="#475467">{tick}</text>')
+
+    svg = f"""<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" viewBox="0 0 {width} {height}">
+  <rect width="{width}" height="{height}" fill="#ffffff"/>
+  <text x="{margin["l"]}" y="28" font-size="24" font-weight="700" fill="#101828">{title}</text>
+  {''.join(grid)}
+  <line x1="{margin["l"]}" y1="{height - margin["b"]}" x2="{width - margin["r"]}" y2="{height - margin["b"]}" stroke="#98a2b3" stroke-width="1.5"/>
+  <line x1="{margin["l"]}" y1="{margin["t"]}" x2="{margin["l"]}" y2="{height - margin["b"]}" stroke="#98a2b3" stroke-width="1.5"/>
+  {''.join(x_ticks)}
+  {''.join(paths)}
+  {''.join(labels)}
+  {''.join(marker)}
+  <text x="{margin["l"]}" y="{height - 12}" font-size="14" fill="#475467">{note}</text>
+</svg>"""
+    path.write_text(svg, encoding="utf-8")
 
 
 def render_trace_step(tag: str, cls: str, title: str, body: str) -> str:
@@ -52,6 +152,46 @@ def main() -> int:
     cascade = values["incoherent_cascade"]["glass_pvk_fixed"]
     row = values["experimental_reflectance"]
     ag_diag = values["ag_mirror_multiframe_trace"]
+    lambda_used = values["lambda_used_nm"]
+
+    _, reflectance_rows = read_csv_rows(
+        PROJECT_ROOT / "data" / "processed" / "phase08" / "reference_comparison" / "phase08_0429_dual_reference_calibrated_reflectance_pvk_x01.csv"
+    )
+    _, nk_rows = read_csv_rows(PROJECT_ROOT / "resources" / "aligned_full_stack_nk_phase08_x01.csv")
+
+    reflectance_x = [float(r["\ufeffWavelength_nm"]) for r in reflectance_rows]
+    reflectance_gag = [float_or_none(r["R_Exp_GlassPVK_by_GlassAg"]) for r in reflectance_rows]
+    reflectance_tmm = [float_or_none(r["R_TMM_GlassPVK_Fixed"]) for r in reflectance_rows]
+    nk_x = [float(r["\ufeffWavelength_nm"]) for r in nk_rows]
+    pvk_n = [float_or_none(r["n_PVK"]) for r in nk_rows]
+    pvk_k = [float_or_none(r["k_PVK"]) for r in nk_rows]
+    ag_k = [float_or_none(r["k_Ag"]) for r in nk_rows]
+
+    svg_line_plot(
+        VALUE_LOCATOR_REFLECTANCE_SVG,
+        "Reflectance source window",
+        reflectance_x,
+        [
+            {"label": "Exp by glass/Ag", "color": "#2f6fed", "y_values": reflectance_gag},
+            {"label": "TMM fixed", "color": "#047857", "y_values": reflectance_tmm},
+        ],
+        lambda_used,
+        "在实验曲线与 TMM 曲线上用同一根虚线标出单点 trace 的取值波长。",
+        y_min=0.0,
+        y_max=0.5,
+    )
+    svg_line_plot(
+        VALUE_LOCATOR_NK_SVG,
+        "n,k source window",
+        nk_x,
+        [
+            {"label": "PVK n", "color": "#7c3aed", "y_values": pvk_n},
+            {"label": "PVK k", "color": "#d97706", "y_values": pvk_k},
+            {"label": "Ag k", "color": "#ef4444", "y_values": ag_k},
+        ],
+        lambda_used,
+        "同一波长虚线同时穿过 n,k 数据表对应位置，说明数值代入来自当前 Phase 08 材料表。",
+    )
 
     glassag_steps = "".join(
         [
@@ -134,11 +274,23 @@ def main() -> int:
           </div>
           <div class="stack-col">
             <div class="card diagram-card">
-              <div class="mermaid">
-flowchart LR
-  A["Air / Glass front surface<br/>R_front = {fresnel["air_glass"]["R"]:.6f}"] --> B["1 mm glass<br/>treated as incoherent spacer"]
-  B --> C["Glass / PVK / Air coherent stack<br/>R_stack = {stack["R_stack_by_formula"]:.6f}"]
-  C --> D["Total reflectance<br/>R_total = {cascade["R_total"]:.6f}"]
+              <div class="cascade-diagram">
+                <div class="cascade-node">
+                  <div class="cascade-node-title">Air / Glass</div>
+                  <div class="cascade-node-note">前表面 Fresnel</div>
+                  <div class="cascade-node-note">R_front = {fresnel["air_glass"]["R"]:.6f}</div>
+                </div>
+                <div class="arrow">→</div>
+                <div class="cascade-node mid">
+                  <div class="cascade-node-title">1 mm glass</div>
+                  <div class="cascade-node-note">只作为非相干隔离层</div>
+                </div>
+                <div class="arrow">→</div>
+                <div class="cascade-node end">
+                  <div class="cascade-node-title">Glass / PVK / Air</div>
+                  <div class="cascade-node-note">后侧相干薄膜栈</div>
+                  <div class="cascade-node-note">R_stack = {stack["R_stack_by_formula"]:.6f}</div>
+                </div>
               </div>
               <div class="diagram-caption">前表面只贡献 Fresnel 强度，后侧薄膜条纹在 <span class="en">R_stack</span> 中处理。</div>
             </div>
@@ -184,14 +336,28 @@ flowchart LR
 
       <section data-qa-watch="slide-4">
         <h1 class="slide-title">TMM Calculation Flow</h1>
-        <p class="slide-subtitle">把原来偏小且右侧有截断风险的图改成横向大卡片，每步都说清楚输入与物理含义。</p>
-        <div class="step-flow">
-          <div class="step-box blue"><div class="step-index">01</div><div class="step-name">nk table</div><div class="step-note">读取对齐后的 Glass、PVK、Ag 光学常数表，并锁定同一波长采样。</div></div>
-          <div class="step-box cyan"><div class="step-index">02</div><div class="step-name">complex n(λ)+ik(λ)</div><div class="step-note">把每种材料写成复折射率，显式保留吸收项，而不是只看 n。</div></div>
-          <div class="step-box purple"><div class="step-index">03</div><div class="step-name">coherent stack</div><div class="step-note">在 Glass/PVK/Air 后侧薄膜栈中计算相位延迟与振幅叠加。</div></div>
-          <div class="step-box gold"><div class="step-index">04</div><div class="step-name">front-surface Fresnel</div><div class="step-note">单独求 Air/Glass 前表面 Fresnel 反射，保持与薄膜干涉层分离。</div></div>
-          <div class="step-box green"><div class="step-index">05</div><div class="step-name">incoherent cascade</div><div class="step-note">把 1 mm 玻璃当作非相干隔离层，用强度级联组合前后两部分。</div></div>
-          <div class="step-box blue"><div class="step-index">06</div><div class="step-name">R_TMM(λ)</div><div class="step-note">输出可与实验反射率逐点对比的理论曲线。</div></div>
+        <p class="slide-subtitle">这一页同时解决两件事：上半页讲计算流程，下半页说明 600 nm 单点 trace 的数值到底从哪条曲线、哪张材料表取来。</p>
+        <div class="flow-slide-grid">
+          <div class="step-flow">
+            <div class="step-box blue"><div class="step-index">01</div><div class="step-name">nk table</div><div class="step-note">读取对齐后的 Glass、PVK、Ag 光学常数表，并锁定同一波长采样。</div></div>
+            <div class="step-box cyan"><div class="step-index">02</div><div class="step-name">complex n(λ)+ik(λ)</div><div class="step-note">把每种材料写成复折射率，显式保留吸收项，而不是只看 n。</div></div>
+            <div class="step-box purple"><div class="step-index">03</div><div class="step-name">coherent stack</div><div class="step-note">在 Glass/PVK/Air 后侧薄膜栈中计算相位延迟与振幅叠加。</div></div>
+            <div class="step-box gold"><div class="step-index">04</div><div class="step-name">front-surface Fresnel</div><div class="step-note">单独求 Air/Glass 前表面 Fresnel 反射，保持与薄膜干涉层分离。</div></div>
+            <div class="step-box green"><div class="step-index">05</div><div class="step-name">incoherent cascade</div><div class="step-note">把 1 mm 玻璃当作非相干隔离层，用强度级联组合前后两部分。</div></div>
+            <div class="step-box blue"><div class="step-index">06</div><div class="step-name">R_TMM(λ)</div><div class="step-note">输出可与实验反射率逐点对比的理论曲线。</div></div>
+          </div>
+          <div class="source-grid">
+            <div class="card source-card">
+              <h2 class="card-title">取值来源：反射率曲线</h2>
+              <img src="assets/value_locator_reflectance.svg" alt="reflectance locator" />
+              <div class="source-caption">虚线固定在 <span class="en">{lambda_used:.3f} nm</span>，对应单点 trace 中使用的最近数据点，而不是人为挑选的“好看位置”。</div>
+            </div>
+            <div class="card source-card">
+              <h2 class="card-title">取值来源：n,k 材料表</h2>
+              <img src="assets/value_locator_nk.svg" alt="nk locator" />
+              <div class="source-caption">同一根虚线在材料表上也落到相同波长，保证代入的 <span class="en">PVK n,k</span> 与反射率 trace 来自同一数据口径。</div>
+            </div>
+          </div>
         </div>
       </section>
 
