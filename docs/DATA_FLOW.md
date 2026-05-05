@@ -141,3 +141,14 @@ raw / processed input
 -> `results/figures/phase08/reference_comparison/*.png`
 -> `results/logs/phase08/reference_comparison/*.md`
 -> `results/report/phase08_reference_comparison/*.md`
+
+### 6.2 Phase 08 dual-reference 实例（Ag + bk）
+
+`test_data/0429/Ag-withoutfliter-20ms*.csv + bk-20ms*.csv`
+-> `src/core/reference_comparison.py` 多帧读取（Frame/Wavelength/Pixel/Counts）
+-> 按 `Pixel_Index` 对齐背景并扣除（Ag 使用帧 2-100，排除过曝第 1 帧）
+-> 产出 `phase08_0429_ag_mirror_background_corrected.csv` 与 frame QC
+-> 与 `glass-PVK*.csv + glass-Ag*.csv` 共同进入 dual-reference 对比
+-> `phase08_0429_dual_reference_calibrated_reflectance.csv`
+-> `phase08_0429_dual_reference_manifest.json`
+-> `phase08_0429_dual_reference_report.md`

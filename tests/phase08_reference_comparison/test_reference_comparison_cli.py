@@ -29,6 +29,35 @@ class ReferenceComparisonCliTest(unittest.TestCase):
         self.assertGreater(payload["strict_point_count_primary"], 0)
         self.assertEqual(payload["sample_exposure_source"], "filename_inference")
 
+    def test_cli_dry_run_dual_reference(self) -> None:
+        repo = Path(__file__).resolve().parents[2]
+        sample = repo / "test_data" / "0429" / "glass-PVK-withoutfliter-20ms 2026 四月 29 14_45_45.csv"
+        reference = repo / "test_data" / "0429" / "glass-Ag-withoutfliter-20ms 2026 四月 29 14_42_25.csv"
+        ag_mirror = repo / "test_data" / "0429" / "Ag-withoutfliter-20ms 2026 四月 29 15_14_48.csv"
+        bk = repo / "test_data" / "0429" / "bk-20ms 2026 四月 29 15_31_12.csv"
+        cmd = [
+            str(repo / ".venv" / "bin" / "python"),
+            str(repo / "src" / "cli" / "reference_comparison.py"),
+            "--sample-csv",
+            str(sample),
+            "--reference-csv",
+            str(reference),
+            "--comparison-mode",
+            "dual_reference",
+            "--ag-mirror-csv",
+            str(ag_mirror),
+            "--background-csv",
+            str(bk),
+            "--dry-run",
+        ]
+        env = os.environ.copy()
+        env["MPLCONFIGDIR"] = "/private/tmp/.mpl"
+        result = subprocess.run(cmd, check=True, text=True, capture_output=True, cwd=repo, env=env)
+        payload = json.loads(result.stdout)
+        self.assertEqual(payload["mode"], "dry_run")
+        self.assertEqual(payload["comparison_mode"], "dual_reference")
+        self.assertIn("ag_background_diagnostics", payload)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -38,6 +38,14 @@ class RuntimeConfig:
     smooth_window: int
     smooth_polyorder: int
     reference_type: str
+    comparison_mode: str
+    ag_mirror_csv: Path | None
+    background_csv: Path | None
+    drop_ag_frames: tuple[int, ...]
+    ag_background_align: str
+    ag_reference_model: str
+    review_min_nm: float
+    review_max_nm: float
 
 
 def parse_range(text: str) -> tuple[float, float]:
@@ -68,6 +76,113 @@ def load_measurement_csv(path: Path) -> pd.DataFrame:
         }
     )
     return frame
+
+
+def load_multiframe_spectrum_csv(path: Path) -> pd.DataFrame:
+    frame = pd.read_csv(path, header=None)
+    if frame.shape[1] < 6:
+        raise ValueError(f"{path} 多帧 CSV 列数不足，至少需要 6 列。")
+    out = pd.DataFrame(
+        {
+            "Frame_Index": pd.to_numeric(frame.iloc[:, 1], errors="coerce"),
+            "Wavelength_nm": pd.to_numeric(frame.iloc[:, 2], errors="coerce"),
+            "Pixel_Index": pd.to_numeric(frame.iloc[:, 4], errors="coerce"),
+            "Counts": pd.to_numeric(frame.iloc[:, 5], errors="coerce"),
+        }
+    )
+    if out.isna().any().any():
+        raise ValueError(f"{path} 存在无法解析为数值的关键列。")
+    out["Frame_Index"] = out["Frame_Index"].astype(int)
+    out["Pixel_Index"] = out["Pixel_Index"].astype(int)
+    return out
+
+
+def calc_stack_reflectance_air_ag_air(
+    wavelength_nm: np.ndarray,
+    n_ag: np.ndarray,
+    d_ag_nm: float,
+) -> np.ndarray:
+    output = np.zeros_like(wavelength_nm, dtype=float)
+    for idx, lam in enumerate(wavelength_nm):
+        n_list = [1.0 + 0.0j, complex(n_ag[idx]), 1.0 + 0.0j]
+        d_list = [np.inf, float(d_ag_nm), np.inf]
+        output[idx] = float(coh_tmm("s", n_list, d_list, th_0=0.0, lam_vac=float(lam))["R"])
+    return output
+
+
+def _frame_qc(frame_df: pd.DataFrame, label: str, used_frames: set[int]) -> pd.DataFrame:
+    grouped = (
+        frame_df.groupby("Frame_Index", as_index=False)
+        .agg(
+            Point_Count=("Counts", "size"),
+            Counts_Min=("Counts", "min"),
+            Counts_Median=("Counts", "median"),
+            Counts_Mean=("Counts", "mean"),
+            Counts_Max=("Counts", "max"),
+            Saturated_65535_Count=("Counts", lambda s: int(np.count_nonzero(np.asarray(s) >= 65535))),
+        )
+        .sort_values("Frame_Index")
+    )
+    grouped["Source"] = label
+    grouped["Used_For_Average"] = grouped["Frame_Index"].isin(used_frames)
+    return grouped
+
+
+def build_ag_mirror_corrected_spectrum(
+    ag_csv: Path,
+    bk_csv: Path,
+    drop_frames: tuple[int, ...],
+    align_mode: str,
+) -> tuple[pd.DataFrame, pd.DataFrame, dict[str, Any]]:
+    if align_mode != "pixel":
+        raise ValueError("首版仅支持 ag_background_align=pixel。")
+    ag = load_multiframe_spectrum_csv(ag_csv)
+    bk = load_multiframe_spectrum_csv(bk_csv)
+
+    ag_frames = sorted(ag["Frame_Index"].unique().tolist())
+    bk_frames = sorted(bk["Frame_Index"].unique().tolist())
+    ag_use_frames = [x for x in ag_frames if x not in set(drop_frames)]
+    if len(ag_use_frames) == 0:
+        raise ValueError("Ag 可用帧为空。")
+
+    ag_filtered = ag[ag["Frame_Index"].isin(ag_use_frames)].copy()
+    ag_pixels = sorted(ag_filtered["Pixel_Index"].unique().tolist())
+    bk_pixels = sorted(bk["Pixel_Index"].unique().tolist())
+    if ag_pixels != bk_pixels:
+        raise ValueError("Ag 与 bk 的 Pixel_Index 集合不一致，无法按 pixel 对齐背景扣除。")
+
+    ag_wl_by_pixel = ag_filtered.groupby("Pixel_Index")["Wavelength_nm"].median().sort_index()
+    bk_wl_by_pixel = bk.groupby("Pixel_Index")["Wavelength_nm"].median().sort_index()
+    wl_diff = (bk_wl_by_pixel - ag_wl_by_pixel).to_numpy(dtype=float)
+
+    ag_mean_by_pixel = ag_filtered.groupby("Pixel_Index")["Counts"].mean().sort_index()
+    bk_mean_by_pixel = bk.groupby("Pixel_Index")["Counts"].mean().sort_index()
+    corrected = ag_mean_by_pixel - bk_mean_by_pixel
+
+    corrected_df = pd.DataFrame(
+        {
+            "Wavelength": ag_wl_by_pixel.to_numpy(dtype=float),
+            "Intensity": corrected.to_numpy(dtype=float),
+        }
+    )
+    qc_df = pd.concat(
+        [
+            _frame_qc(ag, "Ag", set(ag_use_frames)),
+            _frame_qc(bk, "BK", set(bk_frames)),
+        ],
+        ignore_index=True,
+    )
+    diagnostics = {
+        "ag_frame_count_total": len(ag_frames),
+        "ag_frames_used": ag_use_frames,
+        "ag_frames_dropped": list(drop_frames),
+        "bk_frame_count_total": len(bk_frames),
+        "pixel_count": len(ag_pixels),
+        "bk_wavelength_offset_min_nm": float(np.min(wl_diff)),
+        "bk_wavelength_offset_median_nm": float(np.median(wl_diff)),
+        "bk_wavelength_offset_max_nm": float(np.max(wl_diff)),
+    }
+    return corrected_df, qc_df, diagnostics
 
 
 def load_nk_table(nk_csv: Path) -> pd.DataFrame:
@@ -253,6 +368,8 @@ def collect_band_rows(
 def run_reference_comparison(config: RuntimeConfig, dry_run: bool = False) -> dict[str, Any]:
     if config.reference_type != "glass_ag":
         raise ValueError("第一版仅支持 reference_type=glass_ag")
+    if config.comparison_mode not in {"single_reference", "dual_reference"}:
+        raise ValueError("comparison_mode 仅支持 single_reference / dual_reference。")
 
     sample_exposure_ms, sample_exposure_source = parse_exposure_ms_from_filename(config.sample_csv)
     ref_exposure_ms, ref_exposure_source = parse_exposure_ms_from_filename(config.reference_csv)
@@ -273,6 +390,19 @@ def run_reference_comparison(config: RuntimeConfig, dry_run: bool = False) -> di
     counts_sample_raw = sample_df["Counts"].to_numpy(dtype=float)
     counts_ref_raw = ref_df["Counts"].to_numpy(dtype=float)
 
+    ag_mirror_df: pd.DataFrame | None = None
+    ag_qc_df: pd.DataFrame | None = None
+    ag_diag: dict[str, Any] | None = None
+    if config.comparison_mode == "dual_reference":
+        if config.ag_mirror_csv is None or config.background_csv is None:
+            raise ValueError("dual_reference 模式必须提供 ag_mirror_csv 和 background_csv。")
+        ag_mirror_df, ag_qc_df, ag_diag = build_ag_mirror_corrected_spectrum(
+            ag_csv=config.ag_mirror_csv,
+            bk_csv=config.background_csv,
+            drop_frames=config.drop_ag_frames,
+            align_mode=config.ag_background_align,
+        )
+
     nk = load_nk_table(config.nk_csv)
     nk_wl = nk["Wavelength_nm"].to_numpy(dtype=float)
     overlap_min = max(float(wavelength_nm_raw.min()), float(nk_wl.min()))
@@ -284,6 +414,18 @@ def run_reference_comparison(config: RuntimeConfig, dry_run: bool = False) -> di
     wavelength_nm = wavelength_nm_raw[overlap_mask]
     counts_sample = counts_sample_raw[overlap_mask]
     counts_ref = counts_ref_raw[overlap_mask]
+    counts_ag_mirror: np.ndarray | None = None
+    if ag_mirror_df is not None:
+        ag_wl = ag_mirror_df["Wavelength"].to_numpy(dtype=float)
+        ag_counts = ag_mirror_df["Intensity"].to_numpy(dtype=float)
+        if ag_wl.shape[0] != wavelength_nm_raw.shape[0] or not np.allclose(
+            ag_wl,
+            wavelength_nm_raw,
+            atol=1e-6,
+            rtol=0.0,
+        ):
+            raise ValueError("Ag mirror 校准谱与 sample 波长网格不一致。")
+        counts_ag_mirror = ag_counts[overlap_mask]
 
     loose_mask, strict_mask, floor = build_masks(counts_sample, counts_ref)
     finite_mask = np.isfinite(counts_sample) & np.isfinite(counts_ref)
@@ -326,6 +468,11 @@ def run_reference_comparison(config: RuntimeConfig, dry_run: bool = False) -> di
         d_ag_nm=config.d_ag_nm,
     )
     r_tmm_glass_ag = calc_macro_reflectance(r_front=r_front, r_stack=r_stack_ag)
+    r_tmm_ag_mirror = calc_stack_reflectance_air_ag_air(
+        wavelength_nm=wavelength_nm,
+        n_ag=n_ag,
+        d_ag_nm=config.d_ag_nm,
+    )
 
     counts_sample_ms = counts_sample / sample_exposure_ms
     counts_ref_ms = counts_ref / ref_exposure_ms
@@ -333,6 +480,14 @@ def run_reference_comparison(config: RuntimeConfig, dry_run: bool = False) -> di
     valid_ratio = counts_ref_ms > 0.0
     safe_ratio[valid_ratio] = counts_sample_ms[valid_ratio] / counts_ref_ms[valid_ratio]
     r_exp = safe_ratio * r_tmm_glass_ag
+    counts_ag_mirror_ms: np.ndarray | None = None
+    r_exp_ag_mirror: np.ndarray | None = None
+    if counts_ag_mirror is not None:
+        counts_ag_mirror_ms = counts_ag_mirror / ref_exposure_ms
+        ag_ratio = np.full_like(counts_sample_ms, np.nan)
+        valid_ag_ratio = counts_ag_mirror_ms > 0.0
+        ag_ratio[valid_ag_ratio] = counts_sample_ms[valid_ag_ratio] / counts_ag_mirror_ms[valid_ag_ratio]
+        r_exp_ag_mirror = ag_ratio * r_tmm_ag_mirror
 
     r_stack_pvk_fixed = calc_stack_reflectance_glass_pvk(
         wavelength_nm=wavelength_nm,
@@ -400,10 +555,11 @@ def run_reference_comparison(config: RuntimeConfig, dry_run: bool = False) -> di
     )
 
     if dry_run:
-        return {
+        payload = {
             "mode": "dry_run",
             "sample_csv": str(config.sample_csv),
             "reference_csv": str(config.reference_csv),
+            "comparison_mode": config.comparison_mode,
             "point_count": int(wavelength_nm.size),
             "strict_point_count_primary": int(np.count_nonzero(objective_mask)),
             "floor": float(floor),
@@ -412,6 +568,9 @@ def run_reference_comparison(config: RuntimeConfig, dry_run: bool = False) -> di
             "sample_exposure_source": sample_exposure_source,
             "reference_exposure_source": ref_exposure_source,
         }
+        if ag_diag is not None:
+            payload["ag_background_diagnostics"] = ag_diag
+        return payload
 
     config.output_processed_dir.mkdir(parents=True, exist_ok=True)
     config.output_figures_dir.mkdir(parents=True, exist_ok=True)
@@ -437,16 +596,24 @@ def run_reference_comparison(config: RuntimeConfig, dry_run: bool = False) -> di
             "Exposure_Source": np.full(wavelength_nm.size, exposure_source, dtype=object),
             "R_Exp_GlassPVK_by_GlassAg": r_exp,
             "R_TMM_GlassAg": r_tmm_glass_ag,
+            "R_TMM_AgMirror": r_tmm_ag_mirror,
             "R_TMM_GlassPVK_Fixed": r_tmm_pvk_fixed,
             "R_TMM_GlassPVK_BestD": r_tmm_pvk_best,
             "Residual_Fixed": residual_fixed,
             "Residual_BestD": residual_best,
         }
     )
+    if counts_ag_mirror is not None and counts_ag_mirror_ms is not None and r_exp_ag_mirror is not None:
+        calibrated_df["Ag_Mirror_Corrected_Counts"] = counts_ag_mirror
+        calibrated_df["Ag_Mirror_Corrected_CountsPerMs"] = counts_ag_mirror_ms
+        calibrated_df["R_Exp_GlassPVK_by_AgMirror"] = r_exp_ag_mirror
+        calibrated_df["Residual_Fixed_AgMirror"] = r_exp_ag_mirror - r_tmm_pvk_fixed
+        calibrated_df["Residual_BestD_AgMirror"] = r_exp_ag_mirror - r_tmm_pvk_best
     theory_df = pd.DataFrame(
         {
             "Wavelength_nm": wavelength_nm,
             "R_TMM_GlassAg": r_tmm_glass_ag,
+            "R_TMM_AgMirror": r_tmm_ag_mirror,
             "R_TMM_GlassPVK_Fixed": r_tmm_pvk_fixed,
             "R_TMM_GlassPVK_BestD": r_tmm_pvk_best,
         }
@@ -478,21 +645,28 @@ def run_reference_comparison(config: RuntimeConfig, dry_run: bool = False) -> di
         }
     )
 
-    input_inventory_path = config.output_processed_dir / "phase08_0429_input_inventory.csv"
-    calibrated_path = config.output_processed_dir / "phase08_0429_calibrated_reflectance.csv"
-    theory_path = config.output_processed_dir / "phase08_0429_tmm_theory_curves.csv"
-    metrics_path = config.output_processed_dir / "phase08_0429_error_metrics.csv"
-    manifest_path = config.output_processed_dir / "phase08_0429_manifest.json"
-    scan_path = config.output_processed_dir / "phase08_0429_thickness_scan_cost.csv"
+    suffix = "phase08_0429_dual_reference" if config.comparison_mode == "dual_reference" else "phase08_0429"
+    input_inventory_path = config.output_processed_dir / f"{suffix}_input_inventory.csv"
+    calibrated_path = config.output_processed_dir / f"{suffix}_calibrated_reflectance.csv"
+    theory_path = config.output_processed_dir / f"{suffix}_tmm_theory_curves.csv"
+    metrics_path = config.output_processed_dir / f"{suffix}_error_metrics.csv"
+    manifest_path = config.output_processed_dir / f"{suffix}_manifest.json"
+    scan_path = config.output_processed_dir / f"{suffix}_thickness_scan_cost.csv"
+    ag_mirror_path = config.output_processed_dir / "phase08_0429_ag_mirror_background_corrected.csv"
+    ag_qc_path = config.output_processed_dir / "phase08_0429_ag_mirror_frame_qc.csv"
 
     inventory_df.to_csv(input_inventory_path, index=False, encoding="utf-8-sig")
     calibrated_df.to_csv(calibrated_path, index=False, encoding="utf-8-sig")
     theory_df.to_csv(theory_path, index=False, encoding="utf-8-sig")
     metrics_df.to_csv(metrics_path, index=False, encoding="utf-8-sig")
     scan_df.to_csv(scan_path, index=False, encoding="utf-8-sig")
+    if ag_mirror_df is not None and ag_qc_df is not None:
+        ag_mirror_df.to_csv(ag_mirror_path, index=False, encoding="utf-8-sig")
+        ag_qc_df.to_csv(ag_qc_path, index=False, encoding="utf-8-sig")
 
     manifest = {
         "reference_type": config.reference_type,
+        "comparison_mode": config.comparison_mode,
         "sample_csv": config.sample_csv.as_posix(),
         "reference_csv": config.reference_csv.as_posix(),
         "sample_exposure_ms": sample_exposure_ms,
@@ -513,6 +687,7 @@ def run_reference_comparison(config: RuntimeConfig, dry_run: bool = False) -> di
         "smoothing_window": config.smooth_window if config.smooth_for_plot else None,
         "smoothing_polyorder": config.smooth_polyorder if config.smooth_for_plot else None,
         "d_ag_nm_assumption": config.d_ag_nm,
+        "ag_reference_model": config.ag_reference_model,
         "d_pvk_fixed_nm_assumption": config.d_pvk_fixed_nm,
         "d_pvk_scan_min_nm": config.d_pvk_scan_min_nm,
         "d_pvk_scan_max_nm": config.d_pvk_scan_max_nm,
@@ -522,7 +697,14 @@ def run_reference_comparison(config: RuntimeConfig, dry_run: bool = False) -> di
         "diagnostic_offset_b_fixed": b_fixed,
         "diagnostic_scale_a_best_d": a_best,
         "diagnostic_offset_b_best_d": b_best,
+        "review_range_nm": [config.review_min_nm, config.review_max_nm],
     }
+    if ag_diag is not None:
+        manifest["ag_background_diagnostics"] = ag_diag
+        manifest["ag_mirror_csv"] = config.ag_mirror_csv.as_posix() if config.ag_mirror_csv else None
+        manifest["background_csv"] = config.background_csv.as_posix() if config.background_csv else None
+        manifest["ag_background_align"] = config.ag_background_align
+        manifest["drop_ag_frames"] = list(config.drop_ag_frames)
     manifest_path.write_text(json.dumps(manifest, indent=2, ensure_ascii=False), encoding="utf-8")
 
     return {
@@ -544,8 +726,10 @@ def run_reference_comparison(config: RuntimeConfig, dry_run: bool = False) -> di
             "counts_ref_ms": counts_ref_ms,
             "r_exp": r_exp,
             "r_tmm_glass_ag": r_tmm_glass_ag,
+            "r_tmm_ag_mirror": r_tmm_ag_mirror,
             "r_tmm_pvk_fixed": r_tmm_pvk_fixed,
             "r_tmm_pvk_best": r_tmm_pvk_best,
+            "r_exp_ag_mirror": r_exp_ag_mirror,
             "residual_fixed": residual_fixed,
             "residual_best": residual_best,
             "scan_values": scan_values,

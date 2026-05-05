@@ -67,6 +67,48 @@ class ReferenceComparisonCoreTest(unittest.TestCase):
         self.assertTrue((r_ag >= 0.0).all())
         self.assertTrue((r_pvk >= 0.0).all())
 
+    def test_multiframe_column_recognition(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            csv_path = Path(tmp) / "mf.csv"
+            csv_path.write_text("1,2,400.0,0,0,100\n1,2,401.0,0,1,120\n", encoding="utf-8")
+            df = rc.load_multiframe_spectrum_csv(csv_path)
+            self.assertEqual(list(df.columns), ["Frame_Index", "Wavelength_nm", "Pixel_Index", "Counts"])
+            self.assertEqual(df.shape[0], 2)
+
+    def test_ag_bk_pixel_alignment_and_drop_frame(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            ag_path = Path(tmp) / "ag.csv"
+            bk_path = Path(tmp) / "bk.csv"
+            ag_rows = [
+                "1,1,400,0,0,65535",
+                "1,1,401,0,1,65535",
+                "1,2,400,0,0,1000",
+                "1,2,401,0,1,1200",
+                "1,3,400,0,0,1100",
+                "1,3,401,0,1,1300",
+            ]
+            bk_rows = [
+                "1,1,550,0,0,100",
+                "1,1,551,0,1,200",
+                "1,2,550,0,0,120",
+                "1,2,551,0,1,220",
+            ]
+            ag_path.write_text("\n".join(ag_rows) + "\n", encoding="utf-8")
+            bk_path.write_text("\n".join(bk_rows) + "\n", encoding="utf-8")
+            corrected, qc, diag = rc.build_ag_mirror_corrected_spectrum(
+                ag_csv=ag_path,
+                bk_csv=bk_path,
+                drop_frames=(1,),
+                align_mode="pixel",
+            )
+            self.assertEqual(corrected.shape[0], 2)
+            # Ag mean: [1050,1250], bk mean: [110,210]
+            np.testing.assert_allclose(corrected["Intensity"].to_numpy(dtype=float), np.array([940.0, 1040.0]))
+            self.assertGreater(diag["bk_wavelength_offset_median_nm"], 100.0)
+            ag_qc = qc[qc["Source"] == "Ag"]
+            used_f1 = ag_qc.loc[ag_qc["Frame_Index"] == 1, "Used_For_Average"].iloc[0]
+            self.assertFalse(bool(used_f1))
+
 
 if __name__ == "__main__":
     unittest.main()

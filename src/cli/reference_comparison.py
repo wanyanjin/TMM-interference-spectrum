@@ -25,12 +25,34 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Phase 08 glass/Ag reference comparison CLI")
     parser.add_argument("--sample-csv", required=True, help="Path to glass/PVK csv")
     parser.add_argument("--reference-csv", required=True, help="Path to glass/Ag csv")
+    parser.add_argument("--ag-mirror-csv", default=None, help="Path to multi-frame direct Ag mirror csv")
+    parser.add_argument("--background-csv", default=None, help="Path to multi-frame background csv")
     parser.add_argument(
         "--reference-type",
         default="glass_ag",
         choices=["glass_ag"],
         help="Reference type. First version only supports glass_ag.",
     )
+    parser.add_argument(
+        "--comparison-mode",
+        default="single_reference",
+        choices=["single_reference", "dual_reference"],
+        help="Comparison mode.",
+    )
+    parser.add_argument("--drop-ag-frames", default="1", help="Comma-separated Ag frame indices to drop, e.g. 1")
+    parser.add_argument(
+        "--ag-background-align",
+        default="pixel",
+        choices=["pixel"],
+        help="Background alignment strategy for Ag mirror.",
+    )
+    parser.add_argument(
+        "--ag-reference-model",
+        default="air_ag_air",
+        choices=["air_ag_air"],
+        help="Theoretical model for Ag mirror reference.",
+    )
+    parser.add_argument("--review-range", default="500-750", help="Review plot x-range (nm), e.g. 500-750")
     parser.add_argument(
         "--nk-csv",
         default=str(PROJECT_ROOT / "resources" / "aligned_full_stack_nk.csv"),
@@ -88,7 +110,9 @@ def plot_outputs(result: dict, config: RuntimeConfig) -> dict[str, str]:
     counts_sample_ms = arrays["counts_sample_ms"]
     counts_ref_ms = arrays["counts_ref_ms"]
     r_tmm_glass_ag = arrays["r_tmm_glass_ag"]
+    r_tmm_ag_mirror = arrays["r_tmm_ag_mirror"]
     r_exp = arrays["r_exp"]
+    r_exp_ag_mirror = arrays["r_exp_ag_mirror"]
     r_fixed = arrays["r_tmm_pvk_fixed"]
     r_best = arrays["r_tmm_pvk_best"]
     residual_fixed = arrays["residual_fixed"]
@@ -101,8 +125,8 @@ def plot_outputs(result: dict, config: RuntimeConfig) -> dict[str, str]:
     r_best_plot = smooth_for_plot(r_best, config.smooth_for_plot, config.smooth_window, config.smooth_polyorder)
 
     paths: dict[str, str] = {}
-    review_min_nm = 500.0
-    review_max_nm = 750.0
+    review_min_nm = config.review_min_nm
+    review_max_nm = config.review_max_nm
     review_mask = (wl >= review_min_nm) & (wl <= review_max_nm)
 
     def adaptive_ylim(series_list: list[np.ndarray], fallback: tuple[float, float]) -> tuple[float, float]:
@@ -167,25 +191,36 @@ def plot_outputs(result: dict, config: RuntimeConfig) -> dict[str, str]:
     plt.close()
     paths["glass_ag_ref_theory_png"] = glass_ag_theory_path.as_posix()
 
-    exp_vs_tmm_path = config.output_figures_dir / "phase08_0429_reflectance_exp_vs_tmm.png"
+    reflect_name = (
+        "phase08_0429_dual_reference_reflectance_exp_vs_tmm.png"
+        if config.comparison_mode == "dual_reference"
+        else "phase08_0429_reflectance_exp_vs_tmm.png"
+    )
+    exp_vs_tmm_path = config.output_figures_dir / reflect_name
     plt.figure(figsize=(12, 6), dpi=220)
-    plt.plot(wl, r_exp_plot, label="R_Exp_GlassPVK_by_GlassAg")
-    plt.plot(wl, r_fixed_plot, label="R_TMM_GlassPVK_Fixed")
-    plt.plot(wl, r_best_plot, label="R_TMM_GlassPVK_BestD")
+    plt.plot(wl, r_exp_plot, color="#1f77b4", linewidth=2.0, label="R_Exp by Glass/Ag")
+    if r_exp_ag_mirror is not None:
+        r_exp_ag_plot = smooth_for_plot(r_exp_ag_mirror, config.smooth_for_plot, config.smooth_window, config.smooth_polyorder)
+        plt.plot(wl, r_exp_ag_plot, color="#ff7f0e", linewidth=2.0, label="R_Exp by Ag Mirror")
+    plt.plot(wl, r_fixed_plot, color="#7f7f7f", linestyle="--", linewidth=1.8, label="R_TMM_GlassPVK_Fixed")
     plt.axvspan(config.primary_min_nm, config.primary_max_nm, alpha=0.08, color="green", label="Primary")
     plt.axvspan(config.extended_min_nm, config.extended_max_nm, alpha=0.08, color="orange", label="Extended QC")
-    plt.scatter(
-        wl[~strict_mask & primary_mask],
-        r_exp_plot[~strict_mask & primary_mask],
-        s=8,
-        alpha=0.6,
-        label="Primary non-strict points",
-    )
+    if config.comparison_mode == "single_reference":
+        plt.scatter(
+            wl[~strict_mask & primary_mask],
+            r_exp_plot[~strict_mask & primary_mask],
+            s=8,
+            alpha=0.6,
+            label="Primary non-strict points",
+        )
     plt.xlabel("Wavelength (nm)")
     plt.ylabel("Reflectance (0-1)")
     plt.title("Experimental vs TMM Reflectance")
     plt.xlim(review_min_nm, review_max_nm)
-    ymin, ymax = adaptive_ylim([r_exp_plot, r_fixed_plot, r_best_plot], (0.0, 1.0))
+    ylim_series = [r_exp_plot, r_fixed_plot]
+    if r_exp_ag_mirror is not None:
+        ylim_series.append(r_exp_ag_mirror)
+    ymin, ymax = adaptive_ylim(ylim_series, (0.0, 1.0))
     plt.ylim(ymin, ymax)
     plt.legend()
     plt.grid(alpha=0.3)
@@ -212,6 +247,25 @@ def plot_outputs(result: dict, config: RuntimeConfig) -> dict[str, str]:
     plt.close()
     paths["residual_png"] = residual_path.as_posix()
 
+    if config.comparison_mode == "dual_reference":
+        ag_qc_path = config.output_figures_dir / "phase08_0429_ag_bk_qc.png"
+        plt.figure(figsize=(12, 6), dpi=200)
+        plt.plot(wl, counts_ref_ms, label="Glass/Ag Counts/ms", color="#1f77b4", alpha=0.8)
+        if arrays["r_exp_ag_mirror"] is not None:
+            ag_corr = np.asarray(result["arrays"]["r_exp_ag_mirror"])
+            finite = np.isfinite(ag_corr)
+            if np.any(finite):
+                plt.text(0.02, 0.96, "Ag frame #1 dropped (saturation)\nBK aligned by pixel index", transform=plt.gca().transAxes, va="top")
+        plt.xlabel("Wavelength (nm)")
+        plt.ylabel("Counts/ms")
+        plt.title("Ag/BK QC Context")
+        plt.xlim(review_min_nm, review_max_nm)
+        plt.grid(alpha=0.3)
+        plt.legend()
+        plt.savefig(ag_qc_path)
+        plt.close()
+        paths["ag_bk_qc_png"] = ag_qc_path.as_posix()
+
     thickness_scan_path = config.output_figures_dir / "phase08_0429_thickness_scan.png"
     plt.figure(figsize=(10, 5), dpi=220)
     plt.plot(scan_values, scan_cost, linewidth=1.8)
@@ -237,13 +291,16 @@ def write_report(result: dict, config: RuntimeConfig, figure_paths: dict[str, st
     except Exception:
         metrics_df = np.array([])
 
-    summary_path = config.output_logs_dir / "phase08_0429_run_summary.md"
-    report_path = config.output_report_dir / "phase08_0429_reference_comparison_report.md"
+    summary_name = "phase08_0429_dual_reference_run_summary.md" if config.comparison_mode == "dual_reference" else "phase08_0429_run_summary.md"
+    report_name = "phase08_0429_dual_reference_report.md" if config.comparison_mode == "dual_reference" else "phase08_0429_reference_comparison_report.md"
+    summary_path = config.output_logs_dir / summary_name
+    report_path = config.output_report_dir / report_name
 
     summary_lines = [
         "# Phase 08 Reference Comparison Run Summary",
         "",
         f"- Reference type: `{manifest['reference_type']}`",
+        f"- Comparison mode: `{manifest.get('comparison_mode', 'single_reference')}`",
         f"- Exposure source sample/reference: `{manifest['sample_exposure_source']}` / `{manifest['reference_exposure_source']}`",
         f"- Primary range: `{manifest['primary_range_nm'][0]}-{manifest['primary_range_nm'][1]} nm`",
         f"- Extended QC range: `{manifest['extended_qc_range_nm'][0]}-{manifest['extended_qc_range_nm'][1]} nm`",
@@ -259,12 +316,13 @@ def write_report(result: dict, config: RuntimeConfig, figure_paths: dict[str, st
         "# Phase 08 0429 Reference Comparison Report",
         "",
         "## 1. 原始数据质量",
-        "- 本次仅使用 `glass/PVK` 与 `glass/Ag` 两条 CSV，未使用 direct Ag mirror。",
+        "- 本次使用 `glass/PVK` 与 `glass/Ag`，并在 dual 模式引入 direct Ag mirror + bk 多帧校准。",
         "- 无 `.spe` 元数据，曝光时间来自文件名推断（`20ms`）。",
         "- 指标计算使用未平滑曲线；若启用平滑，仅用于图示辅助。",
         "",
         "## 2. 模型与公式",
-        "- 参比模型：`Air / Glass(incoherent) / Ag / Air`",
+        "- 参比模型（glass/Ag）：`Air / Glass(incoherent) / Ag / Air`",
+        "- 参比模型（Ag mirror）：`Air / Ag / Air`",
         "- 样品模型：`Air / Glass(incoherent) / PVK / Air`",
         "- 实验反射率：`R_exp = (I_pvk/t_pvk)/(I_ag/t_ag) * R_TMM_glass_ag`",
         "",
@@ -284,6 +342,8 @@ def write_report(result: dict, config: RuntimeConfig, figure_paths: dict[str, st
         f"- {figure_paths['residual_png']}",
         f"- {figure_paths['thickness_scan_png']}",
     ]
+    if "ag_bk_qc_png" in figure_paths:
+        report_lines.append(f"- {figure_paths['ag_bk_qc_png']}")
     if getattr(metrics_df, "empty", True) is False:
         report_lines.extend(
             [
@@ -312,6 +372,8 @@ def main() -> int:
     args = parse_args()
     primary_min, primary_max = parse_range(args.primary_range)
     ext_min, ext_max = parse_range(args.extended_qc_range)
+    review_min, review_max = parse_range(args.review_range)
+    drop_ag_frames = tuple(int(x.strip()) for x in str(args.drop_ag_frames).split(",") if x.strip())
 
     output_root = Path(args.output_root).resolve()
     processed_dir = output_root / "data" / "processed" / "phase08" / "reference_comparison"
@@ -340,6 +402,14 @@ def main() -> int:
         smooth_window=int(args.smooth_window),
         smooth_polyorder=int(args.smooth_polyorder),
         reference_type=str(args.reference_type),
+        comparison_mode=str(args.comparison_mode),
+        ag_mirror_csv=Path(args.ag_mirror_csv).resolve() if args.ag_mirror_csv else None,
+        background_csv=Path(args.background_csv).resolve() if args.background_csv else None,
+        drop_ag_frames=drop_ag_frames,
+        ag_background_align=str(args.ag_background_align),
+        ag_reference_model=str(args.ag_reference_model),
+        review_min_nm=review_min,
+        review_max_nm=review_max,
     )
 
     result = run_reference_comparison(config=config, dry_run=bool(args.dry_run))
