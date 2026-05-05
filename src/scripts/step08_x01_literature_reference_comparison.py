@@ -41,6 +41,8 @@ REPORT_DIR = PROJECT_ROOT / "results" / "report" / "phase08_reference_comparison
 LOGS_DIR = PROJECT_ROOT / "results" / "logs" / "phase08" / "reference_comparison"
 COMPARE_METRICS_PATH = PROCESSED_DIR / "phase08_0429_dual_reference_pvk_source_comparison_metrics.csv"
 COMPARE_FIG_PATH = FIGURES_DIR / "phase08_0429_dual_reference_pvk_source_comparison.png"
+CURRENT_PVK_FIG_PATH = FIGURES_DIR / "phase08_0429_dual_reference_pvk_source_current_pvk.png"
+X01_PVK_FIG_PATH = FIGURES_DIR / "phase08_0429_dual_reference_pvk_source_pvk_x01.png"
 COMPARE_REPORT_PATH = REPORT_DIR / "phase08_0429_dual_reference_pvk_source_comparison.md"
 
 BASELINE_TAG = "current_pvk"
@@ -98,6 +100,16 @@ def build_compare_panel(ax: plt.Axes, calibrated_df: pd.DataFrame, title: str) -
     ax.grid(alpha=0.3)
 
 
+def save_single_source_figure(calibrated_df: pd.DataFrame, title: str, output_path: Path) -> None:
+    fig, ax = plt.subplots(figsize=(12, 6), dpi=220)
+    build_compare_panel(ax, calibrated_df, title)
+    handles, labels = ax.get_legend_handles_labels()
+    fig.legend(handles, labels, loc="upper center", ncol=3, frameon=False)
+    fig.tight_layout(rect=(0.0, 0.0, 1.0, 0.94))
+    fig.savefig(output_path)
+    plt.close(fig)
+
+
 def summarize_metrics(metrics_df: pd.DataFrame, source_label: str) -> pd.DataFrame:
     primary = metrics_df[metrics_df["Band"] == "400_750_primary"].copy()
     primary.insert(0, "PVK_Source", source_label)
@@ -147,6 +159,17 @@ def main() -> int:
     fig.savefig(COMPARE_FIG_PATH)
     plt.close(fig)
 
+    save_single_source_figure(
+        baseline_calibrated,
+        "Current PVK source: measured reflectance vs TMM",
+        CURRENT_PVK_FIG_PATH,
+    )
+    save_single_source_figure(
+        x01_calibrated,
+        "Literature x=0.1 source: measured reflectance vs TMM",
+        X01_PVK_FIG_PATH,
+    )
+
     report_lines = [
         "# Phase 08 x=0.1 Literature PVK Source Comparison",
         "",
@@ -161,6 +184,8 @@ def main() -> int:
         f"- nk 表：`{NK_OUTPUT_PATH.as_posix()}`",
         f"- Phase08 专用 aligned nk：`{ALIGNED_OUTPUT_PATH.as_posix()}`",
         f"- 对比图：`{COMPARE_FIG_PATH.as_posix()}`",
+        f"- 当前 PVK 单独图：`{CURRENT_PVK_FIG_PATH.as_posix()}`",
+        f"- x=0.1 单独图：`{X01_PVK_FIG_PATH.as_posix()}`",
         f"- 对比指标：`{COMPARE_METRICS_PATH.as_posix()}`",
         "",
         "## 3. 运行口径",

@@ -11,6 +11,8 @@
 - nk 表：`/Users/luxin/百度网盘同步/Code/TMM-interference-spectrum/resources/digitized/lit_x01_csfapi_nk_table_s3.csv`
 - Phase08 专用 aligned nk：`/Users/luxin/百度网盘同步/Code/TMM-interference-spectrum/resources/aligned_full_stack_nk_phase08_x01.csv`
 - 对比图：`/Users/luxin/百度网盘同步/Code/TMM-interference-spectrum/results/figures/phase08/reference_comparison/phase08_0429_dual_reference_pvk_source_comparison.png`
+- 当前 PVK 单独图：`/Users/luxin/百度网盘同步/Code/TMM-interference-spectrum/results/figures/phase08/reference_comparison/phase08_0429_dual_reference_pvk_source_current_pvk.png`
+- x=0.1 单独图：`/Users/luxin/百度网盘同步/Code/TMM-interference-spectrum/results/figures/phase08/reference_comparison/phase08_0429_dual_reference_pvk_source_pvk_x01.png`
 - 对比指标：`/Users/luxin/百度网盘同步/Code/TMM-interference-spectrum/data/processed/phase08/reference_comparison/phase08_0429_dual_reference_pvk_source_comparison_metrics.csv`
 
 ## 3. 运行口径
