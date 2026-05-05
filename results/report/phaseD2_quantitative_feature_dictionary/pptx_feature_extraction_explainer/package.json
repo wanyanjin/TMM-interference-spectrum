@@ -1,0 +1,9 @@
+{
+  "name": "phase-d2-feature-extraction-explainer",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Editable PPTX generator for Phase D-2 feature extraction explainer.",
+  "dependencies": {
+    "pptxgenjs": "^4.0.1"
+  }
+}

@@ -36,6 +36,7 @@
  - 已新增 `stepA1_2_rerun_pristine_with_pvk_v2.py`，可复用 Phase A-1 pristine decomposition 口径，用 `PVK surrogate v2` 重跑 `R_front / R_stack / R_total`，并输出 v1/v2 全谱与局部对照
  - 已新增 `stepA2_pvk_thickness_scan.py`，可基于 `aligned_full_stack_nk_pvk_v2.csv` 扫描 `d_PVK = 500-900 nm`、输出 `R_stack / R_total / ΔR` 热力图、peak/valley tracking 与特征汇总表
   - 已新增 `stepA_local_pvk_thickness_window.py`，可在同一 `PVK surrogate v2` 与 nominal 全器件几何下，仅扫描 `d_PVK = 675-725 nm / 1 nm`，输出局部厚度起伏对应的 `R_total / ΔR_total` 指纹图、基础三窗口 RMS 摘要与汇报资产
+  - 已新增 `stepD2b_explain_feature_pipeline.py`，可直接读取 `phaseD1_rtotal_database.csv`、`phaseD2_quantitative_feature_database.csv`、`phaseD2_family_templates.csv` 与 `PHASE_D2_REPORT.md`，输出 D-2 特征提取流程解释图、原始谱 vs 特征路由对比图、五类特征来源总览图与组会讲稿文案；该脚本不做新的物理仿真，只做汇报层信息重组
   - 已建立 `results/report/` 汇报资产层，并补齐 `Phase A-1.2` 与 `Phase A-2` 的精选 CSV / PNG / Markdown 报告
   - 已新增 `stepB1_rear_bema_sandbox.py`，可在 `PVK/C60` 后界面插入固定 `50/50` Bruggeman BEMA 层、执行厚度守恒扫描并与 `d_PVK` 指纹做对照
   - 已新增 `stepA2_1_pvk_uncertainty_ensemble.py`，可构建 `nominal / more_absorptive / less_absorptive` 三成员 PVK ensemble，重跑代表性 thickness / rear-BEMA 子集并输出 robustness summary
@@ -110,7 +111,9 @@ TMM-interference-spectrum/
 │       ├── stepB2_front_bema_sandbox.py
 │       ├── stepC1a_rear_air_gap_sandbox.py
 │       ├── stepC1b_front_air_gap_sandbox.py
-│       └── stepD1_airgap_discrimination_database.py
+│       ├── stepD1_airgap_discrimination_database.py
+│       ├── stepD2_quantitative_feature_dictionary.py
+│       └── stepD2b_explain_feature_pipeline.py
 ├── data/
 │   └── processed/
 │       ├── CsFAPI_nk_extended.csv
@@ -213,6 +216,7 @@ TMM-interference-spectrum/
 │       ├── phaseC1a_rear_air_gap_sandbox/
 │       ├── phaseC1b_front_air_gap_sandbox/
 │       ├── phaseD1_airgap_discrimination_database/
+│       ├── phaseD2_quantitative_feature_dictionary/
 │       └── ppt_phaseAtoC_assets/
 ├── test_data/
 │   ├── sample.csv
@@ -1662,6 +1666,21 @@ selected phase outputs
   - `src/core/full_stack_microcavity.py`
   - `src/scripts/stepA1_pristine_baseline.py`
   - `src/scripts/stepA_local_pvk_thickness_window.py`
+
+### Phase D-2 Explain Update (2026-04-13)
+
+- Current Phase: `Phase D-2`
+- Update summary:
+  - 已新增 `src/scripts/stepD2b_explain_feature_pipeline.py`，专门为 D-2 的 38 个量化特征生成“原始谱 -> 特征组 -> routing”解释图
+  - 已新增 `results/report/phaseD2_quantitative_feature_dictionary/explain_feature_pipeline/`，其中包含 `feature_extraction_pipeline.png`、`raw_vs_feature_based_analysis.png`、`feature_groups_overview.png` 与 `slide_text.md`
+  - 已新增 `results/report/phaseD2_quantitative_feature_dictionary/pptx_feature_extraction_explainer/`，使用 MiniMax `pptx-generator` 的 PptxGenJS 工作流生成 3 页可编辑 `feature_extraction_explainer.pptx` 与配套 `feature_extraction_explainer_notes.md`
+  - 该任务严格复用 `phaseD1_rtotal_database.csv`、`phaseD2_quantitative_feature_database.csv`、`phaseD2_family_templates.csv` 与 `PHASE_D2_REPORT.md`，未新增仿真、未改特征定义、未写入新的中间数据库
+- Verified conclusions:
+  - 已把 D-2 的 38 个特征来源稳定整理为 5 组：分窗能量、后窗平移、后窗频谱、小波、模板相似度
+  - 已明确对组会口径：feature extraction 用于 routing，而不是替代 full-spectrum fitting
+  - 已把 3 张解释图重排为 3 页原生可编辑 PPT，而不是整页贴图
+- Pending verification:
+  - 当前解释图仍是汇报信息图，不是逐步骤的算法中间态可视化；如后续需要更细粒度的中间态截图，应单独扩展新的 report 任务
   - `data/processed/phaseA_local/phaseA_local_thickness_scan.csv`
   - `data/processed/phaseA_local/phaseA_local_thickness_feature_summary.csv`
   - `results/figures/phaseA_local/phaseA_local_deltaRtotal_heatmap.png`
