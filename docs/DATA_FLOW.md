@@ -183,8 +183,11 @@ raw / processed input
 `phase08_0429_dual_reference_*_pvk_x01.* + phase08_0429_trace_600nm.md`
 -> `src/scripts/step08_build_audit_slide_deck.py`
 -> 读取现有 calibrated/theory/manifest/trace/report
--> 生成 deck 专用 SVG/PNG 资产
+-> 生成本地 `reveal.js + KaTeX` deck HTML 与 `technical_report.html`
+-> 复用 `results/slides/phase08_reference_audit/assets/*` 统一 token / 组件 / overflow watchdog
 -> `results/slides/phase08_reference_audit/phase08_reference_audit_deck.html`
 -> `results/slides/phase08_reference_audit/phase08_reference_audit_technical_report.html`
+-> `node tools/phase08_slides_qa.mjs`
+-> `results/slides/phase08_reference_audit/qa-output/qa-report.json + screenshots/*.png`
 
 该 deck 输出只服务于说明与汇报，不回写或替代 Phase 08 主结果文件。

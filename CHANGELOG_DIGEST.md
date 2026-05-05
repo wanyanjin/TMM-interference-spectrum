@@ -89,6 +89,11 @@
 - 提交记录：`[Phase 08] 新增固定参数TMM理论前向建模脚本`
 - 证据文件：
   - `src/scripts/step08_theoretical_tmm_modeling.py`
+  - `src/scripts/step08_build_audit_slide_deck.py`
+  - `results/slides/phase08_reference_audit/phase08_reference_audit_deck.html`
+  - `results/slides/phase08_reference_audit/assets/theme.css`
+  - `results/slides/phase08_reference_audit/assets/deck.js`
+  - `tools/phase08_slides_qa.mjs`
 
 ### Phase A-D（证据：`git log` + 已跟踪脚本 + 结果目录）
 
@@ -108,3 +113,4 @@
 - 目标：为下一步 `glass/PVK` 与 `glass/Ag`、`Ag mirror` 参比比较流程建立稳定治理层。
 - 本次仅进行治理文档重构，不修改业务代码与结果数据。
 - 后续已形成 `reference-comparison` CLI 与 dual-reference 数据链，可在 Phase 08 内对不同 PVK 光学常数来源做并排重算与比较。
+- 汇报层已补齐本地前端工具链：deck 改为本地 `reveal.js` shell，公式用 `KaTeX` 渲染，新增 `Playwright` 逐页截图与 overflow QA。

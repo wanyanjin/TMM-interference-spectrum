@@ -1,0 +1,103 @@
+{
+  "generatedAt": "2026-05-05T15:03:23.016Z",
+  "deckPath": "/Users/luxin/百度网盘同步/Code/TMM-interference-spectrum/results/slides/phase08_reference_audit/phase08_reference_audit_deck.html",
+  "slideCount": 8,
+  "report": [
+    {
+      "slideIndex": 1,
+      "title": "Phase 08 反射率校准与 TMM 审计",
+      "sectionScrollWidth": 1600,
+      "sectionClientWidth": 1600,
+      "sectionScrollHeight": 900,
+      "sectionClientHeight": 900,
+      "sectionOverflowX": 0,
+      "sectionOverflowY": 0,
+      "offenders": [],
+      "screenshot": "/Users/luxin/百度网盘同步/Code/TMM-interference-spectrum/results/slides/phase08_reference_audit/qa-output/screenshots/01.png"
+    },
+    {
+      "slideIndex": 2,
+      "title": "Incoherent Cascade",
+      "sectionScrollWidth": 1600,
+      "sectionClientWidth": 1600,
+      "sectionScrollHeight": 900,
+      "sectionClientHeight": 900,
+      "sectionOverflowX": 0,
+      "sectionOverflowY": 0,
+      "offenders": [],
+      "screenshot": "/Users/luxin/百度网盘同步/Code/TMM-interference-spectrum/results/slides/phase08_reference_audit/qa-output/screenshots/02.png"
+    },
+    {
+      "slideIndex": 3,
+      "title": "600 nm Trace: Counts to R_exp",
+      "sectionScrollWidth": 1600,
+      "sectionClientWidth": 1600,
+      "sectionScrollHeight": 900,
+      "sectionClientHeight": 900,
+      "sectionOverflowX": 0,
+      "sectionOverflowY": 0,
+      "offenders": [],
+      "screenshot": "/Users/luxin/百度网盘同步/Code/TMM-interference-spectrum/results/slides/phase08_reference_audit/qa-output/screenshots/03.png"
+    },
+    {
+      "slideIndex": 4,
+      "title": "TMM Calculation Flow",
+      "sectionScrollWidth": 1600,
+      "sectionClientWidth": 1600,
+      "sectionScrollHeight": 900,
+      "sectionClientHeight": 900,
+      "sectionOverflowX": 0,
+      "sectionOverflowY": 0,
+      "offenders": [],
+      "screenshot": "/Users/luxin/百度网盘同步/Code/TMM-interference-spectrum/results/slides/phase08_reference_audit/qa-output/screenshots/04.png"
+    },
+    {
+      "slideIndex": 5,
+      "title": "Risk Source Map",
+      "sectionScrollWidth": 1600,
+      "sectionClientWidth": 1600,
+      "sectionScrollHeight": 900,
+      "sectionClientHeight": 900,
+      "sectionOverflowX": 0,
+      "sectionOverflowY": 0,
+      "offenders": [],
+      "screenshot": "/Users/luxin/百度网盘同步/Code/TMM-interference-spectrum/results/slides/phase08_reference_audit/qa-output/screenshots/05.png"
+    },
+    {
+      "slideIndex": 6,
+      "title": "Key Curves",
+      "sectionScrollWidth": 1600,
+      "sectionClientWidth": 1600,
+      "sectionScrollHeight": 900,
+      "sectionClientHeight": 900,
+      "sectionOverflowX": 0,
+      "sectionOverflowY": 0,
+      "offenders": [],
+      "screenshot": "/Users/luxin/百度网盘同步/Code/TMM-interference-spectrum/results/slides/phase08_reference_audit/qa-output/screenshots/06.png"
+    },
+    {
+      "slideIndex": 7,
+      "title": "Ag/BK QA Context",
+      "sectionScrollWidth": 1600,
+      "sectionClientWidth": 1600,
+      "sectionScrollHeight": 900,
+      "sectionClientHeight": 900,
+      "sectionOverflowX": 0,
+      "sectionOverflowY": 0,
+      "offenders": [],
+      "screenshot": "/Users/luxin/百度网盘同步/Code/TMM-interference-spectrum/results/slides/phase08_reference_audit/qa-output/screenshots/07.png"
+    },
+    {
+      "slideIndex": 8,
+      "title": "Technical Report Boundary",
+      "sectionScrollWidth": 1600,
+      "sectionClientWidth": 1600,
+      "sectionScrollHeight": 900,
+      "sectionClientHeight": 900,
+      "sectionOverflowX": 0,
+      "sectionOverflowY": 0,
+      "offenders": [],
+      "screenshot": "/Users/luxin/百度网盘同步/Code/TMM-interference-spectrum/results/slides/phase08_reference_audit/qa-output/screenshots/08.png"
+    }
+  ]
+}

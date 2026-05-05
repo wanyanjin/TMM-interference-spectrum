@@ -1,0 +1,354 @@
+:root {
+  --slide-w: 1600px;
+  --slide-h: 900px;
+  --safe-x: 72px;
+  --safe-y: 52px;
+  --font-cn: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+  --font-en: "Times New Roman", Georgia, serif;
+  --font-ui: "Inter", "Helvetica Neue", Arial, sans-serif;
+  --color-bg: #f3f5f9;
+  --color-paper: #ffffff;
+  --color-ink: #101828;
+  --color-muted: #475467;
+  --color-border: #d0d5dd;
+  --color-soft: #eef2f7;
+  --color-shadow: rgba(16, 24, 40, 0.12);
+  --color-glassag: #2f6fed;
+  --color-agmirror: #d97706;
+  --color-tmm-fixed: #047857;
+  --color-tmm-bestd: #9333ea;
+  --radius-card: 14px;
+  --radius-pill: 999px;
+  --stroke: 1.5px;
+  --title: 34px;
+  --h2: 24px;
+  --body: 18px;
+  --small: 14px;
+  --equation: 1.18;
+}
+
+html, body {
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-ink);
+  font-family: var(--font-cn);
+}
+
+.reveal {
+  font-family: var(--font-cn);
+  color: var(--color-ink);
+}
+
+.reveal .slides {
+  text-align: left;
+  overflow: hidden !important;
+}
+
+.reveal .slides section {
+  position: absolute !important;
+  inset: 0 !important;
+  margin: auto !important;
+  transform: none !important;
+  width: var(--slide-w);
+  height: var(--slide-h);
+  box-sizing: border-box;
+  padding: var(--safe-y) var(--safe-x);
+  background: var(--color-paper);
+  border-radius: 18px;
+  box-shadow: 0 22px 56px var(--color-shadow);
+  overflow: hidden;
+  opacity: 0 !important;
+}
+
+.reveal .slides section.present {
+  opacity: 1 !important;
+}
+
+.reveal h1,
+.reveal h2,
+.reveal h3,
+.en,
+.metric-value,
+.math-inline,
+.katex,
+.katex-display {
+  font-family: var(--font-en);
+}
+
+.slide-title {
+  margin: 0 0 12px;
+  font-size: var(--title);
+  line-height: 1.08;
+  letter-spacing: 0;
+}
+
+.slide-subtitle {
+  margin: 0 0 20px;
+  font-size: 17px;
+  color: var(--color-muted);
+}
+
+.deck-grid-2 {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 24px;
+}
+
+.deck-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.stack-col,
+.trace-col,
+.step-col {
+  display: grid;
+  gap: 16px;
+}
+
+.card {
+  background: var(--color-paper);
+  border: var(--stroke) solid var(--color-border);
+  border-radius: var(--radius-card);
+  padding: 18px 20px;
+  box-sizing: border-box;
+}
+
+.card.soft {
+  background: var(--color-soft);
+}
+
+.card-title {
+  margin: 0 0 10px;
+  font-size: var(--h2);
+  line-height: 1.18;
+}
+
+.card-note,
+.small-note,
+.legend,
+.metric-label,
+.step-note,
+.risk-note {
+  font-size: var(--small);
+  line-height: 1.45;
+  color: var(--color-muted);
+}
+
+.formula-card {
+  display: grid;
+  gap: 12px;
+  padding: 20px 22px;
+}
+
+.formula-card .katex-display {
+  margin: 0;
+  font-size: var(--equation);
+}
+
+.formula-label {
+  font-size: 12px;
+  font-family: var(--font-ui);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-muted);
+}
+
+.trace-chain {
+  display: grid;
+  gap: 10px;
+}
+
+.trace-step {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 12px;
+  align-items: start;
+  padding: 12px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: #fbfcfe;
+}
+
+.trace-step-tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 10px;
+  border-radius: var(--radius-pill);
+  font-size: 12px;
+  font-family: var(--font-ui);
+  font-weight: 600;
+  color: #fff;
+}
+
+.glassag { background: var(--color-glassag); }
+.agmirror { background: var(--color-agmirror); }
+.tmm-fixed { background: var(--color-tmm-fixed); }
+.tmm-bestd { background: var(--color-tmm-bestd); }
+
+.trace-step-body {
+  display: grid;
+  gap: 6px;
+}
+
+.trace-step-title {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.trace-step .katex-display {
+  margin: 0;
+  font-size: 1.02em;
+}
+
+.metric-strip {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.metric-card {
+  display: grid;
+  gap: 6px;
+  padding: 14px 16px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: #fcfcfd;
+}
+
+.metric-value {
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.step-flow {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 12px;
+  align-items: stretch;
+}
+
+.step-box {
+  position: relative;
+  display: grid;
+  gap: 8px;
+  padding: 18px 16px 18px 18px;
+  border-radius: 14px;
+  border: 1px solid var(--color-border);
+  min-height: 190px;
+}
+
+.step-box::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: -11px;
+  width: 18px;
+  height: 18px;
+  border-top: 2px solid #667085;
+  border-right: 2px solid #667085;
+  transform: translateY(-50%) rotate(45deg);
+  background: var(--color-paper);
+}
+
+.step-box:last-child::after {
+  display: none;
+}
+
+.step-index {
+  font-size: 12px;
+  font-family: var(--font-ui);
+  color: var(--color-muted);
+}
+
+.step-name {
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.16;
+}
+
+.step-box.blue { background: #eef4ff; }
+.step-box.cyan { background: #eff8ff; }
+.step-box.purple { background: #f4f3ff; }
+.step-box.gold { background: #fffaeb; }
+.step-box.green { background: #ecfdf3; }
+
+.diagram-card {
+  min-height: 250px;
+}
+
+.diagram-caption {
+  margin-top: 10px;
+  font-size: 13px;
+  color: var(--color-muted);
+}
+
+.quad-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 18px;
+}
+
+.risk-box {
+  display: grid;
+  gap: 10px;
+  min-height: 165px;
+}
+
+.risk-box h3 {
+  margin: 0;
+  font-size: 22px;
+}
+
+.risk-box ul {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 15px;
+  line-height: 1.45;
+}
+
+.risk-summary {
+  margin-top: 18px;
+  padding: 14px 18px;
+  border-radius: 12px;
+  background: #f8fafc;
+  border: 1px solid var(--color-border);
+  font-size: 16px;
+}
+
+.hero-image {
+  width: 100%;
+  max-height: 575px;
+  object-fit: contain;
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  background: #fff;
+}
+
+.bullet-list {
+  margin: 12px 0 0;
+  padding-left: 22px;
+  font-size: 18px;
+  line-height: 1.5;
+}
+
+.dev-overflow-outline {
+  outline: 3px solid #ef4444 !important;
+  outline-offset: 2px !important;
+}
+
+.overflow-banner {
+  position: fixed;
+  top: 14px;
+  left: 14px;
+  z-index: 1000;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(127, 29, 29, 0.92);
+  color: #fff;
+  font: 600 12px/1.2 var(--font-ui);
+}
