@@ -131,3 +131,13 @@ raw / processed input
 - CLI 不应绕开 `data/processed` 中间层直接做隐式内存串联。
 - CLI 不应绕开 `results/figures`、`results/logs`、`results/report` 的结果目录规范。
 - CLI 应将关键运行元信息写入 manifest 或 manifest-like summary，保证后续可追溯。
+
+### 6.1 Phase 08 `reference-comparison` 实例
+
+`test_data/0429/glass-PVK*.csv + glass-Ag*.csv`
+-> `src/cli/reference_comparison.py` 参数解析与输入校验
+-> `src/core/reference_comparison.py`（mask、TMM、厚度扫描、诊断）
+-> `data/processed/phase08/reference_comparison/*.csv + manifest.json`
+-> `results/figures/phase08/reference_comparison/*.png`
+-> `results/logs/phase08/reference_comparison/*.md`
+-> `results/report/phase08_reference_comparison/*.md`

@@ -4,15 +4,15 @@
 
 `Phase 08：参比几何验证与治理规范收敛`
 
-目标：完善项目治理规范，为下一步 `glass/PVK` 与 `glass/Ag`、`Ag mirror` 两类参比反射率比较任务做准备。
+目标：实现 `glass/PVK` 与 `glass/Ag` 参比校准/TMM 对比 CLI 最小闭环，并完成文档与测试同步。
 
 ## 本轮范围
 
-- 重构 `AGENTS.md`（稳定规则与红线）
-- 新增 `CHANGELOG_DIGEST.md`
-- 新增 `docs/DATA_FLOW.md`
-- 新增 `docs/KNOWN_ISSUES.md`
-- 新增 `docs/phases/phase_governance_refactor.md`
+- 新增 `src/core/reference_comparison.py`
+- 新增 `src/cli/reference_comparison.py`
+- 新增最小测试：列识别、公式、mask、TMM smoke、CLI dry-run
+- 更新 `docs/CLI_INDEX.md` 与 `docs/cli/reference_comparison.md`
+- 产出 `phase08/reference_comparison` 数据表、图表、日志、报告
 
 不在本轮范围：
 
@@ -23,18 +23,18 @@
 
 ## TODO
 
-1. 完成治理文档新增与重构
-2. 检查历史条目证据边界，证据不足内容移入“待核对”
-3. 仅暂存治理文档，隔离无关未提交改动
-4. 提交并 push：`[Phase 08] 完善项目治理规范并准备参比比较流程`
+1. 完成 CLI 计算链与严格 mask 输出
+2. 生成主波段（400-750 nm）与扩展 QC（750-931.443 nm）指标
+3. 完成最小测试并记录结果
+4. 仅暂存本任务文件，提交并 push：`[Phase 08] 新增glassAg参比校准与TMM对比CLI`
 
 ## 阻塞与注意事项
 
 - 工作区存在无关未提交改动（`docs/PROJECT_STATE.md`、`src/scripts/stepD2b_explain_feature_pipeline.py`、`results/report/...`），本轮不得纳入提交。
-- `results/report/` 为当前实际目录名；本轮只在规范中声明现状，不做目录改名。
+- `test_data/0429` 无 `.spe`，曝光时间仅来自文件名推断，必须在 manifest/report 标注。
 
 ## 立即下一步
 
-- 建立 CLI 文档索引与模板
-- 准备 Phase 08 `glass/PVK` 参比比较 CLI
-- 后续高频功能先 CLI 化，再考虑 GUI
+- 完成 CLI dry-run 与 full-run 验证
+- 复核主结论仅基于 400-750 nm strict mask
+- 输出提交前文件清单、指标摘要与关键图路径

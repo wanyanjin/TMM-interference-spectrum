@@ -1,0 +1,38 @@
+{
+  "reference_type": "glass_ag",
+  "sample_csv": "/Users/luxin/百度网盘同步/Code/TMM-interference-spectrum/test_data/0429/glass-PVK-withoutfliter-20ms 2026 四月 29 14_45_45.csv",
+  "reference_csv": "/Users/luxin/百度网盘同步/Code/TMM-interference-spectrum/test_data/0429/glass-Ag-withoutfliter-20ms 2026 四月 29 14_42_25.csv",
+  "sample_exposure_ms": 20.0,
+  "reference_exposure_ms": 20.0,
+  "sample_exposure_source": "filename_inference",
+  "reference_exposure_source": "filename_inference",
+  "wavelength_min_nm_raw": 365.1502089323528,
+  "wavelength_max_nm_raw": 931.4433541099622,
+  "wavelength_min_nm_used": 400.21336269574215,
+  "wavelength_max_nm_used": 931.4433541099622,
+  "primary_range_nm": [
+    400.0,
+    750.0
+  ],
+  "extended_qc_range_nm": [
+    750.0,
+    931.443
+  ],
+  "valid_mask_loose": "finite && sample_counts>0 && reference_counts>0",
+  "valid_mask_strict": "finite && sample_counts>37.200000286102295 && reference_counts>37.200000286102295",
+  "strict_floor_counts": 37.200000286102295,
+  "smoothing_enabled_for_metrics": false,
+  "smoothing_enabled_for_plot": false,
+  "smoothing_window": null,
+  "smoothing_polyorder": null,
+  "d_ag_nm_assumption": 100.0,
+  "d_pvk_fixed_nm_assumption": 700.0,
+  "d_pvk_scan_min_nm": 400.0,
+  "d_pvk_scan_max_nm": 1000.0,
+  "d_pvk_scan_step_nm": 1.0,
+  "best_d_PVK_nm": 483.0,
+  "diagnostic_scale_a_fixed": -2.109840655816475,
+  "diagnostic_offset_b_fixed": 0.5837685054674915,
+  "diagnostic_scale_a_best_d": -0.22200195808024437,
+  "diagnostic_offset_b_best_d": 0.3521836080108867
+}
