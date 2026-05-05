@@ -165,3 +165,13 @@ raw / processed input
 -> `src/cli/reference_comparison.py --nk-csv ... --output-tag pvk_x01`
 -> `phase08_0429_dual_reference_*_pvk_x01.*`
 -> `phase08_0429_dual_reference_pvk_source_comparison.png/.md`
+
+### 6.4 Phase 08 单波长审计 trace
+
+`phase08_0429_dual_reference_manifest*.json + calibrated/theory csv + ag/bk multiframe csv`
+-> `src/scripts/step08_single_wavelength_trace.py`
+-> 自动选择最新 dual-reference 结果集
+-> 选取 `target_wavelength_nm` 最近的实际波长点
+-> 展开 counts/ms、参比校准、`nk` 插值、Fresnel、单层相干公式、厚玻璃非相干级联
+-> `data/processed/phase08/reference_comparison_trace/*.json`
+-> `results/report/phase08_reference_comparison_trace/*.md`

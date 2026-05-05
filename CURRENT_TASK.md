@@ -12,6 +12,7 @@
 - 生成 `resources/aligned_full_stack_nk_phase08_x01.csv`
 - 用 `current_pvk` 与 `pvk_x01` 两套 `nk` 完成双参比重算
 - 输出 `phase08_0429_dual_reference_pvk_source_comparison.png/.md/.csv`
+- 新增单波长 trace 审计脚本，展开 600 nm 附近的 counts / TMM / 级联全过程
 - 同步更新文献地图、CLI 文档、数据流与历史摘要
 
 不在本轮范围：
@@ -23,9 +24,9 @@
 
 ## TODO
 
-1. 复核 `current_pvk` vs `pvk_x01` 的 primary 指标与图形差异
-2. 判断是否需要继续引入更贴近样品的 PVK/FA-Cs 组分或几何诊断
-3. 仅暂存本任务文件，提交并 push：`[Phase 08] 引入x=0.1文献PVK光学常数并重算双参比对比`
+1. 审查 `phase08_0429_trace_600nm.md`，确认手写公式与 CSV/TMM 一致性
+2. 判断实验-理论偏差主要来自公式链路还是实验/参比链路
+3. 仅暂存本任务文件，提交并 push：`[Phase 08] 新增单波长反射率链路审计脚本`
 
 ## 阻塞与注意事项
 
@@ -36,6 +37,6 @@
 
 ## 立即下一步
 
-- 审查 `phase08_0429_dual_reference_pvk_source_comparison.png`
-- 对照 `phase08_0429_dual_reference_pvk_source_comparison_metrics.csv` 判断 x=0.1 是否优于当前 PVK surrogate
-- 输出提交前文件清单、关键图、比较报告路径与 commit 信息
+- 运行 `step08_single_wavelength_trace.py --target-wavelength-nm 600 --output-tag 600nm`
+- 审查 trace JSON/Markdown 中的公式展开与一致性检查
+- 输出审计报告路径、JSON 路径、发现的问题与 commit 信息
