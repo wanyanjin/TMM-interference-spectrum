@@ -46,6 +46,7 @@ class RuntimeConfig:
     ag_reference_model: str
     review_min_nm: float
     review_max_nm: float
+    output_tag: str | None
 
 
 def parse_range(text: str) -> tuple[float, float]:
@@ -65,6 +66,12 @@ def parse_exposure_ms_from_filename(path: Path) -> tuple[float | None, str]:
     if value is None:
         return None, "unknown"
     return float(value), "filename_inference"
+
+
+def tag_output_stem(base_stem: str, output_tag: str | None) -> str:
+    if output_tag is None or str(output_tag).strip() == "":
+        return base_stem
+    return f"{base_stem}_{str(output_tag).strip()}"
 
 
 def load_measurement_csv(path: Path) -> pd.DataFrame:
@@ -375,6 +382,8 @@ def run_reference_comparison(config: RuntimeConfig, dry_run: bool = False) -> di
     ref_exposure_ms, ref_exposure_source = parse_exposure_ms_from_filename(config.reference_csv)
     if sample_exposure_ms is None or ref_exposure_ms is None:
         raise ValueError("无法从文件名推断曝光时间，请先确保文件名包含 ms/us/s。")
+    ag_mirror_exposure_ms: float | None = None
+    ag_mirror_exposure_source: str | None = None
 
     sample_df = load_measurement_csv(config.sample_csv)
     ref_df = load_measurement_csv(config.reference_csv)
@@ -396,6 +405,9 @@ def run_reference_comparison(config: RuntimeConfig, dry_run: bool = False) -> di
     if config.comparison_mode == "dual_reference":
         if config.ag_mirror_csv is None or config.background_csv is None:
             raise ValueError("dual_reference 模式必须提供 ag_mirror_csv 和 background_csv。")
+        ag_mirror_exposure_ms, ag_mirror_exposure_source = parse_exposure_ms_from_filename(config.ag_mirror_csv)
+        if ag_mirror_exposure_ms is None:
+            raise ValueError("无法从 Ag mirror 文件名推断曝光时间，请先确保文件名包含 ms/us/s。")
         ag_mirror_df, ag_qc_df, ag_diag = build_ag_mirror_corrected_spectrum(
             ag_csv=config.ag_mirror_csv,
             bk_csv=config.background_csv,
@@ -483,7 +495,7 @@ def run_reference_comparison(config: RuntimeConfig, dry_run: bool = False) -> di
     counts_ag_mirror_ms: np.ndarray | None = None
     r_exp_ag_mirror: np.ndarray | None = None
     if counts_ag_mirror is not None:
-        counts_ag_mirror_ms = counts_ag_mirror / ref_exposure_ms
+        counts_ag_mirror_ms = counts_ag_mirror / ag_mirror_exposure_ms
         ag_ratio = np.full_like(counts_sample_ms, np.nan)
         valid_ag_ratio = counts_ag_mirror_ms > 0.0
         ag_ratio[valid_ag_ratio] = counts_sample_ms[valid_ag_ratio] / counts_ag_mirror_ms[valid_ag_ratio]
@@ -627,8 +639,10 @@ def run_reference_comparison(config: RuntimeConfig, dry_run: bool = False) -> di
                 "reference_type": config.reference_type,
                 "sample_exposure_ms": sample_exposure_ms,
                 "reference_exposure_ms": ref_exposure_ms,
+                "ag_mirror_exposure_ms": ag_mirror_exposure_ms,
                 "sample_exposure_source": sample_exposure_source,
                 "reference_exposure_source": ref_exposure_source,
+                "ag_mirror_exposure_source": ag_mirror_exposure_source,
                 "wavelength_min_nm_raw": float(np.min(wavelength_nm_raw)),
                 "wavelength_max_nm_raw": float(np.max(wavelength_nm_raw)),
                 "wavelength_min_nm_used": float(np.min(wavelength_nm)),
@@ -645,15 +659,15 @@ def run_reference_comparison(config: RuntimeConfig, dry_run: bool = False) -> di
         }
     )
 
-    suffix = "phase08_0429_dual_reference" if config.comparison_mode == "dual_reference" else "phase08_0429"
-    input_inventory_path = config.output_processed_dir / f"{suffix}_input_inventory.csv"
-    calibrated_path = config.output_processed_dir / f"{suffix}_calibrated_reflectance.csv"
-    theory_path = config.output_processed_dir / f"{suffix}_tmm_theory_curves.csv"
-    metrics_path = config.output_processed_dir / f"{suffix}_error_metrics.csv"
-    manifest_path = config.output_processed_dir / f"{suffix}_manifest.json"
-    scan_path = config.output_processed_dir / f"{suffix}_thickness_scan_cost.csv"
-    ag_mirror_path = config.output_processed_dir / "phase08_0429_ag_mirror_background_corrected.csv"
-    ag_qc_path = config.output_processed_dir / "phase08_0429_ag_mirror_frame_qc.csv"
+    prefix = "phase08_0429_dual_reference" if config.comparison_mode == "dual_reference" else "phase08_0429"
+    input_inventory_path = config.output_processed_dir / f"{tag_output_stem(f'{prefix}_input_inventory', config.output_tag)}.csv"
+    calibrated_path = config.output_processed_dir / f"{tag_output_stem(f'{prefix}_calibrated_reflectance', config.output_tag)}.csv"
+    theory_path = config.output_processed_dir / f"{tag_output_stem(f'{prefix}_tmm_theory_curves', config.output_tag)}.csv"
+    metrics_path = config.output_processed_dir / f"{tag_output_stem(f'{prefix}_error_metrics', config.output_tag)}.csv"
+    manifest_path = config.output_processed_dir / f"{tag_output_stem(f'{prefix}_manifest', config.output_tag)}.json"
+    scan_path = config.output_processed_dir / f"{tag_output_stem(f'{prefix}_thickness_scan_cost', config.output_tag)}.csv"
+    ag_mirror_path = config.output_processed_dir / f"{tag_output_stem('phase08_0429_ag_mirror_background_corrected', config.output_tag)}.csv"
+    ag_qc_path = config.output_processed_dir / f"{tag_output_stem('phase08_0429_ag_mirror_frame_qc', config.output_tag)}.csv"
 
     inventory_df.to_csv(input_inventory_path, index=False, encoding="utf-8-sig")
     calibrated_df.to_csv(calibrated_path, index=False, encoding="utf-8-sig")
@@ -669,6 +683,8 @@ def run_reference_comparison(config: RuntimeConfig, dry_run: bool = False) -> di
         "comparison_mode": config.comparison_mode,
         "sample_csv": config.sample_csv.as_posix(),
         "reference_csv": config.reference_csv.as_posix(),
+        "nk_csv": config.nk_csv.as_posix(),
+        "output_tag": config.output_tag,
         "sample_exposure_ms": sample_exposure_ms,
         "reference_exposure_ms": ref_exposure_ms,
         "sample_exposure_source": sample_exposure_source,
@@ -703,6 +719,8 @@ def run_reference_comparison(config: RuntimeConfig, dry_run: bool = False) -> di
         manifest["ag_background_diagnostics"] = ag_diag
         manifest["ag_mirror_csv"] = config.ag_mirror_csv.as_posix() if config.ag_mirror_csv else None
         manifest["background_csv"] = config.background_csv.as_posix() if config.background_csv else None
+        manifest["ag_mirror_exposure_ms"] = ag_mirror_exposure_ms
+        manifest["ag_mirror_exposure_source"] = ag_mirror_exposure_source
         manifest["ag_background_align"] = config.ag_background_align
         manifest["drop_ag_frames"] = list(config.drop_ag_frames)
     manifest_path.write_text(json.dumps(manifest, indent=2, ensure_ascii=False), encoding="utf-8")

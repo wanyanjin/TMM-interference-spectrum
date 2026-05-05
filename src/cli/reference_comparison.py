@@ -18,7 +18,7 @@ SRC_ROOT = PROJECT_ROOT / "src"
 if str(SRC_ROOT) not in sys.path:
     sys.path.insert(0, str(SRC_ROOT))
 
-from core.reference_comparison import RuntimeConfig, parse_range, run_reference_comparison  # noqa: E402
+from core.reference_comparison import RuntimeConfig, parse_range, run_reference_comparison, tag_output_stem  # noqa: E402
 
 
 def parse_args() -> argparse.Namespace:
@@ -74,6 +74,7 @@ def parse_args() -> argparse.Namespace:
         default=str(PROJECT_ROOT),
         help="Repository root used to resolve output directories.",
     )
+    parser.add_argument("--output-tag", default="", help="Optional suffix appended to generated filenames, e.g. pvk_x01")
     parser.add_argument("--smooth-for-plot", action="store_true")
     parser.add_argument("--smooth-window", type=int, default=11)
     parser.add_argument("--smooth-polyorder", type=int, default=2)
@@ -148,7 +149,7 @@ def plot_outputs(result: dict, config: RuntimeConfig) -> dict[str, str]:
         pad = max(0.01, 0.12 * span)
         return vmin - pad, vmax + pad
 
-    raw_counts_path = config.output_figures_dir / "phase08_0429_raw_counts.png"
+    raw_counts_path = config.output_figures_dir / f"{tag_output_stem('phase08_0429_raw_counts', config.output_tag)}.png"
     plt.figure(figsize=(12, 6), dpi=200)
     plt.plot(wl, counts_sample, label="Glass/PVK Counts")
     plt.plot(wl, counts_ref, label="Glass/Ag Counts")
@@ -162,7 +163,7 @@ def plot_outputs(result: dict, config: RuntimeConfig) -> dict[str, str]:
     plt.close()
     paths["raw_counts_png"] = raw_counts_path.as_posix()
 
-    counts_ms_path = config.output_figures_dir / "phase08_0429_counts_per_ms.png"
+    counts_ms_path = config.output_figures_dir / f"{tag_output_stem('phase08_0429_counts_per_ms', config.output_tag)}.png"
     plt.figure(figsize=(12, 6), dpi=200)
     plt.plot(wl, counts_sample_ms, label="Glass/PVK Counts/ms")
     plt.plot(wl, counts_ref_ms, label="Glass/Ag Counts/ms")
@@ -176,7 +177,7 @@ def plot_outputs(result: dict, config: RuntimeConfig) -> dict[str, str]:
     plt.close()
     paths["counts_per_ms_png"] = counts_ms_path.as_posix()
 
-    glass_ag_theory_path = config.output_figures_dir / "phase08_0429_glassAg_ref_theory.png"
+    glass_ag_theory_path = config.output_figures_dir / f"{tag_output_stem('phase08_0429_glassAg_ref_theory', config.output_tag)}.png"
     plt.figure(figsize=(12, 6), dpi=200)
     plt.plot(wl, r_tmm_glass_ag, label="R_TMM_GlassAg")
     plt.xlabel("Wavelength (nm)")
@@ -191,11 +192,12 @@ def plot_outputs(result: dict, config: RuntimeConfig) -> dict[str, str]:
     plt.close()
     paths["glass_ag_ref_theory_png"] = glass_ag_theory_path.as_posix()
 
-    reflect_name = (
+    reflect_stem = (
         "phase08_0429_dual_reference_reflectance_exp_vs_tmm.png"
         if config.comparison_mode == "dual_reference"
         else "phase08_0429_reflectance_exp_vs_tmm.png"
     )
+    reflect_name = tag_output_stem(reflect_stem.removesuffix(".png"), config.output_tag) + ".png"
     exp_vs_tmm_path = config.output_figures_dir / reflect_name
     plt.figure(figsize=(12, 6), dpi=220)
     plt.plot(wl, r_exp_plot, color="#1f77b4", linewidth=2.0, label="R_Exp by Glass/Ag")
@@ -228,7 +230,7 @@ def plot_outputs(result: dict, config: RuntimeConfig) -> dict[str, str]:
     plt.close()
     paths["reflectance_exp_vs_tmm_png"] = exp_vs_tmm_path.as_posix()
 
-    residual_path = config.output_figures_dir / "phase08_0429_residual.png"
+    residual_path = config.output_figures_dir / f"{tag_output_stem('phase08_0429_residual', config.output_tag)}.png"
     plt.figure(figsize=(12, 6), dpi=220)
     plt.plot(wl, residual_fixed, label="Residual Fixed")
     plt.plot(wl, residual_best, label="Residual BestD")
@@ -248,7 +250,7 @@ def plot_outputs(result: dict, config: RuntimeConfig) -> dict[str, str]:
     paths["residual_png"] = residual_path.as_posix()
 
     if config.comparison_mode == "dual_reference":
-        ag_qc_path = config.output_figures_dir / "phase08_0429_ag_bk_qc.png"
+        ag_qc_path = config.output_figures_dir / f"{tag_output_stem('phase08_0429_ag_bk_qc', config.output_tag)}.png"
         plt.figure(figsize=(12, 6), dpi=200)
         plt.plot(wl, counts_ref_ms, label="Glass/Ag Counts/ms", color="#1f77b4", alpha=0.8)
         if arrays["r_exp_ag_mirror"] is not None:
@@ -266,7 +268,7 @@ def plot_outputs(result: dict, config: RuntimeConfig) -> dict[str, str]:
         plt.close()
         paths["ag_bk_qc_png"] = ag_qc_path.as_posix()
 
-    thickness_scan_path = config.output_figures_dir / "phase08_0429_thickness_scan.png"
+    thickness_scan_path = config.output_figures_dir / f"{tag_output_stem('phase08_0429_thickness_scan', config.output_tag)}.png"
     plt.figure(figsize=(10, 5), dpi=220)
     plt.plot(scan_values, scan_cost, linewidth=1.8)
     plt.xlabel("d_PVK (nm)")
@@ -293,6 +295,8 @@ def write_report(result: dict, config: RuntimeConfig, figure_paths: dict[str, st
 
     summary_name = "phase08_0429_dual_reference_run_summary.md" if config.comparison_mode == "dual_reference" else "phase08_0429_run_summary.md"
     report_name = "phase08_0429_dual_reference_report.md" if config.comparison_mode == "dual_reference" else "phase08_0429_reference_comparison_report.md"
+    summary_name = tag_output_stem(summary_name.removesuffix(".md"), config.output_tag) + ".md"
+    report_name = tag_output_stem(report_name.removesuffix(".md"), config.output_tag) + ".md"
     summary_path = config.output_logs_dir / summary_name
     report_path = config.output_report_dir / report_name
 
@@ -410,6 +414,7 @@ def main() -> int:
         ag_reference_model=str(args.ag_reference_model),
         review_min_nm=review_min,
         review_max_nm=review_max,
+        output_tag=str(args.output_tag).strip() or None,
     )
 
     result = run_reference_comparison(config=config, dry_run=bool(args.dry_run))

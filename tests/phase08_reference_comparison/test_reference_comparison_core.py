@@ -109,6 +109,10 @@ class ReferenceComparisonCoreTest(unittest.TestCase):
             used_f1 = ag_qc.loc[ag_qc["Frame_Index"] == 1, "Used_For_Average"].iloc[0]
             self.assertFalse(bool(used_f1))
 
+    def test_tag_output_stem(self) -> None:
+        self.assertEqual(rc.tag_output_stem("phase08_0429_dual_reference", None), "phase08_0429_dual_reference")
+        self.assertEqual(rc.tag_output_stem("phase08_0429_dual_reference", "pvk_x01"), "phase08_0429_dual_reference_pvk_x01")
+
 
 if __name__ == "__main__":
     unittest.main()

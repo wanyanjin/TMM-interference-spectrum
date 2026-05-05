@@ -54,6 +54,7 @@ python src/cli/reference_comparison.py \
 - `--ag-reference-model`: Ag mirror 理论模型，首版仅 `air_ag_air`
 - `--reference-type`: 首版仅支持 `glass_ag`
 - `--nk-csv`: 光学常数表，默认 `resources/aligned_full_stack_nk.csv`
+- `--output-tag`: 输出文件标签；用于在不覆盖旧结果的情况下并行生成对照集，例如 `pvk_x01`
 - `--primary-range`: 主分析波段，默认 `400-750`
 - `--extended-qc-range`: 扩展 QC 波段，默认 `750-931.443`
 - `--review-range`: 主审查图 x 轴范围，默认 `500-750`
@@ -96,6 +97,7 @@ python src/cli/reference_comparison.py \
 - `phase08_0429_ag_mirror_background_corrected.csv`（dual）
 - `phase08_0429_ag_mirror_frame_qc.csv`（dual）
 - `phase08_0429_dual_reference_report.md`（dual）
+- 若指定 `--output-tag pvk_x01`，上述文件名会变为 `..._pvk_x01.*`
 
 ## 7. 执行原理
 
@@ -125,6 +127,9 @@ single：
 dual：
 `Ag multi-frame + bk multi-frame -> pixel 对齐背景扣除 -> Ag mirror corrected spectrum -> dual reference comparison -> data/processed -> figures/logs/report -> manifest`
 
+替代 `nk`：
+`aligned_full_stack_nk_phase08_x01.csv -> --nk-csv -> reference-comparison`
+
 ## 10. 校验与错误行为
 
 - `reference_type` 非 `glass_ag`：报错
@@ -141,9 +146,14 @@ dual：
 - 图示规范：
   - `Ag mirror` 与 `glass/Ag` 使用不同颜色实线
   - TMM 理论曲线使用灰色虚线
+- 若要做不同 PVK 来源并排对比，建议：
+  - 保持 `sample/reference/ag/bk` 输入不变
+  - 仅替换 `--nk-csv`
+  - 并显式设置不同 `--output-tag`
 
 ## 12. 版本与维护记录
 
 - `v1`（Phase 08）：`glass/Ag` 参比最小闭环
 - `v1.1`（Phase 08）：支持 `Ag mirror + bk` 多帧校准与 dual-reference 对比
+- `v1.2`（Phase 08）：支持通过 `--nk-csv` + `--output-tag` 并排比较当前 PVK 与文献 `x=0.1` 替代光学常数
 - 已知限制：不含粗糙层/角度平均/多参数拟合

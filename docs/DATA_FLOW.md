@@ -152,3 +152,16 @@ raw / processed input
 -> `phase08_0429_dual_reference_calibrated_reflectance.csv`
 -> `phase08_0429_dual_reference_manifest.json`
 -> `phase08_0429_dual_reference_report.md`
+
+### 6.3 Phase 08 文献 `x=0.1` 替代 PVK 光学常数实例
+
+`resources/1-s2.0-S0927024818304446-mmc1.docx`
+-> `src/core/literature_x01_nk.py` 提取 `Table S3` 中 `FA0.9Cs0.1PbI3` 的 `Photon Energy / ε1 / ε2`
+-> `resources/digitized/lit_x01_csfapi_epsilon_table_s3.csv`
+-> `eps -> n/k` 转换
+-> `resources/digitized/lit_x01_csfapi_nk_table_s3.csv`
+-> 替换 `resources/aligned_full_stack_nk.csv` 中 `n_PVK/k_PVK`
+-> `resources/aligned_full_stack_nk_phase08_x01.csv`
+-> `src/cli/reference_comparison.py --nk-csv ... --output-tag pvk_x01`
+-> `phase08_0429_dual_reference_*_pvk_x01.*`
+-> `phase08_0429_dual_reference_pvk_source_comparison.png/.md`

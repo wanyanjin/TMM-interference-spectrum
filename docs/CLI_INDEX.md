@@ -9,7 +9,7 @@
 | CLI 名称 | 类型 | 状态 | 主要用途 | 入口命令 | 详细文档路径 | 关联 Phase |
 | --- | --- | --- | --- | --- | --- | --- |
 | `reflectance-calibration` | calibration | planned | 统一绝对反射率标定入口（样品/参比） | `python -m src.cli.reflectance_calibration` | `docs/cli/reflectance_calibration.md` | Phase 01 / Phase 08 |
-| `reference-comparison` | analysis | active | 比较 `glass/PVK` 在 `glass/Ag` 与 `Ag mirror` 双参比口径下的反射率并输出 TMM 诊断（主审查 500-750 nm） | `python src/cli/reference_comparison.py --sample-csv <...> --reference-csv <...> [--comparison-mode dual_reference --ag-mirror-csv <...> --background-csv <...>]` | `docs/cli/reference_comparison.md` | Phase 08 |
+| `reference-comparison` | analysis | active | 比较 `glass/PVK` 在 `glass/Ag` 与 `Ag mirror` 双参比口径下的反射率并输出 TMM 诊断（主审查 500-750 nm，支持替代 `--nk-csv` 与 `--output-tag` 并排结果集） | `python src/cli/reference_comparison.py --sample-csv <...> --reference-csv <...> [--comparison-mode dual_reference --ag-mirror-csv <...> --background-csv <...> --nk-csv <...> --output-tag <...>]` | `docs/cli/reference_comparison.md` | Phase 08 |
 | `phase07-dual-window-inversion` | inversion | script-only | 双窗联合反演流程入口 | `python src/scripts/step07_dual_window_inversion.py` | `docs/cli/phase07_dual_window_inversion.md` | Phase 07 |
 | `phase06-hdr-calibration` | calibration | script-only | HDR 绝对反射率单样本/批处理标定 | `python src/scripts/step06_single_sample_hdr_absolute_calibration.py` / `python src/scripts/step06_batch_hdr_calibration.py` | `docs/cli/phase06_hdr_calibration.md` | Phase 06 |
 

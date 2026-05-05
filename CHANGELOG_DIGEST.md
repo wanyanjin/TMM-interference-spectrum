@@ -107,4 +107,4 @@
 
 - 目标：为下一步 `glass/PVK` 与 `glass/Ag`、`Ag mirror` 参比比较流程建立稳定治理层。
 - 本次仅进行治理文档重构，不修改业务代码与结果数据。
-
+- 后续已形成 `reference-comparison` CLI 与 dual-reference 数据链，可在 Phase 08 内对不同 PVK 光学常数来源做并排重算与比较。
