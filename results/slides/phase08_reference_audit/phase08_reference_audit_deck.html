@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Phase 08 反射率校准与 TMM 审计</title>
+  <style>
+    :root {
+      --bg: #ffffff; --fg: #0f172a; --muted: #475569; --accent: #2563eb; --accent2: #d97706;
+      --border: #cbd5e1; --panel: #f8fafc;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: Arial, "DejaVu Sans", Helvetica, sans-serif; background: #e5e7eb; color: var(--fg); }
+    .deck { width: 100vw; height: 100vh; display: flex; align-items: center; justify-content: center; }
+    .slide { width: 1440px; height: 960px; background: var(--bg); display: none; border-radius: 18px; box-shadow: 0 18px 60px rgba(15,23,42,.18); overflow: hidden; position: relative; }
+    .slide.active { display: block; }
+    .slide-inner { padding: 56px 70px 90px 70px; height: 100%; }
+    h1 { font-size: 40px; margin: 0 0 18px 0; }
+    h2 { font-size: 28px; margin: 0 0 12px 0; }
+    p, li { font-size: 24px; line-height: 1.45; color: var(--fg); }
+    .lead { font-size: 28px; font-weight: 700; color: var(--fg); }
+    .note { color: var(--muted); font-size: 20px; }
+    code { background: #eff6ff; padding: 2px 6px; border-radius: 6px; font-size: .92em; }
+    ul { margin-top: 14px; }
+    .two-col { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 28px; align-items: start; }
+    .hero-image, .side-image, .formula-image, .content-block img { width: 100%; max-height: 720px; object-fit: contain; border: 1px solid var(--border); border-radius: 14px; background: white; }
+    .content-block { width: 100%; }
+    .mini-stack-grid { display: grid; grid-template-columns: 1fr; gap: 14px; margin-bottom: 16px; }
+    .mini-stack { width: 100%; max-height: 170px; object-fit: contain; border: 1px solid var(--border); border-radius: 12px; }
+    .number-panel { display: grid; gap: 18px; }
+    .big-number { background: var(--panel); border: 1px solid var(--border); border-radius: 16px; padding: 20px; font-size: 24px; font-weight: 700; }
+    .big-number span { display: block; margin-top: 8px; font-size: 36px; color: var(--accent); }
+    .toolbar { position: fixed; left: 50%; transform: translateX(-50%); bottom: 18px; background: rgba(15,23,42,.92); color: white; padding: 10px 16px; border-radius: 999px; display: flex; gap: 12px; align-items: center; z-index: 30; }
+    .toolbar button, .toc-btn { border: none; background: #1e293b; color: white; border-radius: 999px; cursor: pointer; }
+    .toolbar button { padding: 8px 14px; font-size: 16px; }
+    .pager { min-width: 78px; text-align: center; font-weight: 700; }
+    .toc { position: fixed; top: 18px; right: 18px; width: 260px; background: rgba(255,255,255,.96); border: 1px solid var(--border); border-radius: 16px; padding: 16px; z-index: 25; }
+    .toc h3 { margin: 0 0 12px 0; font-size: 18px; }
+    .toc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+    .toc-btn { padding: 8px 0; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <div class="toc"><h3>Slides</h3><div class="toc-grid"><button class="toc-btn" data-target="1">1</button><button class="toc-btn" data-target="2">2</button><button class="toc-btn" data-target="3">3</button><button class="toc-btn" data-target="4">4</button><button class="toc-btn" data-target="5">5</button><button class="toc-btn" data-target="6">6</button><button class="toc-btn" data-target="7">7</button><button class="toc-btn" data-target="8">8</button><button class="toc-btn" data-target="9">9</button><button class="toc-btn" data-target="10">10</button><button class="toc-btn" data-target="11">11</button><button class="toc-btn" data-target="12">12</button><button class="toc-btn" data-target="13">13</button><button class="toc-btn" data-target="14">14</button><button class="toc-btn" data-target="15">15</button><button class="toc-btn" data-target="16">16</button></div></div>
+  <div class="deck"><section class="slide" data-index="1"><div class="slide-inner"><h1>Phase 08 反射率校准与 TMM 审计</h1>
+        <div class="two-col">
+          <div>
+            <p class="lead">目标：解释显微反射率如何从原始光谱与参比得到，并说明为何当前实验反射率高于 TMM 理论值。</p>
+            <ul>
+              <li>数据集：0429</li>
+              <li>当前 audited 结果集：<code>pvk_x01</code></li>
+              <li>单点审计波长：<code>599.987374 nm</code></li>
+            </ul>
+          </div>
+          <div><img class="side-image" src="../../figures/phase08/reference_comparison_deck/microscope_geometry.svg" alt="显微几何"/></div>
+        </div>
+    </div></section><section class="slide" data-index="2"><div class="slide-inner"><h1>研究问题：显微反射谱能否得到可 TMM 建模的反射率？</h1>
+        <div class="content-block">
+          <p class="lead">核心矛盾：在 600 nm 附近，实验反射率约为理论值的 2 倍。</p>
+          <ul>
+            <li>实验链：<code>glass/PVK → counts/ms → ratio × R_ref → R_exp</code></li>
+            <li>理论链：<code>n,k + layer stack + incoherent glass cascade → R_TMM</code></li>
+            <li>本轮不是重新拟合，而是把这两条链完整讲清楚。</li>
+          </ul>
+        </div>
+    </div></section><section class="slide" data-index="3"><div class="slide-inner"><h1>实验光路和样品几何</h1>
+        <div class="content-block"><img class="hero-image" src="../../figures/phase08/reference_comparison_deck/microscope_geometry.svg" alt="显微几何"/></div>
+        <ul>
+          <li>平台：IX73 / IX3-RFAL / 4X objective / NA 0.1</li>
+          <li>倒置显微镜，从玻璃侧入射并收光</li>
+          <li>当前建模对象：<code>Air / Glass / PVK / Air</code></li>
+        </ul>
+    </div></section><section class="slide" data-index="4"><div class="slide-inner"><h1>原始光谱和参比对象</h1>
+        <div class="two-col">
+          <div><img class="hero-image" src="../../figures/phase08/reference_comparison/phase08_0429_ag_bk_qc_pvk_x01.png" alt="Ag/BK QC"/></div>
+          <div>
+            <div class="mini-stack-grid">
+              <img class="mini-stack" src="../../figures/phase08/reference_comparison_deck/stack_glass_pvk_air.svg" alt="sample stack"/>
+              <img class="mini-stack" src="../../figures/phase08/reference_comparison_deck/stack_glass_ag.svg" alt="glass ag stack"/>
+              <img class="mini-stack" src="../../figures/phase08/reference_comparison_deck/stack_air_ag_air.svg" alt="ag mirror stack"/>
+            </div>
+            <ul>
+              <li><code>glass/PVK</code>：样品光谱</li>
+              <li><code>glass/Ag</code>：同光路参比</li>
+              <li><code>Ag mirror + bk</code>：直接银镜参比；第 1 帧过曝，后 99 帧可用</li>
+            </ul>
+          </div>
+        </div>
+    </div></section><section class="slide" data-index="5"><div class="slide-inner"><h1>实验反射率校准公式</h1>
+        <div class="two-col">
+          <div><img class="formula-image" src="../../figures/phase08/reference_comparison_deck/formula_reflectance_calibration.svg" alt="reflectance formula"/></div>
+          <div><img class="formula-image" src="../../figures/phase08/reference_comparison_deck/reflectance_calibration_flow.svg" alt="calibration flow"/></div>
+        </div>
+        <ul>
+          <li>先把 sample / reference 都转成 counts/ms</li>
+          <li>再做比值，最后乘以参比反射率</li>
+          <li>反射率单位统一为 <code>0–1</code></li>
+        </ul>
+    </div></section><section class="slide" data-index="6"><div class="slide-inner"><h1>glass/Ag 和 Ag mirror 两条参比链</h1>
+        <div class="two-col">
+          <div>
+            <img class="side-image" src="../../figures/phase08/reference_comparison_deck/stack_glass_ag.svg" alt="glass ag"/>
+            <p class="note"><code>R_ref = R_TMM_GlassAg</code></p>
+          </div>
+          <div>
+            <img class="side-image" src="../../figures/phase08/reference_comparison_deck/stack_air_ag_air.svg" alt="ag mirror"/>
+            <p class="note"><code>R_ref = R_TMM_AgMirror</code></p>
+          </div>
+        </div>
+        <ul>
+          <li>两条参比链共享同一份样品 counts</li>
+          <li>参比结构和理论反射率不同，不能混用</li>
+        </ul>
+    </div></section><section class="slide" data-index="7"><div class="slide-inner"><h1>TMM 输入：nk 与层结构</h1>
+        <div class="two-col">
+          <div>
+            <ul>
+              <li>nk 来源：<code>aligned_full_stack_nk_phase08_x01.csv</code></li>
+              <li>wavelength used range：<code>400.213–931.443 nm</code></li>
+              <li>PVK fixed thickness：<code>700 nm</code></li>
+              <li>best d：<code>458 nm</code></li>
+            </ul>
+          </div>
+          <div>
+            <img class="mini-stack" src="../../figures/phase08/reference_comparison_deck/stack_glass_pvk_air.svg" alt="stack"/>
+            <img class="mini-stack" src="../../figures/phase08/reference_comparison_deck/tmm_flow.svg" alt="tmm flow"/>
+          </div>
+        </div>
+        <p class="note"><code>n + ik</code> 决定 Fresnel 系数、相位项和吸收强度。</p>
+    </div></section><section class="slide" data-index="8"><div class="slide-inner"><h1>TMM 后侧相干栈：Glass / PVK / Air</h1>
+        <div class="two-col">
+          <div><img class="formula-image" src="../../figures/phase08/reference_comparison_deck/formula_coherent_stack.svg" alt="coherent formula"/></div>
+          <div><img class="formula-image" src="../../figures/phase08/reference_comparison_deck/stack_glass_pvk_air.svg" alt="glass pvk air"/></div>
+        </div>
+        <ul>
+          <li>后侧薄膜栈是相干问题，不能把界面反射率直接相加</li>
+          <li>相位项 <code>δ</code> 控制条纹位置和干涉强弱</li>
+        </ul>
+    </div></section><section class="slide" data-index="9"><div class="slide-inner"><h1>厚玻璃非相干级联</h1>
+        <div class="two-col">
+          <div><img class="formula-image" src="../../figures/phase08/reference_comparison_deck/formula_incoherent_cascade.svg" alt="incoherent formula"/></div>
+          <div><img class="formula-image" src="../../figures/phase08/reference_comparison_deck/incoherent_cascade.svg" alt="incoherent cascade"/></div>
+        </div>
+        <p class="note">前表面 <code>Air/Glass</code> 与后侧相干栈之间采用非相干级联，当前审计已证明该公式与 CSV 一致。</p>
+    </div></section><section class="slide" data-index="10"><div class="slide-inner"><h1>600 nm 单点 trace：从 counts 到 R_exp</h1>
+        <div class="two-col">
+          <div><img class="hero-image" src="../../figures/phase08/reference_comparison_deck/trace_600nm_cards.svg" alt="trace cards"/></div>
+          <div class="number-panel">
+            <div class="big-number">R_exp by glass/Ag<br><span>0.290941</span></div>
+            <div class="big-number">R_exp by Ag mirror<br><span>0.263950</span></div>
+          </div>
+        </div>
+    </div></section><section class="slide" data-index="11"><div class="slide-inner"><h1>600 nm 单点 trace：从 Fresnel / TMM 到 R_TMM</h1>
+        <div class="two-col">
+          <div><img class="hero-image" src="../../figures/phase08/reference_comparison_deck/trace_600nm_cards.svg" alt="trace cards"/></div>
+          <div class="number-panel">
+            <div class="big-number">R_TMM GlassPVK fixed<br><span>0.128762</span></div>
+            <div class="big-number">R_TMM GlassAg<br><span>0.983494</span></div>
+            <div class="big-number">R_TMM AgMirror<br><span>0.988237</span></div>
+          </div>
+        </div>
+    </div></section><section class="slide" data-index="12"><div class="slide-inner"><h1>实验 vs TMM 曲线对比</h1>
+        <div class="content-block"><img class="hero-image" src="../../figures/phase08/reference_comparison/phase08_0429_dual_reference_reflectance_exp_vs_tmm_pvk_x01.png" alt="reflectance compare"/></div>
+        <p class="note">主图只看 500–750 nm；实验两条链与 TMM fixed / bestD 颜色和线型保持一致。</p>
+    </div></section><section class="slide" data-index="13"><div class="slide-inner"><h1>残差与核心矛盾</h1>
+        <div class="two-col">
+          <div><img class="hero-image" src="../../figures/phase08/reference_comparison/phase08_0429_residual_pvk_x01.png" alt="residual"/></div>
+          <div>
+            <ul>
+              <li>600 nm residual by glass/Ag: <code>0.162179</code></li>
+              <li>600 nm residual by Ag mirror: <code>0.135188</code></li>
+              <li>best d from manifest: <code>458 nm</code></li>
+            </ul>
+            <p class="lead">核心矛盾不是公式不自洽，而是实验反射率显著高于理论值。</p>
+          </div>
+        </div>
+    </div></section><section class="slide" data-index="14"><div class="slide-inner"><h1>审计结论：证明了什么，没有证明什么</h1>
+        <div class="two-col">
+          <div>
+            <h2>已证明</h2>
+            <ul><li>target wavelength matched to nearest data point</li><li>Ag first frame excluded</li><li>Ag frames reduced by mean</li><li>manual coherent formula vs coh_tmm</li><li>manual incoherent cascade vs CSV</li><li>experimental reflectance manual vs CSV</li></ul>
+          </div>
+          <div>
+            <h2>未证明 / 需警惕</h2>
+            <ul><li>当前只审计 output_tag=pvk_x01 对应 nk 来源，不能证明该 nk 全谱适用。</li><li>公式自洽不等于显微镜实测必然等于理想 specular reflectance。</li></ul>
+          </div>
+        </div>
+    </div></section><section class="slide" data-index="15"><div class="slide-inner"><h1>风险来源地图</h1>
+        <div class="content-block"><img class="hero-image" src="../../figures/phase08/reference_comparison_deck/risk_map.svg" alt="risk map"/></div>
+    </div></section><section class="slide" data-index="16"><div class="slide-inner"><h1>下一步：闭环路线</h1>
+        <div class="content-block"><img class="hero-image" src="../../figures/phase08/reference_comparison_deck/next_step_qc_flow.svg" alt="next step flow"/></div>
+        <ul>
+          <li><code>nk_audit</code>：逐项审查 PVK / Ag 光学常数来源与适用性</li>
+          <li><code>nk_envelope</code>：构建可解释的 nk 不确定范围</li>
+          <li><code>glass only</code> + 标准片 + 现场 QC：补实验闭环</li>
+        </ul>
+    </div></section></div>
+  <div class="toolbar">
+    <button id="prevBtn">← Prev</button>
+    <div class="pager"><span id="pageNow">1</span> / <span id="pageTotal">16</span></div>
+    <button id="nextBtn">Next →</button>
+  </div>
+  <script>
+    const slides = Array.from(document.querySelectorAll('.slide'));
+    const total = slides.length;
+    const pageNow = document.getElementById('pageNow');
+    const pageTotal = document.getElementById('pageTotal');
+    pageTotal.textContent = total;
+    let current = 0;
+    function show(index) {
+      current = Math.max(0, Math.min(total - 1, index));
+      slides.forEach((s, i) => s.classList.toggle('active', i === current));
+      pageNow.textContent = String(current + 1);
+    }
+    document.getElementById('prevBtn').onclick = () => show(current - 1);
+    document.getElementById('nextBtn').onclick = () => show(current + 1);
+    document.querySelectorAll('.toc-btn').forEach(btn => btn.onclick = () => show(Number(btn.dataset.target) - 1));
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') show(current + 1);
+      if (e.key === 'ArrowLeft' || e.key === 'PageUp') show(current - 1);
+    });
+    show(0);
+  </script>
+</body>
+</html>

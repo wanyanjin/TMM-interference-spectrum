@@ -177,3 +177,14 @@ raw / processed input
 -> `results/report/phase08_reference_comparison_trace/*.md`
 
 该 trace 输出用于人工审计与组会说明，不改变主结果 CSV，也不替代全谱验证。
+
+### 6.5 Phase 08 HTML 汇报 deck
+
+`phase08_0429_dual_reference_*_pvk_x01.* + phase08_0429_trace_600nm.md`
+-> `src/scripts/step08_build_audit_slide_deck.py`
+-> 读取现有 calibrated/theory/manifest/trace/report
+-> 生成 deck 专用 SVG/PNG 资产
+-> `results/slides/phase08_reference_audit/phase08_reference_audit_deck.html`
+-> `results/slides/phase08_reference_audit/phase08_reference_audit_technical_report.html`
+
+该 deck 输出只服务于说明与汇报，不回写或替代 Phase 08 主结果文件。

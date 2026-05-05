@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Phase 08 Technical Report</title>
+  <style>
+    body { font-family: Arial, "DejaVu Sans", Helvetica, sans-serif; margin: 0; background: white; color: #0f172a; }
+    main { max-width: 1180px; margin: 0 auto; padding: 40px 48px 80px; }
+    h1 { font-size: 38px; margin-bottom: 8px; }
+    h2 { font-size: 28px; margin-top: 38px; }
+    p, li, td, th { font-size: 18px; line-height: 1.5; }
+    img { max-width: 100%; border: 1px solid #cbd5e1; border-radius: 12px; background: white; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; align-items: start; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #cbd5e1; padding: 8px 10px; text-align: left; }
+    th { background: #f8fafc; }
+    code { background: #eff6ff; padding: 2px 6px; border-radius: 6px; }
+    .note { color: #475569; }
+  </style>
+</head>
+<body>
+<main>
+  <h1>Phase 08 反射率校准与 TMM 审计 Technical Report</h1>
+  <p class="note">当前主审计对象：<code>pvk_x01</code>。本页补充 slide deck，用于组会前阅读，不替代主 deck。</p>
+
+  <h2>1. 输入与版本</h2>
+  <table>
+    <tr><th>项</th><th>值</th></tr>
+    <tr><td>calibrated csv</td><td><code>data/processed/phase08/reference_comparison/phase08_0429_dual_reference_calibrated_reflectance_pvk_x01.csv</code></td></tr>
+    <tr><td>theory csv</td><td><code>data/processed/phase08/reference_comparison/phase08_0429_dual_reference_tmm_theory_curves_pvk_x01.csv</code></td></tr>
+    <tr><td>manifest</td><td><code>data/processed/phase08/reference_comparison/phase08_0429_dual_reference_manifest_pvk_x01.json</code></td></tr>
+    <tr><td>trace report</td><td><code>results/report/phase08_reference_comparison_trace/phase08_0429_trace_600nm.md</code></td></tr>
+    <tr><td>nk source</td><td><code>resources/aligned_full_stack_nk_phase08_x01.csv</code></td></tr>
+  </table>
+
+  <h2>2. 600 nm 单点关键值</h2>
+  <table>
+    <tr><th>quantity</th><th>value</th></tr>
+    <tr><td>lambda_used_nm</td><td>599.987374448794</td></tr>
+    <tr><td>R_Exp_GlassPVK_by_GlassAg</td><td>0.290941137959</td></tr>
+    <tr><td>R_Exp_GlassPVK_by_AgMirror</td><td>0.263950280877</td></tr>
+    <tr><td>R_TMM_GlassPVK_Fixed</td><td>0.128761870208</td></tr>
+    <tr><td>R_TMM_GlassAg</td><td>0.983493821013</td></tr>
+    <tr><td>R_TMM_AgMirror</td><td>0.988236844080</td></tr>
+    <tr><td>counts_ratio_glassAg</td><td>0.295824062889</td></tr>
+    <tr><td>counts_ratio_AgMirror</td><td>0.267092127214</td></tr>
+    <tr><td>best_d_PVK_nm</td><td>458</td></tr>
+  </table>
+
+  <h2>3. 审计状态</h2>
+  <table>
+    <tr><th>检查项</th><th>状态</th><th>说明</th></tr>
+    <tr><td>target wavelength matched to nearest data point</td><td>PASS</td><td>target=600.000 nm, used=599.987374 nm, Δ=-0.012626 nm</td></tr><tr><td>Ag first frame excluded</td><td>PASS</td><td>Ag 第 1 帧显式剔除；若无 Ag trace 则不检查。</td></tr><tr><td>Ag frames reduced by mean</td><td>PASS</td><td>Ag 用 frame 2–100 求 mean；BK 用 frame 1–100 求 mean。</td></tr><tr><td>manual coherent formula vs coh_tmm</td><td>PASS</td><td>一致性阈值 abs_diff &lt;= 1.0e-08</td></tr><tr><td>manual incoherent cascade vs CSV</td><td>PASS</td><td>一致性阈值 abs_diff &lt;= 1.0e-08</td></tr><tr><td>experimental reflectance manual vs CSV</td><td>PASS</td><td>手算实验反射率与输出 CSV 对比。</td></tr><tr><td>PVK n,k suitability</td><td>WARNING</td><td>当前只审计 output_tag=pvk_x01 对应 nk 来源，不能证明该 nk 全谱适用。</td></tr><tr><td>specular-only TMM vs microscope measurement equivalence</td><td>WARNING</td><td>公式自洽不等于显微镜实测必然等于理想 specular reflectance。</td></tr>
+  </table>
+
+  <h2>4. 主要图示</h2>
+  <div class="grid">
+    <div><img src="../../figures/phase08/reference_comparison/phase08_0429_dual_reference_reflectance_exp_vs_tmm_pvk_x01.png" alt="reflectance compare"/></div>
+    <div><img src="../../figures/phase08/reference_comparison/phase08_0429_residual_pvk_x01.png" alt="residual"/></div>
+    <div><img src="../../figures/phase08/reference_comparison/phase08_0429_ag_bk_qc_pvk_x01.png" alt="ag bk qc"/></div>
+    <div><img src="../../figures/phase08/reference_comparison_deck/trace_600nm_cards.svg" alt="trace cards"/></div>
+  </div>
+
+  <h2>5. 解释</h2>
+  <ul>
+    <li>本轮 deck 不重算反射率或 TMM，只读取现有 <code>pvk_x01</code> 结果集。</li>
+    <li>600 nm 单点 trace 已证明：公式实现、单层相干解析式、厚玻璃非相干级联与当前 CSV 输出自洽。</li>
+    <li>当前实验反射率仍显著高于理论值，说明剩余矛盾更可能落在实验链路、nk 适用性、显微收光和 specular-only 假设边界。</li>
+  </ul>
+</main>
+</body>
+</html>
