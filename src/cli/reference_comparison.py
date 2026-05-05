@@ -101,6 +101,8 @@ def plot_outputs(result: dict, config: RuntimeConfig) -> dict[str, str]:
     r_best_plot = smooth_for_plot(r_best, config.smooth_for_plot, config.smooth_window, config.smooth_polyorder)
 
     paths: dict[str, str] = {}
+    review_min_nm = 500.0
+    review_max_nm = 750.0
 
     raw_counts_path = config.output_figures_dir / "phase08_0429_raw_counts.png"
     plt.figure(figsize=(12, 6), dpi=200)
@@ -109,6 +111,7 @@ def plot_outputs(result: dict, config: RuntimeConfig) -> dict[str, str]:
     plt.xlabel("Wavelength (nm)")
     plt.ylabel("Counts")
     plt.title("Raw Counts")
+    plt.xlim(review_min_nm, review_max_nm)
     plt.legend()
     plt.grid(alpha=0.3)
     plt.savefig(raw_counts_path)
@@ -122,6 +125,7 @@ def plot_outputs(result: dict, config: RuntimeConfig) -> dict[str, str]:
     plt.xlabel("Wavelength (nm)")
     plt.ylabel("Counts/ms")
     plt.title("Exposure-Normalized Counts")
+    plt.xlim(review_min_nm, review_max_nm)
     plt.legend()
     plt.grid(alpha=0.3)
     plt.savefig(counts_ms_path)
@@ -134,6 +138,7 @@ def plot_outputs(result: dict, config: RuntimeConfig) -> dict[str, str]:
     plt.xlabel("Wavelength (nm)")
     plt.ylabel("Reflectance (0-1)")
     plt.title("TMM Reference Reflectance: Glass/Ag")
+    plt.xlim(review_min_nm, review_max_nm)
     plt.legend()
     plt.grid(alpha=0.3)
     plt.savefig(glass_ag_theory_path)
@@ -157,6 +162,7 @@ def plot_outputs(result: dict, config: RuntimeConfig) -> dict[str, str]:
     plt.xlabel("Wavelength (nm)")
     plt.ylabel("Reflectance (0-1)")
     plt.title("Experimental vs TMM Reflectance")
+    plt.xlim(review_min_nm, review_max_nm)
     plt.legend()
     plt.grid(alpha=0.3)
     plt.savefig(exp_vs_tmm_path)
@@ -173,6 +179,7 @@ def plot_outputs(result: dict, config: RuntimeConfig) -> dict[str, str]:
     plt.xlabel("Wavelength (nm)")
     plt.ylabel("Residual")
     plt.title("Residual Diagnostics")
+    plt.xlim(review_min_nm, review_max_nm)
     plt.legend()
     plt.grid(alpha=0.3)
     plt.savefig(residual_path)
