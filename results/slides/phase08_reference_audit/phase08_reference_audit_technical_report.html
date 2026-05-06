@@ -4,47 +4,128 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Phase 08 Technical Report</title>
+  <link rel="stylesheet" href="../../../node_modules/katex/dist/katex.min.css" />
   <link rel="stylesheet" href="assets/theme.css" />
   <style>
     body { padding: 40px; background: #f3f5f9; }
-    main { max-width: 1200px; margin: 0 auto; background: #fff; border-radius: 20px; padding: 40px; box-shadow: 0 18px 48px rgba(16,24,40,.12); }
+    main { max-width: 1280px; margin: 0 auto; background: #fff; border-radius: 20px; padding: 40px; box-shadow: 0 18px 48px rgba(16,24,40,.12); }
+    section { margin-bottom: 34px; }
     table { width: 100%; border-collapse: collapse; }
-    th, td { border: 1px solid #d0d5dd; padding: 10px 12px; text-align: left; font-size: 15px; }
+    th, td { border: 1px solid #d0d5dd; padding: 10px 12px; text-align: left; font-size: 15px; vertical-align: top; }
     th { background: #f8fafc; }
     img { width: 100%; border: 1px solid #d0d5dd; border-radius: 12px; }
     .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+    .codeblock { white-space: pre-wrap; font: 14px/1.5 Menlo, monospace; color:#344054; background:#f8fafc; border:1px solid #d0d5dd; border-radius:12px; padding:16px; }
+    .tag { display:inline-block; padding:4px 10px; border-radius:999px; font:600 12px/1.2 Inter, Arial, sans-serif; color:#fff; background:#047857; }
   </style>
 </head>
 <body>
   <main>
     <h1 class="slide-title">Phase 08 Technical Report</h1>
-    <p class="slide-subtitle">本页保留技术查阅密度；slide deck 负责讲解，不与 technical report 混排。</p>
-    <h2 class="card-title">输入路径</h2>
-    <table>
-      <tr><th>项</th><th>路径</th></tr>
-      <tr><td>trace values</td><td><code>data/processed/phase08/reference_comparison_trace/phase08_0429_trace_600nm_values.json</code></td></tr>
-      <tr><td>trace markdown</td><td><code>results/report/phase08_reference_comparison_trace/phase08_0429_trace_600nm.md</code></td></tr>
-      <tr><td>manifest</td><td><code>data/processed/phase08/reference_comparison/phase08_0429_dual_reference_manifest_pvk_x01.json</code></td></tr>
-      <tr><td>reflectance figure</td><td><code>results/figures/phase08/reference_comparison/phase08_0429_dual_reference_reflectance_exp_vs_tmm_pvk_x01.png</code></td></tr>
-      <tr><td>residual figure</td><td><code>results/figures/phase08/reference_comparison/phase08_0429_residual_pvk_x01.png</code></td></tr>
-    </table>
-    <h2 class="card-title">600 nm 核心值</h2>
-    <table>
-      <tr><th>quantity</th><th>value</th></tr>
-      <tr><td>lambda_used_nm</td><td>599.987374448794</td></tr>
-      <tr><td>counts_ratio_glassAg</td><td>0.295824062889</td></tr>
-      <tr><td>counts_ratio_AgMirror</td><td>0.267092127214</td></tr>
-      <tr><td>R_Exp_GlassPVK_by_GlassAg</td><td>0.290941137959</td></tr>
-      <tr><td>R_Exp_GlassPVK_by_AgMirror</td><td>0.263950280877</td></tr>
-      <tr><td>R_TMM_GlassPVK_Fixed</td><td>0.128761870208</td></tr>
-    </table>
-    <h2 class="card-title">关键图</h2>
-    <div class="grid">
-      <img src="../../figures/phase08/reference_comparison/phase08_0429_dual_reference_reflectance_exp_vs_tmm_pvk_x01.png" alt="reflectance compare" />
-      <img src="../../figures/phase08/reference_comparison/phase08_0429_residual_pvk_x01.png" alt="residual compare" />
-    </div>
-    <h2 class="card-title">Trace 边界</h2>
-    <pre style="white-space:pre-wrap; font: 14px/1.5 Menlo, monospace; color:#344054;"># Phase 08 Single-Wavelength Trace Report
+    <p class="slide-subtitle">这份 technical report 负责查证据；HTML slide deck 负责讲主问题。两者共用同一套 Phase 08 审计数据事实。</p>
+
+    <section>
+      <h2 class="card-title">输入路径</h2>
+      <table>
+        <tr><th>项</th><th>路径</th></tr>
+        <tr><td>trace values</td><td><code>data/processed/phase08/reference_comparison_trace/phase08_0429_trace_600nm_values.json</code></td></tr>
+        <tr><td>theory audit json</td><td><code>data/processed/phase08/reference_comparison/phase08_0429_theory_tmm_manual_audit_pvk_x01.json</code></td></tr>
+        <tr><td>trace markdown</td><td><code>results/report/phase08_reference_comparison_trace/phase08_0429_trace_600nm.md</code></td></tr>
+        <tr><td>theory audit markdown</td><td><code>results/report/phase08_reference_comparison_trace/phase08_0429_theory_tmm_manual_audit_pvk_x01.md</code></td></tr>
+        <tr><td>manifest</td><td><code>data/processed/phase08/reference_comparison/phase08_0429_dual_reference_manifest_pvk_x01.json</code></td></tr>
+        <tr><td>reflectance figure</td><td><code>results/figures/phase08/reference_comparison/phase08_0429_dual_reference_reflectance_exp_vs_tmm_pvk_x01.png</code></td></tr>
+        <tr><td>residual figure</td><td><code>results/figures/phase08/reference_comparison/phase08_0429_residual_pvk_x01.png</code></td></tr>
+      </table>
+    </section>
+
+    <section>
+      <h2 class="card-title">TMM theoretical reflectance manual audit</h2>
+      <p class="body-text">采用 Steven Byrnes / python <span class="en">tmm</span> convention：<span class="en">exp(-iωt)</span>、前进方向 <span class="en">+z</span>、法向入射下展示 <span class="en">s polarization</span>。当前入射半无限介质非吸收，因此可写 <span class="en">R = |r|²</span>。</p>
+      <table>
+        <tr><th>quantity</th><th>value</th></tr>
+        <tr><td>lambda_used_nm</td><td>599.987374448794</td></tr>
+        <tr><td>N_glass</td><td>1.515000000000 + 0.000000000000i</td></tr>
+        <tr><td>N_pvk</td><td>2.699975479567 + 0.545587752541i</td></tr>
+        <tr><td>N_ag</td><td>0.049204777984 + 3.997948794498i</td></tr>
+        <tr><td>d_pvk_nm</td><td>700.000000000000</td></tr>
+        <tr><td>d_ag_nm</td><td>100.000000000000</td></tr>
+      </table>
+    </section>
+
+    <section>
+      <h2 class="card-title">Glass / PVK / Air coherent formula</h2>
+      <div class="codeblock">r01 = (N0 - N1) / (N0 + N1)
+r12 = (N1 - N2) / (N1 + N2)
+delta = 2π N1 d1 / lambda
+r_stack = (r01 + r12 * exp(2i * delta)) / (1 + r01 * r12 * exp(2i * delta))
+R_stack = |r_stack|²</div>
+      <table>
+        <tr><th>quantity</th><th>value</th></tr>
+        <tr><td>r01</td><td>-0.292980573691 + -0.091516817043i</td></tr>
+        <tr><td>r12</td><td>0.470959132411 + 0.078010846165i</td></tr>
+        <tr><td>delta</td><td>19.792270453996 + 3.999451267759i</td></tr>
+        <tr><td>exp(2i delta)</td><td>-0.000103928695 + 0.000319345078i</td></tr>
+        <tr><td>r_stack_manual</td><td>-0.293041083220 + -0.091381594421i</td></tr>
+        <tr><td>R_stack_manual</td><td>0.094223672254</td></tr>
+        <tr><td>R_stack_tmm</td><td>0.094223672254</td></tr>
+        <tr><td>abs_diff</td><td>2.776e-17 <span class="tag">PASS</span></td></tr>
+      </table>
+    </section>
+
+    <section>
+      <h2 class="card-title">Incoherent cascade audit</h2>
+      <div class="codeblock">R_total = R01 + (T01 * T10 * P² * R_stack) / (1 - R10 * P² * R_stack)
+
+Current simplification:
+R_total = R_front + ((1 - R_front)² * R_stack) / (1 - R_front * R_stack)</div>
+      <table>
+        <tr><th>quantity</th><th>value</th></tr>
+        <tr><td>R_front</td><td>0.041931314696</td></tr>
+        <tr><td>T01</td><td>0.958068685304</td></tr>
+        <tr><td>T10</td><td>0.958068685304</td></tr>
+        <tr><td>P</td><td>1.000000000000</td></tr>
+        <tr><td>R_total_general_formula</td><td>0.128761870208</td></tr>
+        <tr><td>R_total_simplified_formula</td><td>0.128761870208</td></tr>
+        <tr><td>R_TMM_GlassPVK_Fixed_csv</td><td>0.128761870208</td></tr>
+        <tr><td>abs_diff</td><td>0.000e+00 <span class="tag">PASS</span></td></tr>
+      </table>
+    </section>
+
+    <section>
+      <h2 class="card-title">glass/Ag and Ag mirror audit</h2>
+      <table class="audit-table compact"><thead><tr><th>case</th><th>manual</th><th>tmm</th><th>csv</th><th>abs_diff</th><th>result</th></tr></thead><tbody><tr><td>glass/Ag stack</td><td>0.983481888037</td><td>0.983481888037</td><td>—</td><td>0.000e+00</td><td><span class="status-chip pass">PASS</span></td></tr><tr><td>glass/Ag total</td><td>0.983493821013</td><td>—</td><td>0.983493821013</td><td>1.110e-16</td><td><span class="status-chip pass">PASS</span></td></tr><tr><td>Ag mirror</td><td>0.988236844080</td><td>0.988236844080</td><td>0.988236844080</td><td>3.331e-16</td><td><span class="status-chip pass">PASS</span></td></tr></tbody></table>
+      <p class="body-text">Ag mirror caveat: This only audits consistency with the current model; whether the physical Ag mirror is equivalent to Air / 100 nm Ag / Air still needs sample-level confirmation.</p>
+    </section>
+
+    <section>
+      <h2 class="card-title">Value source locator</h2>
+      <div class="grid">
+        <img src="assets/value_locator_reflectance.svg" alt="reflectance locator" />
+        <img src="assets/value_locator_nk.svg" alt="nk locator" />
+      </div>
+    </section>
+
+    <section>
+      <h2 class="card-title">Key figures</h2>
+      <div class="grid">
+        <img src="../../figures/phase08/reference_comparison/phase08_0429_dual_reference_reflectance_exp_vs_tmm_pvk_x01.png" alt="reflectance compare" />
+        <img src="../../figures/phase08/reference_comparison/phase08_0429_residual_pvk_x01.png" alt="residual compare" />
+      </div>
+    </section>
+
+    <section>
+      <h2 class="card-title">Audit boundary</h2>
+      <ul class="bullet-list compact-list">
+        <li>本审计证明当前手写公式、<span class="en">tmm.coh_tmm()</span> 与现有 CSV 在当前模型假设下自洽。</li>
+        <li>本审计不证明 <span class="en">nk</span> 数据一定代表真实样品，也不证明显微实验一定等价于理想 <span class="en">specular reflectance</span>。</li>
+        <li><span class="en">exp(-2i delta)</span> 结果只作为 convention sanity check，不进入主物理逻辑。</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2 class="card-title">Appendix excerpts</h2>
+      <div class="grid">
+        <div class="codeblock"># Phase 08 Single-Wavelength Trace Report
 
 ## 0. 执行摘要
 - 本报告审计目标波长为 `600.000 nm`，实际使用最近数据点 `599.987374448794 nm`，偏差 `-0.012625551206 nm`。
@@ -83,16 +164,78 @@
 | --- | --- |
 | target_wavelength_nm | 600.000000000000 |
 | lambda_used_nm | 599.987374448794 |
-| delta_nm | -0.012625551206 |
-| row_index | 469 |
+| delta</div>
+        <div class="codeblock"># Phase 08 TMM Theoretical Reflectance Manual Audit
 
-## 3. 实验计数与曝光归一化
-$$
-I_{\mathrm{counts/ms}}(\lambda)=\frac{I_{\mathrm{counts}}(\lambda)}{t_{\mathrm{exposure}}}
-$$
+## 1. Convention
+- 时间因子：`exp(-iωt)`
+- 前进方向：`+z`
+- 统一使用 `s polarization` 展示
+- 当前入射半无限介质非吸收，因此 `R = |r|²`
+- 目标波长使用 trace 最近点：`lambda_used_nm = 599.987374448794`
+
+## 2. Glass / PVK / Air coherent stack
+$$r_{01}=\frac{N_0-N_1}{N_0+N_1},\qquad r_{12}=\frac{N_1-N_2}{N_1+N_2}$$
+$$\delta = \frac{2\pi N_1 d_1}{\lambda}$$
+$$r_{\mathrm{stack}} = \frac{r_{01}+r_{12}e^{2 i \delta}}{1+r_{01}r_{12}e^{2 i \delta}},\qquad R_{\mathrm{stack}}=|r_{\mathrm{stack}}|^2$$
+
 | quantity | value |
 | --- | --- |
-| Glas</pre>
+| N_glass | 1.515000000000 + 0.000000000000i |
+| N_pvk | 2.699975479567 + 0.545587752541i |
+| N_air | 1.000000000000 + 0.000000000000i |
+| d_pvk_nm | 700.000000000000 |
+| r01 | -0.292980573691 + -0.091516817043i |
+| r12 | 0.470959132411 + 0.078010846165i |
+| delta | 19.792270453996 + 3.999451267759i |
+| exp(2i delta) | -0.000103928695 + 0.000319345078i |
+| r_stack_manual | -0.293041083220 + -0.091381594421i |
+| R_stack_manual | 0.094223672254 |
+| R_stack_tmm | 0.094223672254 |
+| abs_diff | 2.776e-17 |
+| PASS | True |
+
+## 3. Thick-glass incoherent cascade
+$$R_{\mathrm{total}} = R_{01} + \frac{T_{01}T_{10}P^2R_{\mathrm{stack}}}{1-R_{10}P^2R_{\mathrm{stack}}}$$
+当前简化条件：`Glass k≈0`，`P≈1`，`R01=R10=R_front`，`T01 T10=(1-R_front)^2`
+$$R_{\mathrm{total}} = R_{\mathrm{front}} + \frac{(1-R_{\mathrm{front}})^2 R_{\mathrm{stack}}}{1-R_{\mathrm{front}}R_{\mathrm{stack}}}$$
+
+| quantity | value |
+| --- | --- |
+| R_front | 0.041931314696 |
+| R_stack | 0.094223672254 |
+| T01 | 0.958068685304 |
+| T10 | 0.958068685304 |
+| P | 1.000000000000 |
+| R_total_general_formula | 0.128761870208 |
+| R_total_simplified_formula | 0.128761870208 |
+| R_TMM_GlassPVK_Fixed_csv | 0.128761870208 |
+| abs_diff | 0.000e+00 |
+| PASS | True |
+
+## 4. Reference theory audit
+| case | manual | tmm | csv | abs_diff | PASS |
+| --- | --- | --- | --- | --- | --- |
+| glass/Ag stack | 0.983481888037 | 0.983481888037 | — | 0.000e+00 | True |
+| glass/Ag total | 0.983493821013 | — | 0.983493821013 | 1.110e-16 | True |
+| Ag mirror | 0.988236844080 | 0.988236844080 | 0.988236844080 | 3.331e-16 | True |
+
+## 5. Convention sanity check
+下表仅用于说明 `exp(-2i delta)` 没被当成主物理逻辑。
+
+| quantity | value |</div>
+      </div>
+    </section>
   </main>
+  <script src="../../../node_modules/katex/dist/katex.min.js"></script>
+  <script src="../../../node_modules/katex/dist/contrib/auto-render.min.js"></script>
+  <script>
+    renderMathInElement(document.body, {
+      delimiters: [
+        {left: "$$", right: "$$", display: true},
+        {left: "$", right: "$", display: false}
+      ]
+    });
+  </script>
 </body>
 </html>

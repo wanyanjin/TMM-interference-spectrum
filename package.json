@@ -8,6 +8,7 @@
     "test": "tests"
   },
   "scripts": {
+    "phase08:theory-audit": "python3 src/scripts/step08_theory_tmm_manual_audit.py",
     "phase08:deck": "python3 src/scripts/step08_build_audit_slide_deck.py",
     "phase08:qa": "node tools/phase08_slides_qa.mjs",
     "test": "echo \"Error: no test specified\" && exit 1"

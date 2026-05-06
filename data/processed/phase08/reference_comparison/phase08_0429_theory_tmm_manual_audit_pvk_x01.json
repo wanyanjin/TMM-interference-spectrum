@@ -1,0 +1,163 @@
+{
+  "meta": {
+    "phase": "Phase 08",
+    "sample_tag": "pvk_x01",
+    "convention": {
+      "time_factor": "exp(-iωt)",
+      "forward_direction": "+z",
+      "polarization": "s",
+      "reflectance_rule": "R = |r|^2 for current non-absorbing incident medium",
+      "note": "Main formula follows Steven Byrnes / python-tmm convention; exp(-2i delta) branch is only a sanity check."
+    },
+    "source_trace_json": "data/processed/phase08/reference_comparison_trace/phase08_0429_trace_600nm_values.json",
+    "source_manifest_json": "data/processed/phase08/reference_comparison/phase08_0429_dual_reference_manifest_pvk_x01.json",
+    "source_nk_csv": "resources/aligned_full_stack_nk_phase08_x01.csv",
+    "abs_tolerance": 1e-08
+  },
+  "lambda_used_nm": 599.987374448794,
+  "N_glass": {
+    "real": 1.515,
+    "imag": 0.0,
+    "abs": 1.515,
+    "phase_rad": 0.0,
+    "phase_deg": 0.0
+  },
+  "N_pvk": {
+    "real": 2.6999754795672275,
+    "imag": 0.5455877525407471,
+    "abs": 2.7545478006356583,
+    "phase_rad": 0.1993864690786537,
+    "phase_deg": 11.42400317022255
+  },
+  "N_ag": {
+    "real": 0.04920477798354474,
+    "imag": 3.997948794497693,
+    "abs": 3.998251577077406,
+    "phase_rad": 1.5584894423618791,
+    "phase_deg": 89.29486746303284
+  },
+  "d_pvk_nm": 700.0,
+  "d_ag_nm": 100.0,
+  "glass_pvk_air": {
+    "structure": "Glass / PVK / Air",
+    "r01": {
+      "real": -0.29298057369101754,
+      "imag": -0.09151681704259217,
+      "abs": 0.30694127184516107,
+      "phase_rad": -2.8388309654110633,
+      "phase_deg": -162.65303306910292
+    },
+    "r12": {
+      "real": 0.47095913241129966,
+      "imag": 0.07801084616476615,
+      "abs": 0.4773763677864111,
+      "phase_rad": 0.16415202175345275,
+      "phase_deg": 9.405218045012521
+    },
+    "delta": {
+      "real": 19.792270453995787,
+      "imag": 3.999451267759308,
+      "abs": 20.192314878866565,
+      "phase_rad": 0.1993864690786537,
+      "phase_deg": 11.42400317022255
+    },
+    "exp_2i_delta": {
+      "real": -0.00010392869546645442,
+      "imag": 0.0003193450782018733,
+      "abs": 0.0003358309883157295,
+      "phase_rad": 1.885429064914055,
+      "phase_deg": 108.02712799087267
+    },
+    "r_stack_manual": {
+      "real": -0.29304108321984274,
+      "imag": -0.09138159442086735,
+      "abs": 0.30695874682692903,
+      "phase_rad": -2.839310227280445,
+      "phase_deg": -162.68049275150003
+    },
+    "R_stack_manual": 0.09422367225355868,
+    "R_stack_tmm": 0.09422367225355871,
+    "abs_diff": 2.7755575615628914e-17,
+    "rel_diff": 2.9457115130195553e-16,
+    "pass": true
+  },
+  "air_glass_front": {
+    "structure": "Air / Glass",
+    "r_front": {
+      "real": -0.20477137176938368,
+      "imag": 0.0,
+      "abs": 0.20477137176938368,
+      "phase_rad": 3.141592653589793,
+      "phase_deg": 180.0
+    },
+    "R_front": 0.04193131469631514,
+    "R10": 0.04193131469631514,
+    "T01": 0.9580686853036849,
+    "T10": 0.9580686853036849,
+    "P": 1.0,
+    "note": "1 mm glass treated as incoherent spacer; current implementation uses P≈1."
+  },
+  "glass_pvk_total": {
+    "structure": "Air / Glass(thick incoherent) / PVK / Air",
+    "R_total_general_formula": 0.12876187020776886,
+    "R_total_simplified_formula": 0.1287618702077688,
+    "R_TMM_GlassPVK_Fixed_csv": 0.1287618702077688,
+    "abs_diff": 0.0,
+    "rel_diff": 0.0,
+    "pass": true
+  },
+  "glass_ag": {
+    "structure": "Air / Glass(thick incoherent) / Ag / Air",
+    "R_stack_manual": 0.9834818880365831,
+    "R_stack_tmm": 0.9834818880365831,
+    "R_total_general_formula": 0.9834938210131992,
+    "R_total_manual": 0.9834938210131989,
+    "R_TMM_GlassAg_csv": 0.9834938210131988,
+    "stack_abs_diff": 0.0,
+    "stack_rel_diff": 0.0,
+    "stack_pass": true,
+    "abs_diff": 1.1102230246251565e-16,
+    "rel_diff": 1.1288561258894345e-16,
+    "pass": true
+  },
+  "ag_mirror": {
+    "structure": "Air / Ag / Air",
+    "R_manual": 0.9882368440802943,
+    "R_tmm": 0.9882368440802941,
+    "R_TMM_AgMirror_csv": 0.988236844080294,
+    "abs_diff": 3.3306690738754696e-16,
+    "rel_diff": 3.3703146101329263e-16,
+    "pass": true,
+    "caveat": "This only audits consistency with the current model; whether the physical Ag mirror is equivalent to Air / 100 nm Ag / Air still needs sample-level confirmation."
+  },
+  "sanity_checks": {
+    "exp_minus_2i_delta_result": {
+      "r_stack": {
+        "real": -3.113144618395331,
+        "imag": 0.9653612042089771,
+        "abs": 3.2593851674258474,
+        "phase_rad": 2.8409030625672753,
+        "phase_deg": 162.77175549089492
+      },
+      "R_stack": 10.623591669635616,
+      "abs_diff": 10.529367997382057,
+      "rel_diff": 111.7486481427641,
+      "pass": false
+    },
+    "note": "exp(-2i delta) is retained only as a convention sanity check; exp(+2i delta) is the report’s primary formula."
+  },
+  "json_complex_real_imag_only": {
+    "N_glass": {
+      "real": 1.515,
+      "imag": 0.0
+    },
+    "N_pvk": {
+      "real": 2.6999754795672275,
+      "imag": 0.5455877525407471
+    },
+    "N_ag": {
+      "real": 0.04920477798354474,
+      "imag": 3.997948794497693
+    }
+  }
+}
