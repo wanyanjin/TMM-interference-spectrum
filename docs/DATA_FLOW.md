@@ -78,7 +78,26 @@ external files
 
 ---
 
-## 4. `reflectance_qc` 最小闭环
+## 4. 生成物路径治理
+
+路径分流原则：
+
+- 正式产物继续进入 `data/processed/`、`results/figures/`、`results/logs/`、`results/report/`
+- 测试临时文件默认进入 `tmp/pytest/` 或 pytest 自带的 `tmp_path`
+- scratch、debug、benchmark、coverage 与本地 cache 进入 `tmp/` 或对应受控临时目录
+- 新工具不得把 `Path.cwd()` 或项目根目录当作默认输出目录
+
+如果某类新文件当前没有规定存放位置：
+
+1. 先判断产物性质。
+2. 选择已有受控目录。
+3. 没有合适目录时再创建清晰命名的新目录。
+4. 更新文档、`.gitignore` 和相关工具说明。
+5. 在回报中说明新目录与数据流。
+
+---
+
+## 5. `reflectance_qc` 最小闭环
 
 Phase 09B 新增的第一个正式工具闭环为：
 

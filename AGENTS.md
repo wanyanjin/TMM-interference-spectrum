@@ -104,6 +104,48 @@ commit message 必须使用中文并以 `[Phase XX]` 开头，例如：
 
 脚本之间必须通过落盘文件交互，不允许依赖聊天上下文或内存状态作为事实来源。
 
+### 4.5 生成物路径治理与根目录零污染规则
+
+项目根目录只允许放置稳定入口文件和项目级配置文件，例如 `AGENTS.md`、`README.md`、`CURRENT_TASK.md`、`CHANGELOG_DIGEST.md`、`pyproject.toml`、`uv.lock`、`.gitignore`、`src/`、`tests/`、`docs/`、`data/`、`results/`、`resources/`、`configs/`、`scripts/`、`test_data/`、`tools/`。
+
+除上述稳定入口和配置外，任何由测试、脚本、CLI、GUI、workflow、agent、notebook 或临时调试产生的文件，都禁止直接写入项目根目录。禁止项包括但不限于：pytest 缓存、测试临时目录、运行缓存、临时 CSV/TXT/JSON/YAML、临时 PNG/SVG/PDF/HTML、调试日志、scratch 脚本、中间数组、实验运行结果、GUI 导出结果、CLI 运行结果、benchmark 输出、profiling 输出、coverage 输出、自动生成报告、模型拟合结果、临时 manifest/summary。
+
+若新增功能会生成仓库尚未定义存放位置的新文件类型，禁止先写到根目录。必须按以下顺序处理：
+
+1. 判断产物性质：raw data / processed data / figure / report / log / run artifact / cache / temp / fixture / calibration / export。
+2. 选择已有受控目录。
+3. 如果没有合适目录，创建清晰命名的新目录。
+4. 在相关文档中登记该目录用途。
+5. 在 `.gitignore` 中明确哪些文件应忽略、哪些索引文件或 `.gitkeep` 应保留。
+6. 在回报中说明新目录和数据流。
+
+推荐分流规则如下：
+
+- 原始实验数据 -> `data/raw/`
+- 标准中间数据 -> `data/processed/`
+- 校准文件 -> `data/calibrations/` 或 `resources/calibrations/`
+- 正式图表 -> `results/figures/`
+- 正式日志 -> `results/logs/`
+- 正式报告 -> `results/report/`
+- 实验运行记录 -> `runs/<workflow_name>/<run_id>/`
+- GUI 导出结果 -> `results/gui_exports/` 或 `runs/gui/<run_id>/`
+- CLI 输出 -> `results/<tool_name>/` 或 `runs/<tool_name>/<run_id>/`
+- 测试临时文件 -> `tmp/pytest/`
+- 测试 fixture -> `tests/fixtures/`
+- 测试生成但需保留的样例 -> `tests/fixtures/generated/` 并配 README
+- scratch 脚本 -> `tmp/scratch/`，任务结束后清理
+- benchmark / profiling -> `results/benchmarks/` 或 `tmp/benchmarks/`
+- coverage / htmlcov -> `tmp/coverage/` 或 `htmlcov/`，并被 `.gitignore` 忽略
+- 缓存 -> `tmp/cache/` 或工具默认 cache 目录，并被 `.gitignore` 忽略
+
+正式产物与临时产物必须严格区分。正式产物包括可复现实验结果、正式报告、正式图表、标准中间数据、以及后续流程需要读取的 manifest / summary / calibration；这些应进入受控目录，并按需要纳入版本管理或通过 README 说明不纳入 Git 的原因。临时产物包括 debug 输出、临时图、一次性 CSV、pytest cache、scratch 文件、中间排错文件；这些必须进入 `tmp/` 或对应临时目录，并默认不进入 Git。
+
+所有新增 CLI、GUI、workflow、脚本必须满足：不得默认 `output_dir =` 项目根目录，不得默认向 `Path.cwd()` 直接写结果，不得把当前工作目录当作结果目录，必须显式传入 `output_dir` 或默认进入受控目录，输出前必须确保 `output_dir` 存在，输出完成后必须生成 manifest 或 summary，说明文件位置。
+
+测试代码必须使用 `pytest tmp_path / tmp_path_factory`，禁止测试向 repository root 写文件，禁止测试把缓存、图片、CSV、JSON、log 写到根目录。如果测试需要生成持久 fixture，必须放到 `tests/fixtures/generated/` 并配说明。
+
+每次任务完成前必须执行 `git status --short`，并检查项目根目录是否新增了未授权文件或目录。若发现根目录污染，必须先判断是否临时产物，再删除或移动到合适目录，随后更新 `.gitignore` 或文档，并再次检查 `git status`；回报中必须说明处理结果。禁止把根目录污染留给用户手动清理。
+
 ---
 
 ## 5. 架构边界（含未来 GUI/CLI）

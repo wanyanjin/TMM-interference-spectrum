@@ -2,42 +2,39 @@
 
 ## 当前任务
 
-`Phase 09B：reflectance_qc 最小 workflow + CLI 闭环`
+`Phase 08：强化根目录生成物路径治理规则`
 
-目标：在 Phase 09 架构骨架上实现第一个正式小工具 `reflectance_qc` 的最小非 GUI 闭环：CSV/TXT 读取、`SpectrumData` 转换、core QC 计算、workflow 编排、CLI 入口，以及 processed CSV、summary JSON、Markdown report 输出。
+目标：建立项目级“根目录零污染”约束，清理现有 pytest 临时/缓存目录，补强 `.gitignore`，并把正式产物、临时产物与测试夹具的路径分流规则写入记忆文档与数据流文档。
 
 ## 本轮范围
 
-- 新增 `reflectance_qc` domain/core/storage/workflow/cli 最小实现
-- 新增 CSV/TXT reader 与 QC writer
-- 新增 `reflectance_qc` 单元测试与集成测试
-- 使用 `test_data/phase09` 进行一次真实 smoke test
-- 更新 CLI 文档、工具文档、状态与技术债文档
+- 更新 `AGENTS.md`，新增生成物路径治理与根目录零污染规则
+- 更新 `.gitignore`，覆盖 pytest/cache/tmp/debug/export 产物
+- 清理根目录现有 `.pytest-tmp*` 与 `pytest-cache-files-*`
+- 必要时补充 `docs/DATA_FLOW.md`、`docs/PROJECT_STATE.md`、`CHANGELOG_DIGEST.md`
+- 检查测试与脚本是否仍会默认写入根目录
+- 完成后执行 `git status --short`、测试、提交并 push
 
 不在本轮范围：
 
-- 不实现 GUI
-- 不实现 H5/Zarr reader
-- 不做 TMM 拟合
-- 不做 Ag->Si 或 glassAg->glass 参比修正
-- 不迁移旧脚本
-- 不修改 Phase 08 主计算逻辑与结果
+- 不改业务物理模型
+- 不做 GUI / CLI 新功能
+- 不迁移既有正式结果目录结构，除非发现根目录污染必须回收
 
 ## TODO
 
-1. 完成 `reflectance_qc` 最小实现
-2. 建立 reader/core/workflow/cli 测试
-3. 完成真实测试数据 smoke
-4. 更新文档与 registry
-5. 提交并 push
+1. 完成文档与 `.gitignore` 更新
+2. 清理现有根目录缓存/临时目录
+3. 复查测试与脚本的输出路径约定
+4. 跑验证并提交 push
 
 ## 完成状态
 
-- 本轮已明确为独立的 Phase 09B 工具闭环任务
-- 本轮只实现最小非 GUI 闭环，不宣称已实现正式 GUI 或复杂参比物理修正
+- 当前任务聚焦于仓库治理与输出路径约束，不涉及模型与算法变更
+- 以 root zero pollution 为检查重点
+- 目前已完成规则与忽略项更新，并清掉部分根目录生成物；剩余少量 `.pytest-tmp` / `pytest-cache-files-*` 目录受 Windows ACL 限制，仍需后续在具备权限的环境中继续清理
 
 ## 下一步建议
 
-- 补充真实参比反射率模型与更严格的 reference conversion
-- 增加 H5/Zarr/LightField reader adapter
-- 再进入 PySide6 + pyqtgraph GUI 实现
+- 若后续新增工具生成新的产物类型，先登记目录再实现输出
+- 保持测试、CLI、GUI、workflow 默认输出到受控目录，不得落根目录

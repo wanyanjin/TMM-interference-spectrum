@@ -35,6 +35,13 @@
 - 已新增 `src/cli/reflectance_qc.py`
 - 已新增 `docs/cli/reflectance_qc.md` 与 `docs/tools/reflectance_qc.md`
 
+### 2.4 生成物路径治理补充
+
+- 已新增 `AGENTS.md` `4.5`，把根目录零污染、产物分流、默认 `output_dir`、以及任务结束前根目录检查写成强制规则。
+- 已强化 `.gitignore`，覆盖 pytest 缓存、临时目录、coverage、debug/export、以及本地生成 vendor 目录。
+- 当前治理口径要求：正式产物继续落在 `data/processed/` 与 `results/*`，临时产物默认进入 `tmp/pytest/` 或对应受控临时目录，测试必须使用 `tmp_path / tmp_path_factory`。
+- 本轮已移除部分根目录生成物（如 `.pytest-tmp-0909b`、`.pytest-tmp-0909c`、`.plot_vendor/`）；少量 `.pytest-tmp` / `pytest-cache-files-*` 目录仍受 Windows ACL 限制，尚待后续在可删环境中处理。
+
 ## 3. 当前正式工具边界
 
 标准分层：
@@ -93,6 +100,7 @@ results/
 - 当前默认 `reference_reflectance = 1`，不等同于最终物理定标。
 - 当前未实现 `reflectance_qc` GUI。
 - 当前未实现 H5/Zarr/LightField reader adapter。
+- 当前所有新增正式工具与脚本都应显式接收 `output_dir`，不得把项目根目录或 `Path.cwd()` 当作默认输出位置。
 
 ## 6. 下一步建议
 

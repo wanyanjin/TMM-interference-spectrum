@@ -4,6 +4,13 @@
 
 ---
 
+## 治理补充
+
+- 新增 `AGENTS.md` `4.5` 生成物路径治理与根目录零污染规则，明确稳定入口、正式产物与临时产物的路径边界。
+- 强化 `.gitignore`，补入 pytest 缓存、临时目录、coverage、debug/export、`.plot_vendor/` 等根目录生成物忽略项。
+- 清理过程中已移除部分根目录生成物（包括 `.pytest-tmp-0909b`、`.pytest-tmp-0909c` 与 `.plot_vendor/`）；少量 `.pytest-tmp` / `pytest-cache-files-*` 目录仍因 Windows ACL 拒绝访问而暂未能删除，后续需在具备权限的环境中继续处理。
+- 将新工具默认 `output_dir` 不得回退到项目根目录、不得依赖 `Path.cwd()` 的约束同步写入记忆文档与数据流文档。
+
 ## 历史摘要
 
 ### Phase 01

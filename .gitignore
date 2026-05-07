@@ -1,5 +1,44 @@
-.DS_Store
-.venv/
+# Python caches and test artifacts
 __pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+
+# pytest / temp artifacts
+.pytest-tmp*/
+pytest-cache-files-*/
+tmp/
+temp/
+.cache/
+
+# Local runtime/debug outputs
+*.log
+*.tmp
+*.bak
+*.swp
+
+# Local GUI / CLI debug exports
+results/tmp/
+results/debug/
+reports/tmp/
+
+# Local generated vendor copies
+.plot_vendor/
+
+# Virtual environments and node tooling
+.venv/
 node_modules/
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Large binary installer kept out of Git
 resources/MinerU-0.13.1-arm64.dmg
