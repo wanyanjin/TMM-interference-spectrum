@@ -1,202 +1,63 @@
 # DATA_FLOW.md
 
-本文档描述当前仓库中可证实的数据链路与 I/O 合约，重点覆盖绝对反射率、HDR、TMM 拟合输入与输出。
+本文档记录当前仓库中可证实的数据链路与正式工具平台的 I/O 约束。
 
 ---
 
-## 1. 数据层分工
+## 1. 数据分层
 
-- `data/raw/`：规范目标中的原始数据层（当前仓库尚未完全落地）
-- `test_data/`：当前主要本地测试夹具与部分历史原始样本入口
-- `data/processed/`：标准中间数据层（跨脚本共享）
+- `data/raw/`：规范目标中的原始数据层
+- `test_data/`：当前本地测试夹具与部分历史原始样本入口
+- `data/processed/`：标准中间数据层
 - `results/figures/`：图表结果
-- `results/logs/`：日志与摘要
-- `results/report/`：汇报层精选资产
+- `results/logs/`：运行日志与摘要
+- `results/report/`：汇报友好的 Markdown / HTML / 精选资产
 
 ---
 
-## 2. 基础链路（绝对反射率 -> 反演）
+## 2. 既有主链路
 
-### 2.1 Phase 01 标定链
-
-- 脚本：`src/scripts/step01_absolute_calibration.py`
-- 典型输入：
-  - `test_data/sample.csv`
-  - `test_data/Ag-mirro.csv`
-  - `resources/GCC-1022系列xlsx.xlsx`
-- 典型输出：
-  - `data/processed/target_reflectance.csv`
-  - `results/figures/absolute_reflectance_interference.png`
-
-### 2.2 Phase 02 外推与反演链
-
-- 脚本：
-  - `src/scripts/step01b_cauchy_extrapolation.py`
-  - `src/scripts/step02_tmm_inversion.py`
-- 关键中间件：
-  - `data/processed/CsFAPI_nk_extended.csv`
-- 关键资源：
-  - `resources/ITO_20 Ohm_105 nm_e1e2.mat`
-- 典型输出：
-  - `results/figures/tmm_inversion_result.png`
-
----
-
-## 3. HDR 与双窗拟合链路
-
-### 3.1 HDR 绝对标定（Phase 06）
-
-- 核心模块：`src/core/hdr_absolute_calibration.py`
-- 入口脚本：
-  - `src/scripts/step06_single_sample_hdr_absolute_calibration.py`
-  - `src/scripts/step06_batch_hdr_calibration.py`
-- 典型输出：
-  - `data/processed/phase06_batch/*_curve_table.csv`
-  - `data/processed/phase06_batch/phase06_batch_summary.csv`
-  - `results/figures/phase06_batch/*_QA_plot.png`
-
-### 3.2 双窗联合反演（Phase 07）
-
-- 核心模块：`src/core/phase07_dual_window.py`
-- 入口脚本：`src/scripts/step07_dual_window_inversion.py`
-- 支持输入：
-  - 原始多曝光 `*-cor.csv + .spe`（若存在）
-  - `*_hdr_curves.csv`（已处理入口）
-- 关键中间层：
-  - `data/processed/phase07/fit_inputs/*_fit_input.csv`
-  - `data/processed/phase07/phase07_source_manifest.csv`
-- 结果层：
-  - `data/processed/phase07/phase07_fit_summary.csv`
-  - `data/processed/phase07/fit_results/*_fit_curve.csv`
-  - `results/figures/phase07/*.png`
-  - `results/logs/phase07/*_optimizer_log.md`
-
----
-
-## 4. 理论重建与专题扫描链路
-
-### 4.1 固定参数理论前向（Phase 08）
-
-- 脚本：`src/scripts/step08_theoretical_tmm_modeling.py`
-- 输入：
-  - `data/processed/phase07/phase07_fit_summary.csv`
-  - `data/processed/phase07/fit_inputs/*_fit_input.csv`
-- 输出：
-  - `data/processed/phase08/*`
-  - `results/figures/phase08/*`
-  - `results/logs/phase08/*`
-
-### 4.2 Phase A-D 专题脚本链
-
-- 脚本族：
-  - `stepA*`、`stepB*`、`stepC*`、`stepD*`
-- 输出主要落在：
-  - `data/processed/phaseA*` 到 `phaseD*`
-  - `results/figures/phaseA*` 到 `phaseD*`
-  - `results/logs/phaseA*` 到 `phaseD*`
-  - `results/report/phase*`
-
----
-
-## 5. I/O 合约最低要求
-
-每个脚本应至少明确：
-
-- 输入文件路径
-- 输出文件路径
-- 依赖资源文件
-- 前序中间产物
-- 运行后产物清单
-
-跨脚本共享数据必须优先落在 `data/processed/`，禁止仅依赖会话状态。
-
----
-
-## 6. CLI 工具层数据流
-
-标准方向：
+### 2.1 绝对反射率与 TMM 历史链路
 
 ```text
-raw / processed input
-  -> CLI 参数解析与输入验证
-  -> core / workflow / storage
-  -> data/processed 标准中间产物
-  -> results/figures QA 图
-  -> results/logs 或 results/report 摘要
-  -> manifest-like summary
+raw CSV
+  -> src/scripts/step01_absolute_calibration.py
+  -> data/processed/target_reflectance.csv
+  -> src/scripts/step02_tmm_inversion.py
+  -> results/figures/tmm_inversion_result.png
 ```
 
-约束：
+### 2.2 HDR 与双窗反演链路
 
-- CLI 不应绕开 `data/processed` 中间层直接做隐式内存串联。
-- CLI 不应绕开 `results/figures`、`results/logs`、`results/report` 的结果目录规范。
-- CLI 应将关键运行元信息写入 manifest 或 manifest-like summary，保证后续可追溯。
+```text
+raw multiexposure data
+  -> src/core/hdr_absolute_calibration.py
+  -> src/scripts/step06_*hdr*.py
+  -> data/processed/phase06/*
+  -> src/core/phase07_dual_window.py
+  -> src/scripts/step07_dual_window_inversion.py
+  -> data/processed/phase07/*
+  -> results/figures/phase07/*
+  -> results/logs/phase07/*
+```
 
-### 6.1 Phase 08 `reference-comparison` 实例
+### 2.3 Phase 08 参比比较与审计链路
 
-`test_data/0429/glass-PVK*.csv + glass-Ag*.csv`
--> `src/cli/reference_comparison.py` 参数解析与输入校验
--> `src/core/reference_comparison.py`（mask、TMM、厚度扫描、诊断）
--> `data/processed/phase08/reference_comparison/*.csv + manifest.json`
--> `results/figures/phase08/reference_comparison/*.png`
--> `results/logs/phase08/reference_comparison/*.md`
--> `results/report/phase08_reference_comparison/*.md`
-
-### 6.2 Phase 08 dual-reference 实例（Ag + bk）
-
-`test_data/0429/Ag-withoutfliter-20ms*.csv + bk-20ms*.csv`
--> `src/core/reference_comparison.py` 多帧读取（Frame/Wavelength/Pixel/Counts）
--> 按 `Pixel_Index` 对齐背景并扣除（Ag 使用帧 2-100，排除过曝第 1 帧）
--> 产出 `phase08_0429_ag_mirror_background_corrected.csv` 与 frame QC
--> 与 `glass-PVK*.csv + glass-Ag*.csv` 共同进入 dual-reference 对比
--> `phase08_0429_dual_reference_calibrated_reflectance.csv`
--> `phase08_0429_dual_reference_manifest.json`
--> `phase08_0429_dual_reference_report.md`
-
-### 6.3 Phase 08 文献 `x=0.1` 替代 PVK 光学常数实例
-
-`resources/1-s2.0-S0927024818304446-mmc1.docx`
--> `src/core/literature_x01_nk.py` 提取 `Table S3` 中 `FA0.9Cs0.1PbI3` 的 `Photon Energy / ε1 / ε2`
--> `resources/digitized/lit_x01_csfapi_epsilon_table_s3.csv`
--> `eps -> n/k` 转换
--> `resources/digitized/lit_x01_csfapi_nk_table_s3.csv`
--> 替换 `resources/aligned_full_stack_nk.csv` 中 `n_PVK/k_PVK`
--> `resources/aligned_full_stack_nk_phase08_x01.csv`
--> `src/cli/reference_comparison.py --nk-csv ... --output-tag pvk_x01`
--> `phase08_0429_dual_reference_*_pvk_x01.*`
--> `phase08_0429_dual_reference_pvk_source_comparison.png/.md`
-
-### 6.4 Phase 08 单波长审计 trace
-
-`phase08_0429_dual_reference_manifest*.json + calibrated/theory csv + ag/bk multiframe csv`
--> `src/scripts/step08_single_wavelength_trace.py`
--> 自动选择最新 dual-reference 结果集
--> 选取 `target_wavelength_nm` 最近的实际波长点
--> 展开 counts/ms、参比校准、`nk` 插值、Fresnel、单层相干公式、厚玻璃非相干级联
--> `data/processed/phase08/reference_comparison_trace/*_values.json`
--> `results/report/phase08_reference_comparison_trace/*.md`
-
-该 trace 输出用于人工审计与组会说明，不改变主结果 CSV，也不替代全谱验证。
-
-### 6.5 Phase 08 HTML 汇报 deck
-
-`phase08_0429_dual_reference_*_pvk_x01.* + phase08_0429_trace_600nm.md`
--> `src/scripts/step08_build_audit_slide_deck.py`
--> 读取现有 calibrated/theory/manifest/trace/report
--> 生成本地 `reveal.js + KaTeX` deck HTML 与 `technical_report.html`
--> 复用 `results/slides/phase08_reference_audit/assets/*` 统一 token / 组件 / overflow watchdog
--> `results/slides/phase08_reference_audit/phase08_reference_audit_deck.html`
--> `results/slides/phase08_reference_audit/phase08_reference_audit_technical_report.html`
--> `node tools/phase08_slides_qa.mjs`
--> `results/slides/phase08_reference_audit/qa-output/qa-report.json + screenshots/*.png`
-
-该 deck 输出只服务于说明与汇报，不回写或替代 Phase 08 主结果文件。
+```text
+sample/reference CSV
+  -> src/cli/reference_comparison.py
+  -> src/core/reference_comparison.py
+  -> data/processed/phase08/reference_comparison/*
+  -> results/figures/phase08/reference_comparison/*
+  -> results/logs/phase08/reference_comparison/*
+  -> results/report/phase08_reference_comparison/*
+```
 
 ---
 
-## 7. 正式工具平台数据流
+## 3. 正式工具平台数据流
 
-正式工具平台的标准数据流应为：
+正式工具平台的标准数据流为：
 
 ```text
 external files
@@ -211,6 +72,29 @@ external files
 约束：
 
 - `core` 不接触文件格式。
-- 文件格式识别、列名归一、元数据提取与 reader 选择只允许出现在 `storage/readers`。
+- 文件格式识别、列名归一、元数据提取与 reader 选择只允许出现在 `src/storage/readers/`。
 - `workflow` 负责连接 reader、domain model、core 与 writer，不得散落基于文件后缀的 `if/else`。
 - GUI 与 CLI 必须尽量复用同一套 workflow。
+
+---
+
+## 4. `reflectance_qc` 最小闭环
+
+Phase 09B 新增的第一个正式工具闭环为：
+
+```text
+sample/reference CSV
+  -> storage.readers.CSVSpectrumReader
+  -> domain.SpectrumData
+  -> workflows.reflectance_qc_workflow
+  -> core.reflectance_qc
+  -> storage.writers.reflectance_qc_writer
+  -> data/processed/phase09/reflectance_qc/<run_id>/
+  -> results/report/phase09_reflectance_qc/<run_id>/
+```
+
+说明：
+
+- `core.reflectance_qc` 只接收 `SpectrumData` 和配置对象，不识别 CSV/TXT 后缀。
+- CLI 只解析参数并调用 workflow，不复制 QC 计算与导出逻辑。
+- 当前输出为 `processed_reflectance.csv`、`qc_summary.json`、`qc_report.md`，不输出 PNG 图。
