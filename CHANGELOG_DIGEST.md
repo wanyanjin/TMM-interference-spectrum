@@ -114,3 +114,11 @@
 - 本次仅进行治理文档重构，不修改业务代码与结果数据。
 - 后续已形成 `reference-comparison` CLI 与 dual-reference 数据链，可在 Phase 08 内对不同 PVK 光学常数来源做并排重算与比较。
 - 汇报层已补齐本地前端工具链：deck 改为本地 `reveal.js` shell，公式用 `KaTeX` 渲染，新增 `Playwright` 逐页截图与 overflow QA。
+
+### Phase 08：本地审计 deck 容错与版式收敛
+
+- 依据：当前工作区差异与 `src/scripts/step08_build_audit_slide_deck.py` 的最新修改。
+- `step08_build_audit_slide_deck.py` 将引用定位图的画布扩大到 `900x384`，并为右侧标签增加边界夹紧，避免长标签与标线重叠。
+- `results/slides/phase08_reference_audit/assets/deck.js` 新增无 `Reveal` / 无 `KaTeX` 的降级渲染路径，并保留 Mermaid 初始化守护，保证离线或依赖缺失时仍可阅读。
+- `results/slides/phase08_reference_audit/assets/theme.css` 新增 `deck-enhanced` / `deck-fallback` 布局分支与公式 fallback 样式，统一本地审计 deck 的呈现边界。
+- `results/slides/phase08_reference_audit/assets/value_locator_nk.svg` 与 `results/slides/phase08_reference_audit/assets/value_locator_reflectance.svg` 已按新画布重生，和脚本输出保持一致。

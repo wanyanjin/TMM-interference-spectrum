@@ -4,9 +4,9 @@
 
 ## 1. Current Snapshot
 
-- 更新时间：2026-04-13
+- 更新时间：2026-05-06
 - 当前判断 Phase：`Phase D-1`
-- 阶段定义：`建立 realistic thickness + roughness background 下的 air-gap discrimination database，统一整理 thickness / roughness / front-gap / rear-gap 的 R_total 判别输入`
+- 阶段定义：`建立 realistic thickness + roughness background 下的 air-gap discrimination database，统一整理 thickness / roughness / front-gap / rear-gap 的 R_total 判别输入，并同步收敛 Phase 08 审计 deck 的容错渲染与版式`
 - 当前可用能力：
   - 已有 `step01_absolute_calibration.py`，可将样品与银镜原始计数转换为绝对反射率
   - 已有 `step01b_cauchy_extrapolation.py`，可基于 [LIT-0001] 的 `ITO/CsFAPI` 数字化折射率曲线生成 `750-1100 nm` 的 CsFAPI 扩展 `n-k` 中间件
@@ -30,6 +30,9 @@
   - 已新增 `src/core/phase07_dual_window.py`，可基于 `aligned_full_stack_nk.csv` 构建 `Glass / ITO / NiOx / SAM / PVK / PVK-C60 Roughness / C60 / Ag(or Air)` Phase 07 堆栈，执行 C60 守恒约束、双窗加权残差、`d_bulk` 后窗 basin 扫描、DE 全局搜索、局部 least-squares 精修与 Phase 07 诊断出图
   - 已新增 `step07_dual_window_inversion.py`，可优先读取原始多曝光目录并复用 Phase 06 HDR 逻辑，或直接消费 `*_hdr_curves.csv`，统一落盘为 `fit_input -> fit_summary / fit_curve / optimizer_log / 4 张诊断图`
   - 已新增 `step08_theoretical_tmm_modeling.py`，可读取 `phase07_fit_summary.csv` 与对应 `fit_input`，冻结 Phase 07 最优参数并重建理论反射率、前表面散射因子和后窗 z-score 对比，统一落盘为 `phase08_theory_curve / phase08_theory_summary / phase08_source_manifest / theory_vs_measured 图`
+  - 已重构 `step08_build_audit_slide_deck.py`，可输出更宽的引用定位图画布并对右侧标签做边界夹紧，避免审计 deck 中的长标签被裁切
+  - 已重构 `results/slides/phase08_reference_audit/assets/deck.js` 与 `theme.css`，可在无 `Reveal` 或无 `KaTeX` 的环境下自动降级，并保留可读的本地审计展示
+  - 已重生 `results/slides/phase08_reference_audit/assets/value_locator_nk.svg` 与 `value_locator_reflectance.svg`，与新的脚本输出画布保持一致
   - 已新增 `stepA1_pristine_baseline.py`，可严格基于 `aligned_full_stack_nk.csv` 和常数玻璃 `n=1.515, k=0` 生成 `R_front / R_stack / R_total` 的 pristine baseline decomposition，并输出三曲线图、三区图与标准日志
   - 已新增 `stepA1_1_pvk_seam_audit.py`，可围绕 `749/750 nm` 对 PVK seam 做局部 n-k/eps/导数审计、上游三源追溯、简化堆栈敏感性比较、Ag 终端边界对照与代码路径核查
   - 已新增 `stepA1_2_build_pvk_surrogate_v2.py`，可在不覆盖 v1 材料表的前提下，对 PVK 的 `740-780 nm` band-edge 区域执行局部 surrogate rebuild，并输出 `aligned_full_stack_nk_pvk_v2.csv`、候选过渡带指标表与 v1/v2 QA 图
@@ -61,7 +64,7 @@
   - 尚未形成规范化的 Phase 日志、资源索引和结构化结果台账
   - 尚未将 Phase 06 批量 HDR 输入规范化迁移到 `data/raw/phase06/`
   - Phase 07 当前两例真实样本都存在参数贴边，说明双窗架构已跑通，但材料先验与边界设定仍需继续收敛
-  - Phase 08 目前仅建立“固定参数前向重建”链路，尚未引入新的物理先验、层结构变体扫描或跨样本共享参数约束
+  - Phase 08 目前仍以“固定参数前向重建 + 审计 deck 收敛”为主，尚未引入新的物理先验、层结构变体扫描或跨样本共享参数约束
   - `Phase A-2.1` 已完成 first-pass uncertainty propagation，但尚未扩展到更高维的 surrogate family 或参数化介电函数不确定性
   - `Phase B-2` 当前仍是 front-side optical proxy，而不是完整化学界面模型
   - `Phase C-1a / C-1b` 当前仍是单侧 gap only 的 specular TMM 模型，不含散射、dual-gap 或 gap+BEMA 耦合

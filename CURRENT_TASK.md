@@ -40,3 +40,10 @@
 - 运行本地 deck build 与 Playwright QA
 - 核对关键页截图和 overflow 报告
 - 下一步准备 `nk_audit` 与 `nk_envelope`，验证 PVK / Ag `n,k` 数据的适用性
+
+## 最新同步
+
+- 现阶段 Phase 08 已把 `step08_build_audit_slide_deck.py` 的图面布局改为更宽的画布与防溢出标注，避免右侧标签被裁切。
+- `results/slides/phase08_reference_audit/assets/deck.js` 已加入无 `Reveal` / 无 `KaTeX` 的降级渲染路径，便于本地 QA 与离线阅读。
+- `results/slides/phase08_reference_audit/assets/theme.css` 已补充 `deck-enhanced` / `deck-fallback` 样式分支，以及公式 fallback 样式。
+- 当前仍保留下一步 `nk_audit` / `nk_envelope` 计划，不改变 Phase 08 的主线方向。

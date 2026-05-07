@@ -57,8 +57,8 @@ def svg_line_plot(
     y_min: float | None = None,
     y_max: float | None = None,
 ) -> None:
-    width, height = 860, 360
-    margin = {"l": 74, "r": 28, "t": 48, "b": 54}
+    width, height = 900, 384
+    margin = {"l": 74, "r": 64, "t": 64, "b": 62}
     plot_w = width - margin["l"] - margin["r"]
     plot_h = height - margin["t"] - margin["b"]
     finite_values = [y for item in series for y in item["y_values"] if y is not None]
@@ -98,8 +98,10 @@ def svg_line_plot(
         if points:
             paths.append(f'<polyline fill="none" stroke="{item["color"]}" stroke-width="3" points="{" ".join(points)}"/>')
         if last is not None:
+            label_x = min(max(sx(last[0]) - 12, margin["l"] + 72), width - margin["r"] + 8)
+            label_y = min(max(sy(last[1]) - 10 - idx * 18, margin["t"] + 14), height - margin["b"] - 8)
             labels.append(
-                f'<text x="{sx(last[0]) - 6:.2f}" y="{sy(last[1]) - 10 - idx * 18:.2f}" text-anchor="end" font-size="14" font-weight="700" fill="{item["color"]}">{item["label"]}</text>'
+                f'<text x="{label_x:.2f}" y="{label_y:.2f}" text-anchor="end" font-size="14" font-weight="700" fill="{item["color"]}">{item["label"]}</text>'
             )
 
     x_line = sx(x_marker)

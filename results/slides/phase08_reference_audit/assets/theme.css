@@ -37,6 +37,7 @@ html, body {
 .reveal {
   font-family: var(--font-cn);
   color: var(--color-ink);
+  padding: 24px 0 48px;
 }
 
 .reveal .slides {
@@ -45,10 +46,8 @@ html, body {
 }
 
 .reveal .slides section {
-  position: absolute !important;
-  inset: 0 !important;
-  margin: auto !important;
-  transform: none !important;
+  position: relative;
+  margin: 0 auto 24px;
   width: var(--slide-w);
   height: var(--slide-h);
   box-sizing: border-box;
@@ -57,10 +56,18 @@ html, body {
   border-radius: 18px;
   box-shadow: 0 22px 56px var(--color-shadow);
   overflow: hidden;
+  opacity: 1;
+}
+
+body.deck-enhanced .reveal .slides section {
+  position: absolute !important;
+  inset: 0 !important;
+  margin: auto !important;
+  transform: none !important;
   opacity: 0 !important;
 }
 
-.reveal .slides section.present {
+body.deck-enhanced .reveal .slides section.present {
   opacity: 1 !important;
 }
 
@@ -158,6 +165,50 @@ html, body {
 .formula-card .katex-display {
   margin: 0;
   font-size: var(--equation);
+}
+
+.math-fallback-display,
+.math-fallback-inline {
+  display: inline-block;
+  font-family: var(--font-en);
+  color: var(--color-ink);
+}
+
+.math-fallback-display {
+  font-size: calc(22px * var(--equation));
+  line-height: 1.35;
+  word-break: break-word;
+}
+
+.math-fallback-inline {
+  font-size: 1em;
+  line-height: 1.25;
+}
+
+.math-fallback-display sup,
+.math-fallback-inline sup,
+.math-fallback-display sub,
+.math-fallback-inline sub {
+  font-size: 0.68em;
+  line-height: 0;
+}
+
+.math-frac {
+  display: inline-grid;
+  grid-template-rows: auto auto;
+  justify-items: center;
+  align-items: center;
+  vertical-align: middle;
+  margin: 0 0.15em;
+}
+
+.math-num {
+  padding: 0 0.25em 0.08em;
+  border-bottom: 1.5px solid currentColor;
+}
+
+.math-den {
+  padding: 0.08em 0.25em 0;
 }
 
 .formula-label {
@@ -406,7 +457,7 @@ html, body {
 
 .source-card img {
   width: 100%;
-  max-height: 255px;
+  max-height: 272px;
   object-fit: contain;
   border: 1px solid var(--color-border);
   border-radius: 12px;
