@@ -350,3 +350,64 @@ CLI 详细文档必须至少包含：
 - 面向组会、论文或对外展示的图默认使用 `3:2` 比例；同一类图必须固定坐标轴范围和视觉语义。
 - CLI 或脚本生成正式结果时，必须同步输出可追溯的 Markdown 报告、机器可读 JSON/CSV，以及符合项目风格的图片资产。
 - 若某类图或报告因特殊用途需要偏离规范，必须在脚本或报告中明确说明原因与影响。
+
+---
+
+## 15. 正式工具单元开发规范
+
+### 15.1 正式工具分层
+
+- 新正式工具优先使用 `domain -> core -> storage -> workflows -> cli/gui -> results` 的标准结构。
+- 建议正式工具把统一数据模型放到 `src/domain/`，通用基础设施放到 `src/common/`，可复用绘图放到 `src/visualization/`。
+- `src/scripts/` 可以保留历史脚本、实验脚本和薄入口脚本，但新正式工具不得直接堆到 `src/scripts/`。
+- 高频、可复用、未来可能 GUI 化的能力必须走正式工具结构。
+- 旧脚本不在每轮任务中默认迁移，除非用户明确要求。
+
+### 15.2 工具交付要求
+
+- 每个正式工具必须登记到 `docs/tools/TOOL_REGISTRY.md`。
+- 每个正式工具必须具备对应文档，至少覆盖工具定位、输入输出、接口与限制。
+- 每个正式工具必须输出 `manifest.json` 或 `summary.json`，保证可追溯性。
+- `experimental -> active` 的升级条件至少包括：测试、文档、CLI、可追溯输出齐全。
+
+---
+
+## 16. Core 沙箱与输入适配器规则
+
+### 16.1 Core 沙箱
+
+- `src/core/` 新代码不得依赖 `pandas`、`h5py`、`zarr`、`PySide6`、`pyqtgraph`、`matplotlib`、`argparse`、`json`、`yaml`。
+- `core` 不得读取文件、写文件、画图、弹窗、解析命令行、判断文件格式。
+- `core` 不得根据 `.csv`、`.h5`、`.txt` 等文件后缀分支。
+- `core` 只接收 domain model 或 `ndarray`。
+- `core` 只返回 domain result 或 `ndarray`。
+- 若已有历史 `src/core/*.py` 暂未完全满足此规则，不在本轮强制重构；新代码必须遵守，旧代码逐步迁移。
+
+### 16.2 输入适配器
+
+- 新文件格式只能通过 `src/storage/readers/` adapter 接入。
+- `workflow` 不得散落基于文件后缀的 `if/else`。
+- 文件格式识别、列名归一、元数据提取与外部文件到 domain model 的转换，都应放在 `storage/readers`。
+- `core` 必须完全不知道数据来自 CSV、TXT、H5、Zarr、SPE、LightField 还是 GUI。
+
+---
+
+## 17. GUI 技术栈规则
+
+### 17.1 默认技术路线
+
+- 新 GUI 默认技术路线为 `PySide6 + pyqtgraph`。
+- `PySide6` 负责窗口、控件、布局、菜单、文件选择和状态栏。
+- `pyqtgraph` 负责光谱曲线、多曲线叠加、缩放、拖拽和快速刷新。
+
+### 17.2 GUI 边界
+
+- GUI 只负责输入、展示、状态查看和动作触发。
+- GUI 不得实现核心计算、TMM/Fresnel/EMA、拟合目标函数、复杂导出。
+- GUI 必须调用 `workflow`，不得直接复制核心业务逻辑。
+- GUI view model 只负责把 domain result 转成界面状态。
+
+### 17.3 依赖边界
+
+- `PySide6` 与 `pyqtgraph` 只允许出现在 `src/gui/` 或 GUI 专用 adapter 中。
+- 不得把 `PySide6`、`pyqtgraph` 引入 `src/core/`、`src/domain/` 或 `src/workflows/`。

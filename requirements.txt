@@ -9,3 +9,6 @@ tmm
 PyWavelets
 scikit-learn
 umap-learn
+PySide6
+pyqtgraph
+pytest

@@ -122,3 +122,11 @@
 - `results/slides/phase08_reference_audit/assets/deck.js` 新增无 `Reveal` / 无 `KaTeX` 的降级渲染路径，并保留 Mermaid 初始化守护，保证离线或依赖缺失时仍可阅读。
 - `results/slides/phase08_reference_audit/assets/theme.css` 新增 `deck-enhanced` / `deck-fallback` 布局分支与公式 fallback 样式，统一本地审计 deck 的呈现边界。
 - `results/slides/phase08_reference_audit/assets/value_locator_nk.svg` 与 `results/slides/phase08_reference_audit/assets/value_locator_reflectance.svg` 已按新画布重生，和脚本输出保持一致。
+
+### Phase 09：工具平台架构规范与 core 沙箱骨架
+
+- 已新增 `docs/architecture/TOOL_ARCHITECTURE.md`、`CORE_SANDBOX_RULES.md`、`DATA_MODEL_GUIDE.md`、`IO_ADAPTER_GUIDE.md`、`GUI_TECH_STACK.md`、`OUTPUT_CONVENTIONS.md`，明确正式工具平台分层、core 沙箱、domain 命名、adapter 规则、GUI 技术路线与输出约定。
+- 已新增 `docs/tools/TOOL_REGISTRY.md` 与 `TOOL_TEMPLATE.md`，建立正式工具登记表和未来工具模板。
+- 已新增 `src/common/`、`src/domain/`、`src/storage/`、`src/workflows/`、`src/visualization/`、`src/gui/common/` 最小骨架，以及 `SpectrumData`、`QCSummary`、`ToolRunManifest`、`SpectrumReaderRegistry` 等基础对象。
+- 已新增 `tests/unit/test_domain_spectrum.py` 与 `tests/unit/test_reader_registry.py`，用于验证最小 domain model 与 reader registry 行为。
+- 本轮未实现具体 `reflectance_qc` GUI，也未重构旧脚本链路。

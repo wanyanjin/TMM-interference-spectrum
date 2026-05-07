@@ -191,3 +191,26 @@ raw / processed input
 -> `results/slides/phase08_reference_audit/qa-output/qa-report.json + screenshots/*.png`
 
 该 deck 输出只服务于说明与汇报，不回写或替代 Phase 08 主结果文件。
+
+---
+
+## 7. 正式工具平台数据流
+
+正式工具平台的标准数据流应为：
+
+```text
+external files
+  -> storage/readers
+  -> domain model
+  -> workflow
+  -> core
+  -> storage/writers
+  -> processed/results/report
+```
+
+约束：
+
+- `core` 不接触文件格式。
+- 文件格式识别、列名归一、元数据提取与 reader 选择只允许出现在 `storage/readers`。
+- `workflow` 负责连接 reader、domain model、core 与 writer，不得散落基于文件后缀的 `if/else`。
+- GUI 与 CLI 必须尽量复用同一套 workflow。
