@@ -4,9 +4,9 @@
 
 ## 1. Current Snapshot
 
-- 更新时间：2026-04-10
-- 当前判断 Phase：`Phase 07`
-- 阶段定义：`双窗联合反演架构落地：HDR / HDR 中间件双入口 -> 标准化 R_abs -> 全栈 TMM -> 双窗加权优化 -> 诊断图表与结果台账`
+- 更新时间：2026-05-06
+- 当前判断 Phase：`Phase D-1`
+- 阶段定义：`建立 realistic thickness + roughness background 下的 air-gap discrimination database，统一整理 thickness / roughness / front-gap / rear-gap 的 R_total 判别输入，并同步收敛 Phase 08 审计 deck 的容错渲染与版式`
 - 当前可用能力：
   - 已新增 `step07_plot_raw_received_spectra.py`，可直接从 `DEVICE-1-withAg-P1_hdr_curves.csv` 提取 `Ag` 与同位置样品的长/短曝光原始 mean counts，在对数坐标上绘制“光谱仪实际收到的光谱”，不做曝光归一化、不做 HDR 权重、也不乘任何校准系数
   - 已有 `step01_absolute_calibration.py`，可将样品与银镜原始计数转换为绝对反射率
@@ -30,6 +30,25 @@
   - 已有 `step07_orthogonal_radar_and_baseline.py`，可输出 pristine 全谱三分区基准图、Front/Back 正交雷达图与 `Phase 07` 指纹字典
   - 已新增 `src/core/phase07_dual_window.py`，可基于 `aligned_full_stack_nk.csv` 构建 `Glass / ITO / NiOx / SAM / PVK / PVK-C60 Roughness / C60 / Ag(or Air)` Phase 07 堆栈，执行 C60 守恒约束、双窗加权残差、`d_bulk` 后窗 basin 扫描、DE 全局搜索、局部 least-squares 精修与 Phase 07 诊断出图
   - 已新增 `step07_dual_window_inversion.py`，可优先读取原始多曝光目录并复用 Phase 06 HDR 逻辑，或直接消费 `*_hdr_curves.csv`，统一落盘为 `fit_input -> fit_summary / fit_curve / optimizer_log / 4 张诊断图`
+  - 已新增 `step08_theoretical_tmm_modeling.py`，可读取 `phase07_fit_summary.csv` 与对应 `fit_input`，冻结 Phase 07 最优参数并重建理论反射率、前表面散射因子和后窗 z-score 对比，统一落盘为 `phase08_theory_curve / phase08_theory_summary / phase08_source_manifest / theory_vs_measured 图`
+  - 已重构 `step08_build_audit_slide_deck.py`，可输出更宽的引用定位图画布并对右侧标签做边界夹紧，避免审计 deck 中的长标签被裁切
+  - 已重构 `results/slides/phase08_reference_audit/assets/deck.js` 与 `theme.css`，可在无 `Reveal` 或无 `KaTeX` 的环境下自动降级，并保留可读的本地审计展示
+  - 已重生 `results/slides/phase08_reference_audit/assets/value_locator_nk.svg` 与 `value_locator_reflectance.svg`，与新的脚本输出画布保持一致
+  - 已新增 `stepA1_pristine_baseline.py`，可严格基于 `aligned_full_stack_nk.csv` 和常数玻璃 `n=1.515, k=0` 生成 `R_front / R_stack / R_total` 的 pristine baseline decomposition，并输出三曲线图、三区图与标准日志
+  - 已新增 `stepA1_1_pvk_seam_audit.py`，可围绕 `749/750 nm` 对 PVK seam 做局部 n-k/eps/导数审计、上游三源追溯、简化堆栈敏感性比较、Ag 终端边界对照与代码路径核查
+  - 已新增 `stepA1_2_build_pvk_surrogate_v2.py`，可在不覆盖 v1 材料表的前提下，对 PVK 的 `740-780 nm` band-edge 区域执行局部 surrogate rebuild，并输出 `aligned_full_stack_nk_pvk_v2.csv`、候选过渡带指标表与 v1/v2 QA 图
+ - 已新增 `stepA1_2_rerun_pristine_with_pvk_v2.py`，可复用 Phase A-1 pristine decomposition 口径，用 `PVK surrogate v2` 重跑 `R_front / R_stack / R_total`，并输出 v1/v2 全谱与局部对照
+ - 已新增 `stepA2_pvk_thickness_scan.py`，可基于 `aligned_full_stack_nk_pvk_v2.csv` 扫描 `d_PVK = 500-900 nm`、输出 `R_stack / R_total / ΔR` 热力图、peak/valley tracking 与特征汇总表
+  - 已新增 `stepA_local_pvk_thickness_window.py`，可在同一 `PVK surrogate v2` 与 nominal 全器件几何下，仅扫描 `d_PVK = 675-725 nm / 1 nm`，输出局部厚度起伏对应的 `R_total / ΔR_total` 指纹图、基础三窗口 RMS 摘要与汇报资产
+  - 已新增 `stepD2b_explain_feature_pipeline.py`，可直接读取 `phaseD1_rtotal_database.csv`、`phaseD2_quantitative_feature_database.csv`、`phaseD2_family_templates.csv` 与 `PHASE_D2_REPORT.md`，输出 D-2 特征提取流程解释图、原始谱 vs 特征路由对比图、五类特征来源总览图与组会讲稿文案；该脚本不做新的物理仿真，只做汇报层信息重组
+  - 已建立 `results/report/` 汇报资产层，并补齐 `Phase A-1.2` 与 `Phase A-2` 的精选 CSV / PNG / Markdown 报告
+  - 已新增 `stepB1_rear_bema_sandbox.py`，可在 `PVK/C60` 后界面插入固定 `50/50` Bruggeman BEMA 层、执行厚度守恒扫描并与 `d_PVK` 指纹做对照
+  - 已新增 `stepA2_1_pvk_uncertainty_ensemble.py`，可构建 `nominal / more_absorptive / less_absorptive` 三成员 PVK ensemble，重跑代表性 thickness / rear-BEMA 子集并输出 robustness summary
+  - 已新增 `stepB2_front_bema_sandbox.py`，可在固定 `SAM` 厚度前提下引入 `NiOx/PVK` front-side BEMA proxy，输出 front-only roughness 主扫描、与 thickness/rear-BEMA 的正交对照，以及 uncertainty spot-check
+  - 已新增 `stepC1a_rear_air_gap_sandbox.py`，可在 `PVK/C60` 后界面插入真实 air gap，输出 low-gap 高分辨主扫描、LOD 粗评估、branch-aware tracking 和与 thickness / rear-BEMA / front-BEMA 的四机制对照
+  - 已新增 `stepC1b_front_air_gap_sandbox.py`，可在 `SAM/PVK` 前界面插入真实 air gap，输出 low-gap 高分辨主扫描、前/过渡/后窗分窗响应、LOD 粗评估、uncertainty spot-check 与五机制对照
+  - 已新增 `stepPPT_phaseAtoC_assets.py`，可基于现有 `data/processed` 结果重绘一套统一风格的 `R_total-only` PPT 汇报资产，并同步生成每页 `slide_text.md / source_manifest.md`
+  - 已新增 `stepD1_airgap_discrimination_database.py`，可在 realistic `d_PVK + front/rear roughness` 背景上统一构建 `thickness nuisance / roughness nuisance / front-gap overlay / rear-gap overlay` 的 `R_total / Delta_R_total` 判别数据库，并输出 rear shift analysis、feature atlas 与算法讨论用 report 资产
   - 已产出标准中间文件 `data/processed/target_reflectance.csv` 与 `data/processed/CsFAPI_nk_extended.csv`
   - 已完成 Phase 02 形状畸变诊断，当前证据指向：ITO 近红外吸收失真是长波端托平与整体形状失配的主导因素
   - 已完成 Phase 04 空气隙前向预测，当前基线下 `d_air = 2 nm` 与 `5 nm` 的 `max(|ΔR|)` 分别约为 `0.538%` 与 `1.347%`，均高于 `0.2%` 典型噪声线
@@ -46,6 +65,12 @@
   - 尚未形成规范化的 Phase 日志、资源索引和结构化结果台账
   - 尚未将 Phase 06 批量 HDR 输入规范化迁移到 `data/raw/phase06/`
   - Phase 07 当前两例真实样本都存在参数贴边，说明双窗架构已跑通，但材料先验与边界设定仍需继续收敛
+  - Phase 08 目前仍以“固定参数前向重建 + 审计 deck 收敛”为主，尚未引入新的物理先验、层结构变体扫描或跨样本共享参数约束
+  - `Phase A-2.1` 已完成 first-pass uncertainty propagation，但尚未扩展到更高维的 surrogate family 或参数化介电函数不确定性
+  - `Phase B-2` 当前仍是 front-side optical proxy，而不是完整化学界面模型
+  - `Phase C-1a / C-1b` 当前仍是单侧 gap only 的 specular TMM 模型，不含散射、dual-gap 或 gap+BEMA 耦合
+  - `Phase D-1` 当前仅覆盖 thickness / roughness / gap 三类结构机制，尚未纳入 composition variation、实验噪声模型与真实分类器训练
+  - `constant-glass vs dispersive-glass` 与参数化 band-edge dielectric model 仍未展开
 
 ## 2. Current Directory Tree
 
@@ -78,7 +103,22 @@ TMM-interference-spectrum/
 │       ├── step06_single_sample_hdr_absolute_calibration.py
 │       ├── step07_dual_window_inversion.py
 │       ├── step07_plot_raw_received_spectra.py
-│       └── step07_orthogonal_radar_and_baseline.py
+│       ├── step07_orthogonal_radar_and_baseline.py
+│       ├── step08_theoretical_tmm_modeling.py
+│       ├── stepA1_pristine_baseline.py
+│       ├── stepA1_1_pvk_seam_audit.py
+│       ├── stepA1_2_build_pvk_surrogate_v2.py
+│       ├── stepA1_2_rerun_pristine_with_pvk_v2.py
+│       ├── stepA2_pvk_thickness_scan.py
+│       ├── stepA_local_pvk_thickness_window.py
+│       ├── stepA2_1_pvk_uncertainty_ensemble.py
+│       ├── stepB1_rear_bema_sandbox.py
+│       ├── stepB2_front_bema_sandbox.py
+│       ├── stepC1a_rear_air_gap_sandbox.py
+│       ├── stepC1b_front_air_gap_sandbox.py
+│       ├── stepD1_airgap_discrimination_database.py
+│       ├── stepD2_quantitative_feature_dictionary.py
+│       └── stepD2b_explain_feature_pipeline.py
 ├── data/
 │   └── processed/
 │       ├── CsFAPI_nk_extended.csv
@@ -88,13 +128,27 @@ TMM-interference-spectrum/
 │       ├── phase04c/
 │       ├── phase06/
 │       ├── phase07/
+│       ├── phase08/
+│       ├── phaseA1/
+│       ├── phaseA1_2/
+│       ├── phaseA2/
+│       ├── phaseA_local/
+│       ├── phaseA2_1/
+│       ├── phaseB1/
+│       ├── phaseB2/
+│       ├── phaseC1a/
+│       ├── phaseC1b/
+│       ├── phaseD1/
+│       ├── phaseA1_seam_audit/
 │       └── target_reflectance.csv
 ├── resources/
 │   ├── digitized/
 │   │   ├── phase02_fig2_fapi_optical_constants_digitized.csv
 │   │   └── phase02_fig3_csfapi_optical_constants_digitized.csv
 │   ├── n-kdata/
+│   ├── pvk_ensemble/
 │   ├── aligned_full_stack_nk.csv
+│   ├── aligned_full_stack_nk_pvk_v2.csv
 │   ├── materials_master_db.json
 │   ├── GCC-1022系列xlsx.xlsx
 │   ├── ITO_20 Ohm_105 nm_e1e2.mat
@@ -102,6 +156,17 @@ TMM-interference-spectrum/
 │   └── MinerU-0.13.1-arm64.dmg
 ├── results/
 │   ├── figures/
+│   │   ├── phaseA2/
+│   │   ├── phaseA_local/
+│   │   ├── phaseA2_1/
+│   │   ├── phaseB1/
+│   │   ├── phaseB2/
+│   │   ├── phaseC1a/
+│   │   ├── phaseC1b/
+│   │   ├── phaseA1_2/
+│   │   ├── phaseA1_seam_audit/
+│   │   ├── phaseA1/
+│   │   ├── phase08/
 │   │   ├── phase07/
 │   │   │   └── phase07_raw_received_spectra_log.png
 │   │   ├── absolute_reflectance_interference.png
@@ -124,6 +189,18 @@ TMM-interference-spectrum/
 │   │   └── tmm_inversion_result.png
 │   └── logs/
 │       ├── phase03_batch_fit/
+│       ├── phaseA2/
+│       ├── phaseA_local/
+│       ├── phaseA2_1/
+│       ├── phaseB1/
+│       ├── phaseB2/
+│       ├── phaseC1a/
+│       ├── phaseC1b/
+│       ├── phaseD1/
+│       ├── phaseA1_2/
+│       ├── phaseA1_seam_audit/
+│       ├── phaseA1/
+│       ├── phase08/
 │       ├── phase07/
 │       │   └── phase07_raw_received_spectra_log.md
 │       ├── phase04c_fingerprint_mapping.md
@@ -133,7 +210,21 @@ TMM-interference-spectrum/
 │       ├── phase07_orthogonal_radar_diagnostic.md
 │       ├── phase02_shape_diagnostic_report.md
 │       ├── phase02_fig2_fapi_digitization_notes.md
-│       └── phase02_fig3_csfapi_digitization_notes.md
+│       ├── phase02_fig3_csfapi_digitization_notes.md
+│   └── report/
+│       ├── README.md
+│       ├── report_manifest.csv
+│       ├── phaseA1_2_pvk_surrogate_and_pristine/
+│       ├── phaseA2_1_pvk_uncertainty_ensemble/
+│       ├── phaseA2_pvk_thickness_scan/
+│       ├── phaseA_local_thickness_window/
+│       ├── phaseB1_rear_bema_sandbox/
+│       ├── phaseB2_front_bema_sandbox/
+│       ├── phaseC1a_rear_air_gap_sandbox/
+│       ├── phaseC1b_front_air_gap_sandbox/
+│       ├── phaseD1_airgap_discrimination_database/
+│       ├── phaseD2_quantitative_feature_dictionary/
+│       └── ppt_phaseAtoC_assets/
 ├── test_data/
 │   ├── sample.csv
 │   ├── glass-1mm.csv
@@ -571,6 +662,412 @@ TMM-interference-spectrum/
 - `results/figures/phase07/*_rear_basin_scan.png`
 - `results/logs/phase07/*_optimizer_log.md`
 
+### 4.14 `step08_theoretical_tmm_modeling.py`
+
+- 文件位置：`src/scripts/step08_theoretical_tmm_modeling.py`
+- 核心依赖：`src/core/phase07_dual_window.py`
+- 主要职责：冻结 `Phase 07` 最优参数并在实测空间重建理论反射率，形成 `Phase 08` 的批量 TMM 前向建模基线
+
+输入：
+- `data/processed/phase07/phase07_fit_summary.csv`
+- `data/processed/phase07/fit_inputs/*_fit_input.csv`
+- `resources/aligned_full_stack_nk.csv`
+
+核心处理流程：
+- 逐样本读取 `Phase 07 fit_summary + fit_input`
+- 复用 `calc_macro_reflectance()` 重建全栈物理反射率
+- 复用 `apply_front_scattering_observation_model()` 把物理曲线映射回 collected reflectance
+- 对后窗额外输出 `z-score` 理论对比与导数相关性，检查干涉形貌是否被保留
+- 批量写出理论曲线表、批次摘要、来源清单和理论对比图
+
+输出：
+- `data/processed/phase08/phase08_theory_summary.csv`
+- `data/processed/phase08/phase08_source_manifest.csv`
+- `data/processed/phase08/theory_curves/*_theory_curve.csv`
+- `results/figures/phase08/*_theory_vs_measured.png`
+- `results/logs/phase08/phase08_theoretical_tmm_modeling.md`
+
+### 4.15 `stepA1_pristine_baseline.py`
+
+- 文件位置：`src/scripts/stepA1_pristine_baseline.py`
+- 核心依赖：`src/core/full_stack_microcavity.py`
+- 主要职责：建立零缺陷 pristine baseline decomposition，显式拆分 `R_front / R_stack / R_total`
+
+输入：
+- `resources/aligned_full_stack_nk.csv`
+  - 作为本轮唯一 `n-k` 输入来源
+
+核心处理流程：
+- 校验 `aligned_full_stack_nk.csv` 的材料列和 `400-1100 nm / 1 nm` 波长网格
+- 强制覆盖玻璃为常数 `n_glass = 1.515`, `k_glass = 0`
+- 计算 `Air / Glass` 前表面 Fresnel 反射 `R_front`
+- 计算 `Glass -> ITO -> NiOx -> SAM -> PVK -> C60 -> Ag(100 nm) -> Air` 的相干反射 `R_stack`
+- 用厚玻璃强度级联计算 `R_total`
+- 输出三曲线分解图、三区基线图和 Markdown 结果说明
+
+输出：
+- `data/processed/phaseA1/phaseA1_pristine_baseline.csv`
+- `results/figures/phaseA1/phaseA1_pristine_decomposition.png`
+- `results/figures/phaseA1/phaseA1_pristine_3zones.png`
+- `results/logs/phaseA1/phaseA1_pristine_baseline.md`
+
+### 4.16 `stepA1_1_pvk_seam_audit.py`
+
+- 文件位置：`src/scripts/stepA1_1_pvk_seam_audit.py`
+- 核心依赖：`src/core/full_stack_microcavity.py`
+- 主要职责：对 `749/750 nm` 附近的 PVK seam 做法医式审计，确认接缝来源、结构放大链路与边界条件影响
+
+输入：
+- `resources/aligned_full_stack_nk.csv`
+- `data/processed/phaseA1/phaseA1_pristine_baseline.csv`
+- `data/processed/CsFAPI_nk_extended.csv`
+- `resources/digitized/phase02_fig3_csfapi_optical_constants_digitized.csv`
+- `src/scripts/step05c_build_aligned_nk_stack.py`
+
+核心处理流程：
+- 抽取 `730-770 nm` 的 `n_PVK / k_PVK / eps1 / eps2` 与一阶导数
+- 对照 digitized / extended / aligned 三份 PVK 数据，定位 seam 的引入步骤
+- 比较 `Glass/PVK/Air`、`Glass/ITO/NiOx/SAM/PVK/Air` 与完整 stack 的局部反射率，判断 seam 是否被层序放大
+- 比较 `finite Ag + Air exit` 与 `semi-infinite Ag`，判断 Ag 终端是否是重要放大器
+- 核查 Phase A-1 与全栈主链路是否存在插值、层序或边界条件 bug
+
+输出：
+- `data/processed/phaseA1_seam_audit/pvk_seam_local_audit.csv`
+- `data/processed/phaseA1_seam_audit/pvk_source_comparison.csv`
+- `data/processed/phaseA1_seam_audit/seam_stack_sensitivity.csv`
+- `data/processed/phaseA1_seam_audit/seam_ag_boundary_sensitivity.csv`
+- `results/figures/phaseA1_seam_audit/*.png`
+- `results/logs/phaseA1_seam_audit/phaseA1_seam_audit.md`
+
+### 4.17 `stepA1_2_build_pvk_surrogate_v2.py`
+
+- 文件位置：`src/scripts/stepA1_2_build_pvk_surrogate_v2.py`
+- 主要职责：基于 `digitized + extended + aligned v1 + seam audit` 结果，重建 `PVK surrogate v2`，在材料层而不是反射率层消除 `740-780 nm` 带边 seam artifact
+
+输入：
+- `resources/aligned_full_stack_nk.csv`
+- `data/processed/CsFAPI_nk_extended.csv`
+- `resources/digitized/phase02_fig3_csfapi_optical_constants_digitized.csv`
+- `data/processed/phaseA1_seam_audit/pvk_seam_local_audit.csv`
+- `data/processed/phaseA1_seam_audit/pvk_source_comparison.csv`
+
+核心处理流程：
+- 对 `744-760 nm`、`740-770 nm`、`740-780 nm` 三个候选 transition zone 做局部 surrogate 比较
+- 在过渡带左侧用 pre-seam `aligned v1` 锚点拟合单调 `PCHIP` 左参考
+- 在过渡带内对 `n` 使用 `smoothstep` 权重桥接到 long-wave extended 趋势
+- 在过渡带内对 `k` 使用 `smoothstep + cosine-tail decay`，避免 `750 nm` 起硬清零
+- 以 `ΔR_stack(749->750)`、`ΔR_total(749->750)`、`Δeps2`、导数/二阶差分平滑性及 `810-1100 nm` fringe 保真度联合打分，选出主推荐版本
+
+输出：
+- `resources/aligned_full_stack_nk_pvk_v2.csv`
+- `data/processed/phaseA1_2/pvk_v2_candidate_metrics.csv`
+- `data/processed/phaseA1_2/pvk_v1_v2_local_comparison.csv`
+- `results/figures/phaseA1_2/pvk_v2_nk_local_zoom.png`
+- `results/figures/phaseA1_2/pvk_v2_eps_local_zoom.png`
+- `results/figures/phaseA1_2/pvk_v2_derivative_local_zoom.png`
+- `results/figures/phaseA1_2/pvk_v1_vs_v2_overlay.png`
+- `results/logs/phaseA1_2/phaseA1_2_pvk_surrogate_build.md`
+
+### 4.18 `stepA1_2_rerun_pristine_with_pvk_v2.py`
+
+- 文件位置：`src/scripts/stepA1_2_rerun_pristine_with_pvk_v2.py`
+- 主要职责：保持几何和其他材料完全不变，仅替换 PVK surrogate 为 v2，重跑 pristine baseline 并完成 v1/v2 定量对照
+
+输入：
+- `resources/aligned_full_stack_nk.csv`
+- `resources/aligned_full_stack_nk_pvk_v2.csv`
+- `data/processed/phaseA1/phaseA1_pristine_baseline.csv`
+- `data/processed/phaseA1_2/pvk_v2_candidate_metrics.csv`
+
+核心处理流程：
+- 复用 `stepA1_pristine_baseline.py` 的常数玻璃与厚玻璃非相干级联口径
+- 生成 `R_front / R_stack / R_total` 的 v2 pristine baseline
+- 比较 `749->750 nm` 的 seam 步长、`740-780 nm` 的导数/二阶差分平滑性，以及 `810-1100 nm` 后窗 fringe 保真度
+- 输出局部 `720-780 nm` 对照图、全谱 v1/v2 对照图与 Phase A-1.2 结论日志
+
+输出：
+- `data/processed/phaseA1_2/phaseA1_2_pristine_baseline.csv`
+- `results/figures/phaseA1_2/phaseA1_2_pristine_decomposition.png`
+- `results/figures/phaseA1_2/phaseA1_2_pristine_3zones.png`
+- `results/figures/phaseA1_2/phaseA1_2_pristine_720_780_zoom.png`
+- `results/figures/phaseA1_2/phaseA1_2_pristine_v1_vs_v2_full_spectrum.png`
+- `results/logs/phaseA1_2/phaseA1_2_pvk_surrogate_rebuild.md`
+
+### 4.19 `stepA2_pvk_thickness_scan.py`
+
+- 文件位置：`src/scripts/stepA2_pvk_thickness_scan.py`
+- 主要职责：基于 `PVK surrogate v2` 扫描 `d_PVK` 对 pristine baseline 的调制规律，建立厚度-条纹相位-谱形图谱
+
+输入：
+- `resources/aligned_full_stack_nk_pvk_v2.csv`
+- `src/scripts/stepA1_pristine_baseline.py`
+
+核心处理流程：
+- 固定 `Glass / ITO / NiOx / SAM / C60 / Ag` 与常数玻璃口径，仅扫描 `d_PVK`
+- 以 `500-900 nm`、`5 nm` 步长重算 `R_stack / R_total`
+- 相对 `700 nm` 参考厚度构造 `ΔR_stack` 与 `ΔR_total`
+- 在 `810-1100 nm` 后窗提取主峰、主谷、峰谷间距与代表波长反射率
+- 输出 `R_stack / R_total / ΔR` 热力图、peak/valley tracking 图和代表厚度曲线图
+
+输出：
+- `data/processed/phaseA2/phaseA2_pvk_thickness_scan.csv`
+- `data/processed/phaseA2/phaseA2_pvk_feature_summary.csv`
+- `results/figures/phaseA2/phaseA2_R_stack_heatmap.png`
+- `results/figures/phaseA2/phaseA2_R_total_heatmap.png`
+- `results/figures/phaseA2/phaseA2_deltaR_stack_vs_700nm_heatmap.png`
+- `results/figures/phaseA2/phaseA2_deltaR_total_vs_700nm_heatmap.png`
+- `results/figures/phaseA2/phaseA2_peak_valley_tracking.png`
+- `results/figures/phaseA2/phaseA2_selected_thickness_curves.png`
+- `results/logs/phaseA2/phaseA2_pvk_thickness_scan.md`
+
+### 4.20 `stepB1_rear_bema_sandbox.py`
+
+- 文件位置：`src/scripts/stepB1_rear_bema_sandbox.py`
+- 主要职责：在保持 `PVK surrogate v2` 与名义几何不变的前提下，仅对 `PVK/C60` 后界面引入 `50/50` solid-solid Bruggeman 粗糙层，建立 rear-only roughness 指纹字典
+
+输入：
+- `resources/aligned_full_stack_nk_pvk_v2.csv`
+- `data/processed/phaseA1_2/phaseA1_2_pristine_baseline.csv`
+- `data/processed/phaseA2/phaseA2_pvk_thickness_scan.csv`
+- `data/processed/phaseA2/phaseA2_pvk_feature_summary.csv`
+
+核心处理流程：
+- 构建层序：
+  - `Glass / ITO / NiOx / SAM / PVK_bulk / BEMA(PVK,C60) / C60_bulk / Ag / Air`
+- 固定 Bruggeman 体积分数为 `50% PVK + 50% C60`
+- 对 `d_BEMA,rear = 0-30 nm` 做 `1 nm` 扫描
+- 执行厚度守恒：
+  - `d_PVK,bulk = 700 - 0.5 * d_BEMA,rear`
+  - `d_C60,bulk = max(0, 15 - 0.5 * d_BEMA,rear)`
+- 计算 `R_stack / R_total / ΔR`，提取后窗峰谷、对比度和最大 `|ΔR|`
+- 与 `Phase A-2` 的 `d_PVK` 指纹做后窗 `ΔR` 对照
+
+输出：
+- `data/processed/phaseB1/phaseB1_rear_bema_scan.csv`
+- `data/processed/phaseB1/phaseB1_rear_bema_feature_summary.csv`
+- `results/figures/phaseB1/phaseB1_R_stack_heatmap.png`
+- `results/figures/phaseB1/phaseB1_R_total_heatmap.png`
+- `results/figures/phaseB1/phaseB1_deltaR_stack_heatmap.png`
+- `results/figures/phaseB1/phaseB1_deltaR_total_heatmap.png`
+- `results/figures/phaseB1/phaseB1_selected_bema_curves.png`
+- `results/figures/phaseB1/phaseB1_peak_valley_tracking.png`
+- `results/figures/phaseB1/phaseB1_contrast_vs_bema.png`
+- `results/figures/phaseB1/phaseB1_bema_vs_pvk_deltaR_comparison.png`
+- `results/logs/phaseB1/phaseB1_rear_bema_sandbox.md`
+
+### 4.21 `stepA2_1_pvk_uncertainty_ensemble.py`
+
+- 文件位置：`src/scripts/stepA2_1_pvk_uncertainty_ensemble.py`
+- 主要职责：围绕 `PVK surrogate v2` 的 `740-850 nm` band-edge / absorption-tail 不确定性构建小型 ensemble，并把这组先验扰动传播到 `d_PVK` 与 rear-only BEMA 两类机制
+
+输入：
+- `resources/aligned_full_stack_nk_pvk_v2.csv`
+- `data/processed/phaseA1_2/phaseA1_2_pristine_baseline.csv`
+- `data/processed/phaseA2/phaseA2_pvk_thickness_scan.csv`
+- `data/processed/phaseA2/phaseA2_pvk_feature_summary.csv`
+- `data/processed/phaseB1/phaseB1_rear_bema_scan.csv`
+- `data/processed/phaseB1/phaseB1_rear_bema_feature_summary.csv`
+
+核心处理流程：
+- 以 `PVK surrogate v2` 为 nominal 成员，构建：
+  - `nominal`
+  - `more_absorptive`
+  - `less_absorptive`
+- 在 `740-850 nm` 主扰动窗内对 `k(λ)` 施加 smooth envelope 缩放，并用弱耦合 `n(λ)` 修正保证 `n/k/eps1/eps2` 连续且导数平滑
+- 额外在 `730-900 nm` 软窗内收尾，避免引入新的 band-edge seam
+- 输出 ensemble 的 `n/k/eps/导数` QA 图和 local comparison 表
+- 对代表性厚度子集 `d_PVK = 600 / 700 / 800 nm` 重算 `R_stack / R_total / ΔR`
+- 对代表性 rear-BEMA 子集 `d_BEMA,rear = 0 / 10 / 20 / 30 nm` 重算 `R_stack / R_total / ΔR`
+- 计算 rear-window 与 transition-window 的稳健性摘要，并输出 `robust vs surrogate-sensitive` 特征矩阵
+
+输出：
+- `resources/pvk_ensemble/aligned_full_stack_nk_pvk_ens_*.csv`
+- `data/processed/phaseA2_1/pvk_ensemble_manifest.csv`
+- `data/processed/phaseA2_1/pvk_ensemble_local_comparison.csv`
+- `data/processed/phaseA2_1/phaseA2_1_thickness_ensemble_scan.csv`
+- `data/processed/phaseA2_1/phaseA2_1_thickness_robustness_summary.csv`
+- `data/processed/phaseA2_1/phaseA2_1_rear_bema_ensemble_scan.csv`
+- `data/processed/phaseA2_1/phaseA2_1_rear_bema_robustness_summary.csv`
+- `data/processed/phaseA2_1/phaseA2_1_feature_robustness_matrix.csv`
+- `results/figures/phaseA2_1/*.png`
+- `results/logs/phaseA2_1/phaseA2_1_pvk_uncertainty_ensemble.md`
+
+### 4.22 `stepB2_front_bema_sandbox.py`
+
+- 文件位置：`src/scripts/stepB2_front_bema_sandbox.py`
+- 主要职责：在固定 `SAM` 厚度和名义层厚口径下，使用 `NiOx/PVK` 作为前界面 optical proxy，建立 front-only BEMA 指纹字典，并做代表性 uncertainty spot-check
+
+输入：
+- `resources/aligned_full_stack_nk_pvk_v2.csv`
+- `resources/pvk_ensemble/aligned_full_stack_nk_pvk_ens_{nominal,more_absorptive,less_absorptive}.csv`
+- `data/processed/phaseA2/phaseA2_pvk_thickness_scan.csv`
+- `data/processed/phaseB1/phaseB1_rear_bema_scan.csv`
+- `data/processed/phaseA2_1/phaseA2_1_feature_robustness_matrix.csv`
+
+核心处理流程：
+- 构建前界面 proxy 层序：
+  - `Glass / ITO / NiOx / SAM / BEMA_front(NiOx,PVK) / PVK_bulk / C60 / Ag / Air`
+- 固定 Bruggeman 体积分数为 `50% NiOx + 50% PVK`
+- 固定 `SAM = 5 nm`、`NiOx = 45 nm`、`C60 = 15 nm`
+- 对 `d_BEMA,front = 0-30 nm` 做 `1 nm` 扫描，并执行守恒：
+  - `d_PVK,bulk = 700 - d_BEMA,front`
+- 输出 `R_stack / R_total / ΔR` 热力图、前窗/过渡区重点图、代表曲线、peak/valley tracking 与三机制对照图
+- 对 `d_BEMA,front = 0 / 10 / 20 nm` 做 `nominal / more_absorptive / less_absorptive` spot-check，提取稳健与敏感特征
+
+输出：
+- `data/processed/phaseB2/phaseB2_front_bema_scan.csv`
+- `data/processed/phaseB2/phaseB2_front_bema_feature_summary.csv`
+- `data/processed/phaseB2/phaseB2_front_bema_ensemble_spotcheck.csv`
+- `data/processed/phaseB2/phaseB2_front_bema_robustness_summary.csv`
+- `results/figures/phaseB2/*.png`
+- `results/logs/phaseB2/phaseB2_front_bema_sandbox.md`
+
+### 4.23 `stepC1a_rear_air_gap_sandbox.py`
+
+- 文件位置：`src/scripts/stepC1a_rear_air_gap_sandbox.py`
+- 主要职责：仅在 `PVK/C60` 后界面引入真实 rear air gap，建立 low-gap 高分辨指纹字典，并完成 LOD 粗评估与 uncertainty spot-check
+
+输入：
+- `resources/aligned_full_stack_nk_pvk_v2.csv`
+- `resources/pvk_ensemble/aligned_full_stack_nk_pvk_ens_{nominal,more_absorptive,less_absorptive}.csv`
+- `data/processed/phaseA2/phaseA2_pvk_thickness_scan.csv`
+- `data/processed/phaseB1/phaseB1_rear_bema_scan.csv`
+- `data/processed/phaseB2/phaseB2_front_bema_scan.csv`
+
+核心处理流程：
+- 构建层序：
+  - `Glass / ITO / NiOx / SAM / PVK / Air_gap_rear / C60 / Ag / Air`
+- rear-gap 被视为真实分离层，不做厚度守恒扣减：
+  - `d_PVK = 700 nm` fixed
+  - `d_C60 = 15 nm` fixed
+- 采用低 gap 高分辨扫描：
+  - `0-20 nm`，步长 `0.5 nm`
+  - 额外补 `25 / 30 / 40 / 50 nm`
+- 输出 `R_stack / R_total / ΔR` 热力图、transition/rear 响应图、branch-aware peak/valley tracking、波数轴对照和四机制比较图
+- 对 `1 / 2 / 3 / 5 / 10 nm` 给出基于 `ΔR_noise ≈ 0.2%` 的理论 LOD 粗评估
+- 对 `0 / 2 / 5 / 10 nm` 做三成员 ensemble spot-check，判断哪些结论稳健、哪些绝对量敏感
+
+输出：
+- `data/processed/phaseC1a/phaseC1a_rear_air_gap_scan.csv`
+- `data/processed/phaseC1a/phaseC1a_rear_air_gap_feature_summary.csv`
+- `data/processed/phaseC1a/phaseC1a_rear_air_gap_lod_summary.csv`
+- `data/processed/phaseC1a/phaseC1a_rear_air_gap_ensemble_spotcheck.csv`
+- `data/processed/phaseC1a/phaseC1a_rear_air_gap_robustness_summary.csv`
+- `results/figures/phaseC1a/*.png`
+- `results/logs/phaseC1a/phaseC1a_rear_air_gap_sandbox.md`
+
+### 4.24 `stepC1b_front_air_gap_sandbox.py`
+
+- 文件位置：`src/scripts/stepC1b_front_air_gap_sandbox.py`
+- 主要职责：仅在 `SAM/PVK` 前界面引入真实 front air-gap，建立 low-gap 高分辨指纹字典，并完成 LOD 粗评估、uncertainty spot-check 与五机制对照
+
+输入：
+- `resources/aligned_full_stack_nk_pvk_v2.csv`
+- `resources/pvk_ensemble/aligned_full_stack_nk_pvk_ens_{nominal,more_absorptive,less_absorptive}.csv`
+- `data/processed/phaseA2/phaseA2_pvk_thickness_scan.csv`
+- `data/processed/phaseB2/phaseB2_front_bema_scan.csv`
+- `data/processed/phaseC1a/phaseC1a_rear_air_gap_scan.csv`
+
+核心处理流程：
+- 构建层序：
+  - `Glass / ITO / NiOx / SAM / Air_gap_front / PVK / C60 / Ag / Air`
+- front-gap 被视为真实分离层，不做厚度守恒扣减：
+  - `d_SAM = 5 nm` fixed
+  - `d_PVK = 700 nm` fixed
+  - `d_C60 = 15 nm` fixed
+- 采用低 gap 高分辨扫描：
+  - `0-20 nm`，步长 `0.5 nm`
+  - 额外补 `25 / 30 / 40 / 50 nm`
+- 输出 `R_stack / R_total / ΔR` 热力图、front/transition/rear 分窗响应图、rear-window peak/valley tracking、波数轴对照和五机制比较图
+- 对 `1 / 2 / 3 / 5 / 10 nm` 给出基于 `ΔR_noise ≈ 0.2%` 的理论 LOD 粗评估
+- 对 `0 / 2 / 5 / 10 nm` 做三成员 ensemble spot-check，判断哪些结论稳健、哪些绝对量敏感
+
+输出：
+- `data/processed/phaseC1b/phaseC1b_front_air_gap_scan.csv`
+- `data/processed/phaseC1b/phaseC1b_front_air_gap_feature_summary.csv`
+- `data/processed/phaseC1b/phaseC1b_front_air_gap_lod_summary.csv`
+- `data/processed/phaseC1b/phaseC1b_front_air_gap_ensemble_spotcheck.csv`
+- `data/processed/phaseC1b/phaseC1b_front_air_gap_robustness_summary.csv`
+- `results/figures/phaseC1b/*.png`
+- `results/logs/phaseC1b/phaseC1b_front_air_gap_sandbox.md`
+
+### 4.25 `stepPPT_phaseAtoC_assets.py`
+
+- 文件位置：`src/scripts/stepPPT_phaseAtoC_assets.py`
+- 主要职责：基于 `Phase A-1.2` 到 `Phase C-1b` 的既有 `processed/report` 结果，重绘一套统一风格的 `R_total-only` PPT 汇报资产，不引入任何新的物理模拟
+
+输入：
+- `data/processed/phaseA1/phaseA1_pristine_baseline.csv`
+- `data/processed/phaseA1_2/phaseA1_2_pristine_baseline.csv`
+- `data/processed/phaseA1_2/pvk_v1_v2_local_comparison.csv`
+- `data/processed/phaseA2/phaseA2_pvk_thickness_scan.csv`
+- `data/processed/phaseB1/phaseB1_rear_bema_scan.csv`
+- `data/processed/phaseB2/phaseB2_front_bema_scan.csv`
+- `data/processed/phaseC1a/phaseC1a_rear_air_gap_scan.csv`
+- `data/processed/phaseC1b/phaseC1b_front_air_gap_scan.csv`
+- `results/report/phaseA*_*/PHASE_*.md`
+- `results/report/phaseB*_*/PHASE_*.md`
+- `results/report/phaseC*_*/PHASE_*.md`
+
+核心处理流程：
+- 统一重绘 baseline、thickness、rear-BEMA、front-BEMA、rear-gap、front-gap 的 `R_total / Delta R_total` 主图
+- 为每一页输出 `main_figure.png / secondary_figure.png / slide_text.md / source_manifest.md`
+- 生成 `07_summary/mechanism_summary_matrix.png` 和 `appendix_pvk_surrogate_fix` 两张附录图
+- 生成总 `00_manifest.md`，用于快速拼装 Phase A→C 的 PPT 叙事线
+- 同步更新 `results/report/README.md` 与 `report_manifest.csv`
+
+输出：
+- `results/report/ppt_phaseAtoC_assets/00_manifest.md`
+- `results/report/ppt_phaseAtoC_assets/01_baseline/*`
+- `results/report/ppt_phaseAtoC_assets/02_thickness/*`
+- `results/report/ppt_phaseAtoC_assets/03_rear_bema/*`
+- `results/report/ppt_phaseAtoC_assets/04_front_bema/*`
+- `results/report/ppt_phaseAtoC_assets/05_rear_gap/*`
+- `results/report/ppt_phaseAtoC_assets/06_front_gap/*`
+- `results/report/ppt_phaseAtoC_assets/07_summary/*`
+- `results/report/ppt_phaseAtoC_assets/appendix_pvk_surrogate_fix/*`
+
+### 4.26 `stepD1_airgap_discrimination_database.py`
+
+- 文件位置：`src/scripts/stepD1_airgap_discrimination_database.py`
+- 主要职责：在 realistic `d_PVK + front/rear roughness` 背景上统一建立 `thickness nuisance / roughness nuisance / front-gap overlay / rear-gap overlay` 的 `R_total` 判别数据库，为后续 air-gap 识别算法比较提供结构化输入
+
+输入：
+- `resources/aligned_full_stack_nk_pvk_v2.csv`
+- `results/report/phaseA2_pvk_thickness_scan/PHASE_A2_REPORT.md`
+- `results/report/phaseA2_1_pvk_uncertainty_ensemble/PHASE_A2_1_REPORT.md`
+- `results/report/phaseB1_rear_bema_sandbox/PHASE_B1_REPORT.md`
+- `results/report/phaseB2_front_bema_sandbox/PHASE_B2_REPORT.md`
+- `results/report/phaseC1a_rear_air_gap_sandbox/PHASE_C1A_REPORT.md`
+- `results/report/phaseC1b_front_air_gap_sandbox/PHASE_C1B_REPORT.md`
+
+核心处理流程：
+- 复用 `full_stack_microcavity.py` 的组合入口，在同一 coherent stack 中统一加入 `d_PVK`、front/rear BEMA background 与单侧 gap overlay
+- 设定 realistic baseline：`d_PVK=700 nm, d_BEMA_front=10 nm, d_BEMA_rear=20 nm, no gap`
+- 构建五类 logical family：
+  - `thickness_nuisance`
+  - `front_roughness_nuisance`
+  - `rear_roughness_nuisance`
+  - `front_gap_on_background`
+  - `rear_gap_on_background`
+- 额外保留 `background_anchor` 作为 reference tracking family
+- 对每个 logical case 输出：
+  - `R_total`
+  - `Delta_R_total_vs_reference`
+  - front / transition / rear 窗口特征
+  - rear-window shift matching
+  - peak/valley 工程摘要
+- 进一步生成 feature scatter / boxplots / discrimination atlas，并同步写出 report 层资产
+
+输出：
+- `data/processed/phaseD1/phaseD1_case_manifest.csv`
+- `data/processed/phaseD1/phaseD1_rtotal_database.csv`
+- `data/processed/phaseD1/phaseD1_feature_database.csv`
+- `data/processed/phaseD1/phaseD1_discrimination_summary.csv`
+- `results/figures/phaseD1/*.png`
+- `results/logs/phaseD1/phaseD1_airgap_discrimination_database.md`
+- `results/report/phaseD1_airgap_discrimination_database/`
+
 ## 5. Data Flow
 
 当前项目主数据流如下：
@@ -720,6 +1217,116 @@ resources/aligned_full_stack_nk.csv
     -> results/figures/phase07/*_residual_diagnostics.png
     -> results/figures/phase07/*_rear_basin_scan.png
     -> results/logs/phase07/*_optimizer_log.md
+
+data/processed/phase07/phase07_fit_summary.csv
+data/processed/phase07/fit_inputs/*_fit_input.csv
+resources/aligned_full_stack_nk.csv
+    -> step08_theoretical_tmm_modeling.py (冻结 Phase 07 参数 -> 重建物理反射率 -> 前表面散射映射 -> 后窗 z-score 理论核对 -> 批量输出)
+    -> data/processed/phase08/phase08_theory_summary.csv
+    -> data/processed/phase08/phase08_source_manifest.csv
+    -> data/processed/phase08/theory_curves/*_theory_curve.csv
+    -> results/figures/phase08/*_theory_vs_measured.png
+    -> results/logs/phase08/phase08_theoretical_tmm_modeling.md
+
+resources/aligned_full_stack_nk.csv
+    -> stepA1_pristine_baseline.py (常数玻璃覆盖 -> Fresnel 前表面 -> 后侧相干 stack -> 厚玻璃非相干级联 -> 分解图 / 三区图 / 日志)
+    -> data/processed/phaseA1/phaseA1_pristine_baseline.csv
+    -> results/figures/phaseA1/phaseA1_pristine_decomposition.png
+    -> results/figures/phaseA1/phaseA1_pristine_3zones.png
+    -> results/logs/phaseA1/phaseA1_pristine_baseline.md
+
+resources/aligned_full_stack_nk.csv
+data/processed/phaseA1/phaseA1_pristine_baseline.csv
+data/processed/CsFAPI_nk_extended.csv
+resources/digitized/phase02_fig3_csfapi_optical_constants_digitized.csv
+src/scripts/step05c_build_aligned_nk_stack.py
+    -> stepA1_1_pvk_seam_audit.py (PVK seam 局部法医审计 -> 三源追溯 -> 堆栈放大比较 -> Ag 边界对照 -> 代码级排查)
+    -> data/processed/phaseA1_seam_audit/*.csv
+    -> results/figures/phaseA1_seam_audit/*.png
+    -> results/logs/phaseA1_seam_audit/phaseA1_seam_audit.md
+
+resources/aligned_full_stack_nk.csv
+data/processed/CsFAPI_nk_extended.csv
+resources/digitized/phase02_fig3_csfapi_optical_constants_digitized.csv
+data/processed/phaseA1_seam_audit/*.csv
+    -> stepA1_2_build_pvk_surrogate_v2.py (候选 transition zone 扫描 -> smoothstep n bridge + cosine-tail k decay -> seam 指标 / 平滑性 / fringe 保真度联合打分)
+    -> resources/aligned_full_stack_nk_pvk_v2.csv
+    -> data/processed/phaseA1_2/pvk_v2_candidate_metrics.csv
+    -> data/processed/phaseA1_2/pvk_v1_v2_local_comparison.csv
+    -> results/figures/phaseA1_2/pvk_v2_*.png
+    -> results/logs/phaseA1_2/phaseA1_2_pvk_surrogate_build.md
+
+resources/aligned_full_stack_nk_pvk_v2.csv
+data/processed/phaseA1/phaseA1_pristine_baseline.csv
+    -> stepA1_2_rerun_pristine_with_pvk_v2.py (仅替换 PVK surrogate -> pristine baseline rerun -> seam 步长 / 局部平滑性 / 后窗 fringe 保真度对照)
+    -> data/processed/phaseA1_2/phaseA1_2_pristine_baseline.csv
+    -> results/figures/phaseA1_2/phaseA1_2_pristine_*.png
+    -> results/logs/phaseA1_2/phaseA1_2_pvk_surrogate_rebuild.md
+
+resources/aligned_full_stack_nk_pvk_v2.csv
+    -> stepA2_pvk_thickness_scan.py (扫描 d_PVK -> pristine baseline rerun -> rear-window peak/valley tracking -> R/ΔR 热力图)
+    -> data/processed/phaseA2/phaseA2_pvk_thickness_scan.csv
+    -> data/processed/phaseA2/phaseA2_pvk_feature_summary.csv
+    -> results/figures/phaseA2/phaseA2_*.png
+    -> results/logs/phaseA2/phaseA2_pvk_thickness_scan.md
+
+resources/aligned_full_stack_nk_pvk_v2.csv
+data/processed/phaseA1_2/phaseA1_2_pristine_baseline.csv
+data/processed/phaseA2/phaseA2_pvk_thickness_scan.csv
+    -> stepB1_rear_bema_sandbox.py (rear-only PVK/C60 BEMA -> 厚度守恒 -> R/ΔR 热力图 -> d_PVK 正交对照)
+    -> data/processed/phaseB1/phaseB1_rear_bema_scan.csv
+    -> data/processed/phaseB1/phaseB1_rear_bema_feature_summary.csv
+    -> results/figures/phaseB1/phaseB1_*.png
+    -> results/logs/phaseB1/phaseB1_rear_bema_sandbox.md
+
+resources/aligned_full_stack_nk_pvk_v2.csv
+data/processed/phaseA2/phaseA2_pvk_thickness_scan.csv
+data/processed/phaseB1/phaseB1_rear_bema_scan.csv
+    -> stepA2_1_pvk_uncertainty_ensemble.py (PVK nominal/more/less absorptive ensemble -> thickness 子集传播 -> rear-BEMA 子集传播 -> robustness summary / feature matrix)
+    -> resources/pvk_ensemble/aligned_full_stack_nk_pvk_ens_*.csv
+    -> data/processed/phaseA2_1/*.csv
+    -> results/figures/phaseA2_1/*.png
+    -> results/logs/phaseA2_1/phaseA2_1_pvk_uncertainty_ensemble.md
+
+resources/aligned_full_stack_nk_pvk_v2.csv
+resources/pvk_ensemble/aligned_full_stack_nk_pvk_ens_*.csv
+data/processed/phaseA2/phaseA2_pvk_thickness_scan.csv
+data/processed/phaseB1/phaseB1_rear_bema_scan.csv
+    -> stepB2_front_bema_sandbox.py (front-only NiOx/PVK proxy BEMA -> PVK 守恒扣减 -> R/ΔR 热力图 -> front/rear/thickness 对照 -> lightweight uncertainty spot-check)
+    -> data/processed/phaseB2/*.csv
+    -> results/figures/phaseB2/*.png
+    -> results/logs/phaseB2/phaseB2_front_bema_sandbox.md
+
+resources/aligned_full_stack_nk_pvk_v2.csv
+resources/pvk_ensemble/aligned_full_stack_nk_pvk_ens_*.csv
+data/processed/phaseA2/phaseA2_pvk_thickness_scan.csv
+data/processed/phaseB1/phaseB1_rear_bema_scan.csv
+data/processed/phaseB2/phaseB2_front_bema_scan.csv
+    -> stepC1a_rear_air_gap_sandbox.py (rear air-gap only -> low-gap high-resolution scan -> branch-aware tracking -> LOD粗评估 -> thickness/rear-BEMA/front-BEMA 四机制对照 -> uncertainty spot-check)
+    -> data/processed/phaseC1a/*.csv
+    -> results/figures/phaseC1a/*.png
+    -> results/logs/phaseC1a/phaseC1a_rear_air_gap_sandbox.md
+
+resources/aligned_full_stack_nk_pvk_v2.csv
+resources/pvk_ensemble/aligned_full_stack_nk_pvk_ens_*.csv
+data/processed/phaseA2/phaseA2_pvk_thickness_scan.csv
+data/processed/phaseB2/phaseB2_front_bema_scan.csv
+data/processed/phaseC1a/phaseC1a_rear_air_gap_scan.csv
+    -> stepC1b_front_air_gap_sandbox.py (front air-gap only -> low-gap high-resolution scan -> front/transition/rear 分窗响应 -> LOD粗评估 -> thickness/front-BEMA/rear-gap 五机制对照 -> uncertainty spot-check)
+    -> data/processed/phaseC1b/*.csv
+    -> results/figures/phaseC1b/*.png
+    -> results/logs/phaseC1b/phaseC1b_front_air_gap_sandbox.md
+
+selected phase outputs
+    -> results/report/ (精选 CSV / PNG / Markdown 汇报层)
+    -> results/report/phaseA1_2_pvk_surrogate_and_pristine/*
+    -> results/report/phaseA2_1_pvk_uncertainty_ensemble/*
+    -> results/report/phaseA2_pvk_thickness_scan/*
+    -> results/report/phaseB1_rear_bema_sandbox/*
+    -> results/report/phaseB2_front_bema_sandbox/*
+    -> results/report/phaseC1a_rear_air_gap_sandbox/*
+    -> results/report/phaseC1b_front_air_gap_sandbox/*
+    -> results/report/ppt_phaseAtoC_assets/*
 ```
 
 可按 SOP 理解为：
@@ -734,7 +1341,17 @@ resources/aligned_full_stack_nk.csv
 8. `step06_dual_mode_microcavity_sandbox.py` 则在不再引入拟合自由度的前提下，把全栈材料表直接转为双模式微腔缺陷字典，用于后续缺陷定量和指纹匹配
 9. `step07_orthogonal_radar_and_baseline.py` 进一步把缺陷模式压缩为 `front/back` 两类宏观正交界面，并补上面向后续 LM 的标准前向接口与三分区基准可视化
 10. `step07_dual_window_inversion.py` 则把 `Phase 06 HDR`、`Phase 05c 对齐 n-k` 和 `Phase 07 双窗反演` 接成当前主干闭环，能够直接把 `hdr_curves` 样本转为标准化拟合输入、参数表、逐波长拟合表、优化日志和诊断图
-11. 当前脚本链已经具备“文献数字化 / 椭偏报告解析 -> 材料数据库 -> 全栈对齐 `n-k` 表 -> 宏观正交界面指纹字典 -> 双窗联合反演”的 Phase 07 闭环
+11. `step08_theoretical_tmm_modeling.py` 在不新增拟合自由度的前提下，把 `Phase 07` 的最优参数固化为可复现的前向建模输出，便于后续做结构假设对比和跨样本理论审计
+12. `stepA1_pristine_baseline.py` 则进一步把全栈材料表压缩为最严格的零缺陷参考谱，显式拆开 `R_front`、`R_stack` 与 `R_total`
+13. `stepA1_1_pvk_seam_audit.py` 则把 Phase A-1 中暴露的 `749/750 nm` 台阶追溯到 PVK seam，本质上为后续 repair 提供证据链而不是直接修复
+14. `stepA1_2_build_pvk_surrogate_v2.py` 在材料层重建 `PVK surrogate v2`，把 `749/750 nm` 的跳点降级为连续 band-edge 过渡
+15. `stepA1_2_rerun_pristine_with_pvk_v2.py` 进一步验证修复后 `ΔR_stack(749->750)` 与 `ΔR_total(749->750)` 已显著压低，同时后窗 fringe 保持稳定
+16. `stepA2_pvk_thickness_scan.py` 进一步把 repaired pristine baseline 推进为厚度-条纹相位图谱，可直接区分“厚度导致的全局 fringe 漂移”与“界面缺陷导致的局部扰动”
+17. `stepB1_rear_bema_sandbox.py` 则把 rear-only `PVK/C60` intermixing 单独拆成独立机制，得到与 `d_PVK` 可比较的后界面粗糙指纹
+18. `stepA2_1_pvk_uncertainty_ensemble.py` 则把 `PVK surrogate v2` 的 band-edge 不确定性正式传播到 thickness 与 rear-BEMA 两类机制，用于区分高置信度结构指纹和 surrogate-sensitive 特征
+19. `stepB2_front_bema_sandbox.py` 则把前界面 `NiOx/PVK` optical proxy 单独拆成第三类机制，形成与 thickness / rear-BEMA 并列的 front-side roughness 指纹
+20. `stepC1a_rear_air_gap_sandbox.py` 则把真实 rear air-gap 作为第四类机制单独引入，提供与 thickness / front-BEMA / rear-BEMA 可直接比较的分离层指纹与理论 LOD
+21. 当前脚本链已经具备“文献数字化 / 椭偏报告解析 -> 材料数据库 -> 全栈对齐 `n-k` 表 -> pristine baseline decomposition -> seam forensic audit -> surrogate rebuild -> pristine rerun -> thickness scan -> rear-only BEMA sandbox -> PVK uncertainty propagation -> front-only BEMA sandbox -> rear air-gap sandbox -> 宏观正交界面指纹字典 -> 双窗联合反演 -> 固定参数理论重建”的前向-反演联合基线
 
 ## 6. Key Physical / Numerical Assumptions
 
@@ -747,6 +1364,38 @@ resources/aligned_full_stack_nk.csv
 - 厂家银镜基准若数值范围大于 `1.5`，则按百分比转为 `0-1` 小数
 - PVK 的近红外色散来源为 [LIT-0001] Fig. 3 的 `ITO/CsFAPI` 数字化 `n` 曲线，并通过 Cauchy 模型外推到 `1100 nm`
 - `750-1100 nm` 内强制采用 `k = 0`
+- Phase A-1.2 新增 `PVK surrogate v2`：
+  - 仅对 `740-780 nm` band-edge 区域做局部 surrogate rebuild
+  - 主推荐 transition zone 为 `740-780 nm`
+  - `n` 用 `smoothstep` 桥接到 long-wave 趋势，`k` 用 `smoothstep + cosine-tail` 衰减到透明尾
+  - 不再允许 `750 nm` 起 `k = 0` 的硬切换
+- Phase A-2 固定 `PVK surrogate v2` 与其余材料参数，仅扫描 `d_PVK`，因此当前厚度灵敏度图谱反映的是“零缺陷微腔光程变化”，不是缺陷调制叠加结果
+- Phase B-1 固定 `PVK surrogate v2` 与名义层厚，仅在 `PVK/C60` 后界面加入 `50/50` solid-solid BEMA，并执行 `PVK/C60` 守恒扣减，因此当前 rear-BEMA 指纹反映的是“后界面 intermixing + 相邻层变薄”的联合机制
+- Phase A-2.1 进一步引入三成员 PVK uncertainty ensemble：
+  - `nominal` 直接沿用 `PVK surrogate v2`
+  - `more_absorptive` 在 `740-850 nm` 增强 `k(λ)` 吸收尾，并做弱耦合 `n(λ)` 上调
+  - `less_absorptive` 在 `740-850 nm` 削弱 `k(λ)` 吸收尾，并做弱耦合 `n(λ)` 下调
+  - 三成员都要求在 `730-900 nm` 保持连续、无新 seam，且不破坏 `850-1100 nm` 的 nominal rear-window 趋势
+- 当前 A-2.1 的 first-pass 传播结果表明：
+  - `d_PVK` 的 rear-window 相位/峰位漂移结论对 surrogate 选择高度稳健
+  - rear-only BEMA 的“局部包络/轻微振幅扰动”结论仍成立，但其幅值量级对 band-edge 先验敏感
+  - 绝对 `R_total(780 nm)` 一类 band-edge 邻域观测量不宜直接作为高置信度结构归因特征
+- Phase B-2 进一步引入 front-only `NiOx/PVK` proxy BEMA：
+  - 层序固定为 `Glass / ITO / NiOx / SAM / BEMA_front(NiOx,PVK) / PVK_bulk / C60 / Ag / Air`
+  - `SAM`、`NiOx` 与 `C60` 厚度固定不变
+  - 守恒仅作用于 `PVK`：`d_PVK,bulk = 700 - d_BEMA,front`
+  - 当前结果表明 front-BEMA 的主响应偏向 `400-810 nm` 的前窗/过渡区，而不是 rear-window 主相位机制
+- Phase B-2 的 spot-check 进一步表明：
+  - front-window 平均 `ΔR` 属于较稳健特征
+  - transition/rear 振幅量级与 `R_total(780 nm)` 仍会受到 surrogate 先验影响
+- Phase C-1a 进一步引入 rear air-gap only：
+  - 层序固定为 `Glass / ITO / NiOx / SAM / PVK / Air_gap_rear / C60 / Ag / Air`
+  - rear-gap 被视为真实分离层，不做 `PVK/C60` 厚度守恒扣减
+  - 低 gap 区域采用 `0-20 nm / 0.5 nm` 高分辨扫描，并补 `25 / 30 / 40 / 50 nm`
+- 当前 C-1a 的 first-pass 结果表明：
+  - rear-gap 的主敏感窗口位于 transition/rear，理论 LOD 在 `1 nm` 级已经超过 `0.2%`
+  - rear-gap 比 rear-BEMA 更强、更非线性，也比 thickness 更不像全局平移
+  - rear-gap 可作为与 thickness / rear-BEMA / front-BEMA 并列的第四类机制字典
 - `1000-1100 nm` 属于超出原始椭偏测量窗口的模型外推区
 - Phase 04 中 `1100-1500 nm` 的 PVK 折射率不再直接沿用表格，而是基于 `1050-1100 nm` 的真实点二次拟合 Cauchy 尾段后继续外推，且仍强制 `k = 0`
 - 粗糙层采用 `50% PVK + 50% Air` 的 BEMA 有效介质
@@ -996,33 +1645,72 @@ resources/aligned_full_stack_nk.csv
 
 ## 9. Recent Update Summary
 
-- 更新时间：`2026-04-10`
-- 当前 Phase：`Phase 07`
+- 更新时间：`2026-04-13`
+- 当前 Phase：`Phase D-1`
 - 本次新增/修改：
-  - 新增 `src/core/phase07_dual_window.py`，建立 Phase 07 双窗反演核心模块
-  - 新增 `src/scripts/step07_dual_window_inversion.py`，建立原始多曝光 / `hdr_curves` 双入口拟合脚本
-  - 新增 `data/processed/phase07/fit_inputs/` 与 `data/processed/phase07/fit_results/` 标准中间件落盘规则
-  - 新增 `results/figures/phase07/` 与 `results/logs/phase07/`，输出单样本 4 图 + 优化日志
-  - 更新 `PROJECT_STATE.md`，记录 Phase 07 的 C60 守恒、双窗窗口口径、优化器结构和当前边界风险
+  - 新增 `src/scripts/stepD1_airgap_discrimination_database.py`，基于 realistic `d_PVK + front/rear roughness` 背景统一生成 `R_total` 判别数据库
+  - 在 `src/core/full_stack_microcavity.py` 新增组合前向入口，允许在同一 coherent stack 中叠加 `front/rear BEMA background` 与单侧 `front-gap / rear-gap`
+  - 新增 `data/processed/phaseD1/`、`results/figures/phaseD1/`、`results/logs/phaseD1/` 与 `results/report/phaseD1_airgap_discrimination_database/`
+  - 产出 case manifest、全谱库、窗口特征库、rear shift analysis、family summary 和 discrimination atlas
 - 已验证结论：
-  - 当前 `DEVICE-1-withAg-P1` 与 `DEVICE-1-withoutAg-P1` 已成功完成双窗拟合并落盘
-  - C60 守恒检查通过：`d_rough = 0/10/20/30 nm` 对应 `d_C60_bulk = 15/10/5/0 nm`
-  - `withAg / withoutAg` 两类终端边界都可返回有限且 `0-1` 范围内的反射率
-  - 前窗 / 后窗的 `scale_w` 均大于 `0.005` 下限，未出现权重爆炸
+  - 局部 thickness nuisance 在 realistic background 上仍主要表现为 rear-window fringe 的高可解释 shift
+  - front / rear roughness 更像 envelope / amplitude perturbation，而不是 rigid shift
+  - front-gap / rear-gap 叠加 roughness background 后，仍保留不同的窗口分布与非刚性 residual 指纹
 - 仍待验证：
-  - 当前真实样本的多参数贴边仍需通过更强先验或更合理边界进一步收敛
-  - `Ag_mirro-500us` 与 `Ag_mirro-10ms` 的归一化失配根因仍未确认
-  - 当前 HDR 逻辑虽已扩展到批量样品，但仍未纳入标准 `data/raw/` 目录
+  - 还没有正式训练或比较分类器，当前数据库仍是算法讨论输入，不是最终识别器
+  - composition variation 尚未纳入，因此当前 separability 仅覆盖 thickness / roughness / gap 三类结构机制
+  - 仍是 specular TMM；散射、dual-gap、gap+BEMA 联合机制与实验噪声模型尚未引入
+
+### Phase A-local Update (2026-04-13)
+
+- Current Phase: `Phase A-local`
+- Update summary:
+  - 已新增 `src/scripts/stepA_local_pvk_thickness_window.py`，用于在 `PVK surrogate v2` 与 nominal 全器件结构下重绘更现实的局部厚度指纹图
+  - 已新增 `data/processed/phaseA_local/`、`results/figures/phaseA_local/`、`results/logs/phaseA_local/` 与 `results/report/phaseA_local_thickness_window/`
+  - 已生成 `phaseA_local_thickness_scan.csv`、`phaseA_local_thickness_feature_summary.csv`、`phaseA_local_deltaRtotal_heatmap.png`、`phaseA_local_selected_curves.png`、`phaseA_local_thickness_window.md` 与 `PHASE_A_LOCAL_REPORT.md`
+- Data flow:
+  - `resources/aligned_full_stack_nk_pvk_v2.csv`
+  - `src/core/full_stack_microcavity.py`
+  - `src/scripts/stepA1_pristine_baseline.py`
+  - `src/scripts/stepA_local_pvk_thickness_window.py`
+
+### Phase D-2 Explain Update (2026-04-13)
+
+- Current Phase: `Phase D-2`
+- Update summary:
+  - 已新增 `src/scripts/stepD2b_explain_feature_pipeline.py`，专门为 D-2 的 38 个量化特征生成“原始谱 -> 特征组 -> routing”解释图
+  - 已新增 `results/report/phaseD2_quantitative_feature_dictionary/explain_feature_pipeline/`，其中包含 `feature_extraction_pipeline.png`、`raw_vs_feature_based_analysis.png`、`feature_groups_overview.png` 与 `slide_text.md`
+  - 已新增 `results/report/phaseD2_quantitative_feature_dictionary/pptx_feature_extraction_explainer/`，使用 MiniMax `pptx-generator` 的 PptxGenJS 工作流生成 3 页可编辑 `feature_extraction_explainer.pptx` 与配套 `feature_extraction_explainer_notes.md`
+  - 该任务严格复用 `phaseD1_rtotal_database.csv`、`phaseD2_quantitative_feature_database.csv`、`phaseD2_family_templates.csv` 与 `PHASE_D2_REPORT.md`，未新增仿真、未改特征定义、未写入新的中间数据库
+- Verified conclusions:
+  - 已把 D-2 的 38 个特征来源稳定整理为 5 组：分窗能量、后窗平移、后窗频谱、小波、模板相似度
+  - 已明确对组会口径：feature extraction 用于 routing，而不是替代 full-spectrum fitting
+  - 已把 3 张解释图重排为 3 页原生可编辑 PPT，而不是整页贴图
+- Pending verification:
+  - 当前解释图仍是汇报信息图，不是逐步骤的算法中间态可视化；如后续需要更细粒度的中间态截图，应单独扩展新的 report 任务
+  - `data/processed/phaseA_local/phaseA_local_thickness_scan.csv`
+  - `data/processed/phaseA_local/phaseA_local_thickness_feature_summary.csv`
+  - `results/figures/phaseA_local/phaseA_local_deltaRtotal_heatmap.png`
+  - `results/figures/phaseA_local/phaseA_local_selected_curves.png`
+  - `results/logs/phaseA_local/phaseA_local_thickness_window.md`
+  - `results/report/phaseA_local_thickness_window/*`
+- Verified results:
+  - 扫描范围固定为 `d_PVK = 675-725 nm`，步长 `1 nm`，共 `51` 个 thickness cases
+  - `R_total` 的局部厚度响应在前窗最弱，在 `650-810 nm` 与 `810-1055 nm` 明显增强，其中 rear-window 最大 RMS `ΔR_total` 约为 `7.52%`
+  - `rear_peak_nm` 由 `922 nm` 平移到 `972 nm`，`rear_valley_nm` 由 `820 nm` 平移到 `871 nm`，说明局部 thickness 指纹主要表现为 rear-window fringe 的系统漂移
+- Risks / pending checks:
+  - 本轮仅作为局部厚度起伏字典，不含 roughness、air-gap、composition variation 与 feature engineering
+  - `500-900 nm` 的宽范围厚度图仍保留为全局趋势参考，但不应替代本轮局部厚度判别图
 
 ## 10. Recommended Next Actions
 
 建议后续优先处理以下事项：
 
-1. 回查 `Ag_mirro-500us` 与 `Ag_mirro-10ms` 的归一化失配来源，优先检查仪器门控、导出流程与实际曝光标签
-2. 基于 `phase07_fit_summary.csv` 的贴边结果，重新评估 `ito_alpha`、`pvk_b_scale` 与 `niox_k` 的边界和先验
-3. 判断 `withAg / withoutAg` 是否应拆分为两套参数边界或固定参数策略
-4. 建立 `data/raw/phase06/` 或稳定数据索引，把 OneDrive 外部路径纳入规范化入口
-5. 继续把 `step01`/`step01b`/`step02` 中可复用逻辑下沉到 `src/core/`
+1. 优先进入 `Phase C-2 gap vs BEMA coupled comparison`，在 separation vs intermixing 两类缺陷之间建立系统混淆边界
+2. 并行评估是否需要新增 `Phase C-3 front-gap vs rear-gap symmetry comparison`，对前后界面分离机制做统一归一化比较
+3. 回查 `Ag_mirro-500us` 与 `Ag_mirro-10ms` 的归一化失配来源，优先检查仪器门控、导出流程与实际曝光标签
+4. 基于 `phase07_fit_summary.csv` 的贴边结果，重新评估 `ito_alpha`、`pvk_b_scale` 与 `niox_k` 的边界和先验
+5. 建立 `data/raw/phase06/` 或稳定数据索引，把 OneDrive 外部路径纳入规范化入口
 
 ## 11. Update Rule
 

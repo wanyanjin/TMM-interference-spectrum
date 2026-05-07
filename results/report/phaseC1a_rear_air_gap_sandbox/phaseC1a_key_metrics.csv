@@ -1,0 +1,8 @@
+﻿metric,value
+scan_mode,A
+noise_floor_pct,0.20
+max_transition_abs_deltaR_total_pct,9.405
+max_rear_abs_deltaR_total_pct,12.826
+min_detectable_gap_total_nm,1.0
+robust_feature_count,0
+sensitive_feature_count,2

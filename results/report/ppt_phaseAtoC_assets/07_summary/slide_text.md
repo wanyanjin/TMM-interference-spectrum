@@ -1,0 +1,15 @@
+# 标题建议
+五类单因素机制字典：统一落在 `R_total`
+
+# 主结论
+从 Phase A 到 C，我们已经建立了基于完整器件 `R_total` 的五类单因素机制字典，重点不在信号大小，而在不同机制的窗口分布与谱形特征差异。
+
+# 要点
+- thickness 主导后窗 fringe 的全局相位/峰谷位置漂移。
+- BEMA 更接近 intermixing / transition-layer，gap 更接近 real separation。
+- 真正可用于区分机制的核心不是单个点值，而是 `R_total` 的窗口分布与谱形形态。
+
+Structure cue: five mechanisms are compared on the same full-device layer stack, with only one highlighted modification each time.
+
+# 讲稿提示
+可以把这一页当成整个 Phase A→C 的收束页。前面所有单因素扫描最后都汇到这张矩阵里：每一类机制究竟改了什么物理量、主要影响哪个窗口、在 `R_total` 上留下什么指纹。后续若要解释实验异常，先看它更像矩阵中的哪一类，而不是直接跳到联合拟合。

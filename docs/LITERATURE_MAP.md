@@ -15,6 +15,7 @@
 | ID | Title | Tags | Key Models / Parameters | Source Coverage | Status |
 | --- | --- | --- | --- | --- | --- |
 | `LIT-0001` | Khan et al. (2024) Optical constants manipulation of formamidinium lead iodide perovskites | `perovskite`, `Tauc-Lorentz`, `FAPI`, `CsFAPI`, `n-k`, `ellipsometry` | 三振子 Tauc-Lorentz；FAPI/CsFAPI 的 `Eg`、`eps_inf`、`A_i/E_i/C_i`；`eps_r=n^2-k^2`；`eps_i=2nk` | 2 个重复 MinerU 目录已合并 | indexed |
+| `LIT-0002` | Subedi et al. Supplementary Information for FA1-xCsxPbI3 optical properties | `perovskite`, `FA1-xCsxPbI3`, `dielectric-function`, `epsilon`, `n-k`, `table-s3` | `x=0.0/0.1/0.2/0.3/0.4` 的 `Photon Energy / ε1 / ε2` 表；`eps_r=n^2-k^2`；`eps_i=2nk` | 当前仓库存在补充材料 docx，可直接抽取表格行 | indexed |
 
 ## Entries
 
@@ -110,3 +111,63 @@
 #### Code Links
 
 - `src/scripts/step02_tmm_inversion.py`
+
+### [LIT-0002] Subedi et al. Supplementary Information for: Formamidinium + Cesium Lead Triiodide Perovskites: Discrepancies between Thin Film Optical Absorption and Solar Cell Efficiency
+
+- Status: `indexed`
+- DOI: `not confirmed from local supplementary docx`
+- Tags: `FA1-xCsxPbI3`, `Cs-alloy`, `dielectric-function`, `epsilon`, `n-k`, `table-s3`
+- Source File: `resources/1-s2.0-S0927024818304446-mmc1.docx`
+- Source Note: 当前仓库只有补充材料 `.docx`，未配套主文 PDF/MinerU 目录；本条目仅记录本地可验证的 `Table S3` 数据与可实现公式。
+
+#### Applicability
+
+- 适用于 `FA1-xCsxPbI3`（`x=0.0/0.1/0.2/0.3/0.4`）的文献介电函数表直接转 `n/k`。
+- 对本项目当前最直接的价值，是为 Phase 08 提供 `x=0.1` 候选 PVK 光学常数来源，并与现有 `aligned_full_stack_nk.csv` 的 PVK 列做并排比较。
+
+#### Key Extraction
+
+- Table S3 给出了 `FA1-xCsxPbI3` 多个组分的数值反演介电函数：
+  - `Photon Energy (eV)`
+  - `ε1`
+  - `ε2`
+- 当前任务直接使用的子表是：
+  - `ε for FA0.9Cs0.1PbI3 vs photon energy (eV)`
+- 本地 docx 可提取的 `x=0.1` 行数为 `695` 行。
+- 本地 `x=0.1` 表的能量覆盖约为：
+  - `0.734799 - 5.886830 eV`
+- 对应波长覆盖约为：
+  - `210.613 - 1687.321 nm`
+
+#### Formula Notes
+
+- 本条目可直接支持从介电函数恢复 `n, k`：
+  - `eps_r = n^2 - k^2`
+  - `eps_i = 2 n k`
+- 因而可用标准关系：
+  - `n = sqrt((sqrt(eps_r^2 + eps_i^2) + eps_r) / 2)`
+  - `k = sqrt((sqrt(eps_r^2 + eps_i^2) - eps_r) / 2)`
+- 波长与光子能量换算：
+  - `lambda_nm = 1239.841984 / E_eV`
+
+#### Implementation Notes
+
+- Phase 08 当前实现使用：
+  - `src/core/literature_x01_nk.py`
+  - `src/scripts/step08_x01_literature_reference_comparison.py`
+- 当前流程从 `Table S3` 提取 `x=0.1` 的 `ε1/ε2` 后，生成：
+  - `resources/digitized/lit_x01_csfapi_epsilon_table_s3.csv`
+  - `resources/digitized/lit_x01_csfapi_nk_table_s3.csv`
+  - `resources/aligned_full_stack_nk_phase08_x01.csv`
+- 本次只替换 Phase 08 对比链路中的 `n_PVK/k_PVK`，不全局替换其他 Phase 的默认 PVK 来源。
+
+#### Risks / Open Questions
+
+- 当前本地只有补充材料 docx，主文 DOI 与正文上下文尚未在仓库内核实。
+- `FA0.9Cs0.1PbI3` 是否比当前项目已有 PVK surrogate 更贴近样品，必须通过 Phase 08 双参比对比结果判断，不能只凭材料名称替换为默认值。
+- 若后续把该文献升级为全项目默认来源，需补主文 PDF 或 MinerU 目录，并重新审查制样基底、测量窗口和组分适配性。
+
+#### Code Links
+
+- `src/core/literature_x01_nk.py`
+- `src/scripts/step08_x01_literature_reference_comparison.py`

@@ -1,0 +1,10 @@
+﻿report_dir,phase,theme,primary_markdown
+phaseA1_2_pvk_surrogate_and_pristine,Phase A-1.2,PVK surrogate rebuild and pristine rerun,phaseA1_2_pvk_surrogate_and_pristine/PHASE_A1_2_REPORT.md
+phaseA2_pvk_thickness_scan,Phase A-2,d_PVK thickness scan,phaseA2_pvk_thickness_scan/PHASE_A2_REPORT.md
+phaseB1_rear_bema_sandbox,Phase B-1,rear-only PVK/C60 BEMA sandbox,phaseB1_rear_bema_sandbox/PHASE_B1_REPORT.md
+phaseA2_1_pvk_uncertainty_ensemble,Phase A-2.1,PVK band-edge uncertainty ensemble,phaseA2_1_pvk_uncertainty_ensemble/PHASE_A2_1_REPORT.md
+phaseB2_front_bema_sandbox,Phase B-2,front-only NiOx/PVK proxy BEMA sandbox,phaseB2_front_bema_sandbox/PHASE_B2_REPORT.md
+phaseC1a_rear_air_gap_sandbox,Phase C-1a,rear air-gap only sandbox,phaseC1a_rear_air_gap_sandbox/PHASE_C1A_REPORT.md
+phaseC1b_front_air_gap_sandbox,Phase C-1b,front air-gap only sandbox,phaseC1b_front_air_gap_sandbox/PHASE_C1B_REPORT.md
+ppt_phaseAtoC_assets,Phase A→C,PPT-ready R_total-only asset pack,ppt_phaseAtoC_assets/00_manifest.md
+phaseD1_airgap_discrimination_database,Phase D-1,Air-gap discrimination database on realistic thickness plus roughness background,phaseD1_airgap_discrimination_database/PHASE_D1_REPORT.md

@@ -1,0 +1,154 @@
+case_id,family,anchor_id,d_PVK_nm,d_BEMA_front_nm,d_BEMA_rear_nm,d_gap_front_nm,d_gap_rear_nm,reference_case_id,comment
+D1_0001,background_anchor,anchor_01_nominal,700.0,10.0,20.0,0.0,0.0,D1_0001,"Front roughness nuisance with fixed rear background.; Front-gap overlay on roughness background anchor.; Local PVK thickness nuisance under realistic roughness baseline.; Realistic roughness anchor background.; Rear roughness nuisance with fixed front background.; Rear-gap overlay on roughness background anchor. Aliases=background_anchor,front_gap_on_background,front_roughness_nuisance,rear_gap_on_background,rear_roughness_nuisance,thickness_nuisance."
+D1_0002,background_anchor,anchor_02_pvk690,690.0,10.0,20.0,0.0,0.0,D1_0001,"Front-gap overlay on roughness background anchor.; Local PVK thickness nuisance under realistic roughness baseline.; Realistic roughness anchor background.; Rear-gap overlay on roughness background anchor. Aliases=background_anchor,front_gap_on_background,rear_gap_on_background,thickness_nuisance. AnchorAliases=anchor_01_nominal,anchor_02_pvk690."
+D1_0003,background_anchor,anchor_03_pvk710,710.0,10.0,20.0,0.0,0.0,D1_0001,"Front-gap overlay on roughness background anchor.; Local PVK thickness nuisance under realistic roughness baseline.; Realistic roughness anchor background.; Rear-gap overlay on roughness background anchor. Aliases=background_anchor,front_gap_on_background,rear_gap_on_background,thickness_nuisance. AnchorAliases=anchor_01_nominal,anchor_03_pvk710."
+D1_0004,background_anchor,anchor_04_front5,700.0,5.0,20.0,0.0,0.0,D1_0001,"Front roughness nuisance with fixed rear background.; Front-gap overlay on roughness background anchor.; Realistic roughness anchor background.; Rear-gap overlay on roughness background anchor. Aliases=background_anchor,front_gap_on_background,front_roughness_nuisance,rear_gap_on_background. AnchorAliases=anchor_01_nominal,anchor_04_front5."
+D1_0005,background_anchor,anchor_05_front15,700.0,15.0,20.0,0.0,0.0,D1_0001,"Front roughness nuisance with fixed rear background.; Front-gap overlay on roughness background anchor.; Realistic roughness anchor background.; Rear-gap overlay on roughness background anchor. Aliases=background_anchor,front_gap_on_background,front_roughness_nuisance,rear_gap_on_background. AnchorAliases=anchor_01_nominal,anchor_05_front15."
+D1_0006,background_anchor,anchor_06_rear10,700.0,10.0,10.0,0.0,0.0,D1_0001,"Front-gap overlay on roughness background anchor.; Realistic roughness anchor background.; Rear roughness nuisance with fixed front background.; Rear-gap overlay on roughness background anchor. Aliases=background_anchor,front_gap_on_background,rear_gap_on_background,rear_roughness_nuisance. AnchorAliases=anchor_01_nominal,anchor_06_rear10."
+D1_0007,background_anchor,anchor_07_rear30,700.0,10.0,30.0,0.0,0.0,D1_0001,"Front-gap overlay on roughness background anchor.; Realistic roughness anchor background.; Rear roughness nuisance with fixed front background.; Rear-gap overlay on roughness background anchor. Aliases=background_anchor,front_gap_on_background,rear_gap_on_background,rear_roughness_nuisance. AnchorAliases=anchor_01_nominal,anchor_07_rear30."
+D1_0008,thickness_nuisance,anchor_01_nominal,675.0,10.0,20.0,0.0,0.0,D1_0001,Local PVK thickness nuisance under realistic roughness baseline.
+D1_0009,thickness_nuisance,anchor_01_nominal,676.0,10.0,20.0,0.0,0.0,D1_0001,Local PVK thickness nuisance under realistic roughness baseline.
+D1_0010,thickness_nuisance,anchor_01_nominal,677.0,10.0,20.0,0.0,0.0,D1_0001,Local PVK thickness nuisance under realistic roughness baseline.
+D1_0011,thickness_nuisance,anchor_01_nominal,678.0,10.0,20.0,0.0,0.0,D1_0001,Local PVK thickness nuisance under realistic roughness baseline.
+D1_0012,thickness_nuisance,anchor_01_nominal,679.0,10.0,20.0,0.0,0.0,D1_0001,Local PVK thickness nuisance under realistic roughness baseline.
+D1_0013,thickness_nuisance,anchor_01_nominal,680.0,10.0,20.0,0.0,0.0,D1_0001,Local PVK thickness nuisance under realistic roughness baseline.
+D1_0014,thickness_nuisance,anchor_01_nominal,681.0,10.0,20.0,0.0,0.0,D1_0001,Local PVK thickness nuisance under realistic roughness baseline.
+D1_0015,thickness_nuisance,anchor_01_nominal,682.0,10.0,20.0,0.0,0.0,D1_0001,Local PVK thickness nuisance under realistic roughness baseline.
+D1_0016,thickness_nuisance,anchor_01_nominal,683.0,10.0,20.0,0.0,0.0,D1_0001,Local PVK thickness nuisance under realistic roughness baseline.
+D1_0017,thickness_nuisance,anchor_01_nominal,684.0,10.0,20.0,0.0,0.0,D1_0001,Local PVK thickness nuisance under realistic roughness baseline.
+D1_0018,thickness_nuisance,anchor_01_nominal,685.0,10.0,20.0,0.0,0.0,D1_0001,Local PVK thickness nuisance under realistic roughness baseline.
+D1_0019,thickness_nuisance,anchor_01_nominal,686.0,10.0,20.0,0.0,0.0,D1_0001,Local PVK thickness nuisance under realistic roughness baseline.
+D1_0020,thickness_nuisance,anchor_01_nominal,687.0,10.0,20.0,0.0,0.0,D1_0001,Local PVK thickness nuisance under realistic roughness baseline.
+D1_0021,thickness_nuisance,anchor_01_nominal,688.0,10.0,20.0,0.0,0.0,D1_0001,Local PVK thickness nuisance under realistic roughness baseline.
+D1_0022,thickness_nuisance,anchor_01_nominal,689.0,10.0,20.0,0.0,0.0,D1_0001,Local PVK thickness nuisance under realistic roughness baseline.
+D1_0023,thickness_nuisance,anchor_01_nominal,691.0,10.0,20.0,0.0,0.0,D1_0001,Local PVK thickness nuisance under realistic roughness baseline.
+D1_0024,thickness_nuisance,anchor_01_nominal,692.0,10.0,20.0,0.0,0.0,D1_0001,Local PVK thickness nuisance under realistic roughness baseline.
+D1_0025,thickness_nuisance,anchor_01_nominal,693.0,10.0,20.0,0.0,0.0,D1_0001,Local PVK thickness nuisance under realistic roughness baseline.
+D1_0026,thickness_nuisance,anchor_01_nominal,694.0,10.0,20.0,0.0,0.0,D1_0001,Local PVK thickness nuisance under realistic roughness baseline.
+D1_0027,thickness_nuisance,anchor_01_nominal,695.0,10.0,20.0,0.0,0.0,D1_0001,Local PVK thickness nuisance under realistic roughness baseline.
+D1_0028,thickness_nuisance,anchor_01_nominal,696.0,10.0,20.0,0.0,0.0,D1_0001,Local PVK thickness nuisance under realistic roughness baseline.
+D1_0029,thickness_nuisance,anchor_01_nominal,697.0,10.0,20.0,0.0,0.0,D1_0001,Local PVK thickness nuisance under realistic roughness baseline.
+D1_0030,thickness_nuisance,anchor_01_nominal,698.0,10.0,20.0,0.0,0.0,D1_0001,Local PVK thickness nuisance under realistic roughness baseline.
+D1_0031,thickness_nuisance,anchor_01_nominal,699.0,10.0,20.0,0.0,0.0,D1_0001,Local PVK thickness nuisance under realistic roughness baseline.
+D1_0032,thickness_nuisance,anchor_01_nominal,701.0,10.0,20.0,0.0,0.0,D1_0001,Local PVK thickness nuisance under realistic roughness baseline.
+D1_0033,thickness_nuisance,anchor_01_nominal,702.0,10.0,20.0,0.0,0.0,D1_0001,Local PVK thickness nuisance under realistic roughness baseline.
+D1_0034,thickness_nuisance,anchor_01_nominal,703.0,10.0,20.0,0.0,0.0,D1_0001,Local PVK thickness nuisance under realistic roughness baseline.
+D1_0035,thickness_nuisance,anchor_01_nominal,704.0,10.0,20.0,0.0,0.0,D1_0001,Local PVK thickness nuisance under realistic roughness baseline.
+D1_0036,thickness_nuisance,anchor_01_nominal,705.0,10.0,20.0,0.0,0.0,D1_0001,Local PVK thickness nuisance under realistic roughness baseline.
+D1_0037,thickness_nuisance,anchor_01_nominal,706.0,10.0,20.0,0.0,0.0,D1_0001,Local PVK thickness nuisance under realistic roughness baseline.
+D1_0038,thickness_nuisance,anchor_01_nominal,707.0,10.0,20.0,0.0,0.0,D1_0001,Local PVK thickness nuisance under realistic roughness baseline.
+D1_0039,thickness_nuisance,anchor_01_nominal,708.0,10.0,20.0,0.0,0.0,D1_0001,Local PVK thickness nuisance under realistic roughness baseline.
+D1_0040,thickness_nuisance,anchor_01_nominal,709.0,10.0,20.0,0.0,0.0,D1_0001,Local PVK thickness nuisance under realistic roughness baseline.
+D1_0041,thickness_nuisance,anchor_01_nominal,711.0,10.0,20.0,0.0,0.0,D1_0001,Local PVK thickness nuisance under realistic roughness baseline.
+D1_0042,thickness_nuisance,anchor_01_nominal,712.0,10.0,20.0,0.0,0.0,D1_0001,Local PVK thickness nuisance under realistic roughness baseline.
+D1_0043,thickness_nuisance,anchor_01_nominal,713.0,10.0,20.0,0.0,0.0,D1_0001,Local PVK thickness nuisance under realistic roughness baseline.
+D1_0044,thickness_nuisance,anchor_01_nominal,714.0,10.0,20.0,0.0,0.0,D1_0001,Local PVK thickness nuisance under realistic roughness baseline.
+D1_0045,thickness_nuisance,anchor_01_nominal,715.0,10.0,20.0,0.0,0.0,D1_0001,Local PVK thickness nuisance under realistic roughness baseline.
+D1_0046,thickness_nuisance,anchor_01_nominal,716.0,10.0,20.0,0.0,0.0,D1_0001,Local PVK thickness nuisance under realistic roughness baseline.
+D1_0047,thickness_nuisance,anchor_01_nominal,717.0,10.0,20.0,0.0,0.0,D1_0001,Local PVK thickness nuisance under realistic roughness baseline.
+D1_0048,thickness_nuisance,anchor_01_nominal,718.0,10.0,20.0,0.0,0.0,D1_0001,Local PVK thickness nuisance under realistic roughness baseline.
+D1_0049,thickness_nuisance,anchor_01_nominal,719.0,10.0,20.0,0.0,0.0,D1_0001,Local PVK thickness nuisance under realistic roughness baseline.
+D1_0050,thickness_nuisance,anchor_01_nominal,720.0,10.0,20.0,0.0,0.0,D1_0001,Local PVK thickness nuisance under realistic roughness baseline.
+D1_0051,thickness_nuisance,anchor_01_nominal,721.0,10.0,20.0,0.0,0.0,D1_0001,Local PVK thickness nuisance under realistic roughness baseline.
+D1_0052,thickness_nuisance,anchor_01_nominal,722.0,10.0,20.0,0.0,0.0,D1_0001,Local PVK thickness nuisance under realistic roughness baseline.
+D1_0053,thickness_nuisance,anchor_01_nominal,723.0,10.0,20.0,0.0,0.0,D1_0001,Local PVK thickness nuisance under realistic roughness baseline.
+D1_0054,thickness_nuisance,anchor_01_nominal,724.0,10.0,20.0,0.0,0.0,D1_0001,Local PVK thickness nuisance under realistic roughness baseline.
+D1_0055,thickness_nuisance,anchor_01_nominal,725.0,10.0,20.0,0.0,0.0,D1_0001,Local PVK thickness nuisance under realistic roughness baseline.
+D1_0056,front_gap_on_background,anchor_01_nominal,700.0,10.0,20.0,0.5,0.0,D1_0001,Front-gap overlay on roughness background anchor.
+D1_0057,front_gap_on_background,anchor_01_nominal,700.0,10.0,20.0,1.0,0.0,D1_0001,Front-gap overlay on roughness background anchor.
+D1_0058,front_gap_on_background,anchor_01_nominal,700.0,10.0,20.0,2.0,0.0,D1_0001,Front-gap overlay on roughness background anchor.
+D1_0059,front_gap_on_background,anchor_01_nominal,700.0,10.0,20.0,3.0,0.0,D1_0001,Front-gap overlay on roughness background anchor.
+D1_0060,front_gap_on_background,anchor_01_nominal,700.0,10.0,20.0,5.0,0.0,D1_0001,Front-gap overlay on roughness background anchor.
+D1_0061,front_gap_on_background,anchor_01_nominal,700.0,10.0,20.0,10.0,0.0,D1_0001,Front-gap overlay on roughness background anchor.
+D1_0062,front_gap_on_background,anchor_01_nominal,700.0,10.0,20.0,15.0,0.0,D1_0001,Front-gap overlay on roughness background anchor.
+D1_0063,rear_gap_on_background,anchor_01_nominal,700.0,10.0,20.0,0.0,0.5,D1_0001,Rear-gap overlay on roughness background anchor.
+D1_0064,rear_gap_on_background,anchor_01_nominal,700.0,10.0,20.0,0.0,1.0,D1_0001,Rear-gap overlay on roughness background anchor.
+D1_0065,rear_gap_on_background,anchor_01_nominal,700.0,10.0,20.0,0.0,2.0,D1_0001,Rear-gap overlay on roughness background anchor.
+D1_0066,rear_gap_on_background,anchor_01_nominal,700.0,10.0,20.0,0.0,3.0,D1_0001,Rear-gap overlay on roughness background anchor.
+D1_0067,rear_gap_on_background,anchor_01_nominal,700.0,10.0,20.0,0.0,5.0,D1_0001,Rear-gap overlay on roughness background anchor.
+D1_0068,rear_gap_on_background,anchor_01_nominal,700.0,10.0,20.0,0.0,10.0,D1_0001,Rear-gap overlay on roughness background anchor.
+D1_0069,rear_gap_on_background,anchor_01_nominal,700.0,10.0,20.0,0.0,15.0,D1_0001,Rear-gap overlay on roughness background anchor.
+D1_0070,front_gap_on_background,anchor_02_pvk690,690.0,10.0,20.0,0.5,0.0,D1_0002,Front-gap overlay on roughness background anchor.
+D1_0071,front_gap_on_background,anchor_02_pvk690,690.0,10.0,20.0,1.0,0.0,D1_0002,Front-gap overlay on roughness background anchor.
+D1_0072,front_gap_on_background,anchor_02_pvk690,690.0,10.0,20.0,2.0,0.0,D1_0002,Front-gap overlay on roughness background anchor.
+D1_0073,front_gap_on_background,anchor_02_pvk690,690.0,10.0,20.0,3.0,0.0,D1_0002,Front-gap overlay on roughness background anchor.
+D1_0074,front_gap_on_background,anchor_02_pvk690,690.0,10.0,20.0,5.0,0.0,D1_0002,Front-gap overlay on roughness background anchor.
+D1_0075,front_gap_on_background,anchor_02_pvk690,690.0,10.0,20.0,10.0,0.0,D1_0002,Front-gap overlay on roughness background anchor.
+D1_0076,front_gap_on_background,anchor_02_pvk690,690.0,10.0,20.0,15.0,0.0,D1_0002,Front-gap overlay on roughness background anchor.
+D1_0077,rear_gap_on_background,anchor_02_pvk690,690.0,10.0,20.0,0.0,0.5,D1_0002,Rear-gap overlay on roughness background anchor.
+D1_0078,rear_gap_on_background,anchor_02_pvk690,690.0,10.0,20.0,0.0,1.0,D1_0002,Rear-gap overlay on roughness background anchor.
+D1_0079,rear_gap_on_background,anchor_02_pvk690,690.0,10.0,20.0,0.0,2.0,D1_0002,Rear-gap overlay on roughness background anchor.
+D1_0080,rear_gap_on_background,anchor_02_pvk690,690.0,10.0,20.0,0.0,3.0,D1_0002,Rear-gap overlay on roughness background anchor.
+D1_0081,rear_gap_on_background,anchor_02_pvk690,690.0,10.0,20.0,0.0,5.0,D1_0002,Rear-gap overlay on roughness background anchor.
+D1_0082,rear_gap_on_background,anchor_02_pvk690,690.0,10.0,20.0,0.0,10.0,D1_0002,Rear-gap overlay on roughness background anchor.
+D1_0083,rear_gap_on_background,anchor_02_pvk690,690.0,10.0,20.0,0.0,15.0,D1_0002,Rear-gap overlay on roughness background anchor.
+D1_0084,front_gap_on_background,anchor_03_pvk710,710.0,10.0,20.0,0.5,0.0,D1_0003,Front-gap overlay on roughness background anchor.
+D1_0085,front_gap_on_background,anchor_03_pvk710,710.0,10.0,20.0,1.0,0.0,D1_0003,Front-gap overlay on roughness background anchor.
+D1_0086,front_gap_on_background,anchor_03_pvk710,710.0,10.0,20.0,2.0,0.0,D1_0003,Front-gap overlay on roughness background anchor.
+D1_0087,front_gap_on_background,anchor_03_pvk710,710.0,10.0,20.0,3.0,0.0,D1_0003,Front-gap overlay on roughness background anchor.
+D1_0088,front_gap_on_background,anchor_03_pvk710,710.0,10.0,20.0,5.0,0.0,D1_0003,Front-gap overlay on roughness background anchor.
+D1_0089,front_gap_on_background,anchor_03_pvk710,710.0,10.0,20.0,10.0,0.0,D1_0003,Front-gap overlay on roughness background anchor.
+D1_0090,front_gap_on_background,anchor_03_pvk710,710.0,10.0,20.0,15.0,0.0,D1_0003,Front-gap overlay on roughness background anchor.
+D1_0091,rear_gap_on_background,anchor_03_pvk710,710.0,10.0,20.0,0.0,0.5,D1_0003,Rear-gap overlay on roughness background anchor.
+D1_0092,rear_gap_on_background,anchor_03_pvk710,710.0,10.0,20.0,0.0,1.0,D1_0003,Rear-gap overlay on roughness background anchor.
+D1_0093,rear_gap_on_background,anchor_03_pvk710,710.0,10.0,20.0,0.0,2.0,D1_0003,Rear-gap overlay on roughness background anchor.
+D1_0094,rear_gap_on_background,anchor_03_pvk710,710.0,10.0,20.0,0.0,3.0,D1_0003,Rear-gap overlay on roughness background anchor.
+D1_0095,rear_gap_on_background,anchor_03_pvk710,710.0,10.0,20.0,0.0,5.0,D1_0003,Rear-gap overlay on roughness background anchor.
+D1_0096,rear_gap_on_background,anchor_03_pvk710,710.0,10.0,20.0,0.0,10.0,D1_0003,Rear-gap overlay on roughness background anchor.
+D1_0097,rear_gap_on_background,anchor_03_pvk710,710.0,10.0,20.0,0.0,15.0,D1_0003,Rear-gap overlay on roughness background anchor.
+D1_0098,front_gap_on_background,anchor_04_front5,700.0,5.0,20.0,0.5,0.0,D1_0004,Front-gap overlay on roughness background anchor.
+D1_0099,front_gap_on_background,anchor_04_front5,700.0,5.0,20.0,1.0,0.0,D1_0004,Front-gap overlay on roughness background anchor.
+D1_0100,front_gap_on_background,anchor_04_front5,700.0,5.0,20.0,2.0,0.0,D1_0004,Front-gap overlay on roughness background anchor.
+D1_0101,front_gap_on_background,anchor_04_front5,700.0,5.0,20.0,3.0,0.0,D1_0004,Front-gap overlay on roughness background anchor.
+D1_0102,front_gap_on_background,anchor_04_front5,700.0,5.0,20.0,5.0,0.0,D1_0004,Front-gap overlay on roughness background anchor.
+D1_0103,front_gap_on_background,anchor_04_front5,700.0,5.0,20.0,10.0,0.0,D1_0004,Front-gap overlay on roughness background anchor.
+D1_0104,front_gap_on_background,anchor_04_front5,700.0,5.0,20.0,15.0,0.0,D1_0004,Front-gap overlay on roughness background anchor.
+D1_0105,rear_gap_on_background,anchor_04_front5,700.0,5.0,20.0,0.0,0.5,D1_0004,Rear-gap overlay on roughness background anchor.
+D1_0106,rear_gap_on_background,anchor_04_front5,700.0,5.0,20.0,0.0,1.0,D1_0004,Rear-gap overlay on roughness background anchor.
+D1_0107,rear_gap_on_background,anchor_04_front5,700.0,5.0,20.0,0.0,2.0,D1_0004,Rear-gap overlay on roughness background anchor.
+D1_0108,rear_gap_on_background,anchor_04_front5,700.0,5.0,20.0,0.0,3.0,D1_0004,Rear-gap overlay on roughness background anchor.
+D1_0109,rear_gap_on_background,anchor_04_front5,700.0,5.0,20.0,0.0,5.0,D1_0004,Rear-gap overlay on roughness background anchor.
+D1_0110,rear_gap_on_background,anchor_04_front5,700.0,5.0,20.0,0.0,10.0,D1_0004,Rear-gap overlay on roughness background anchor.
+D1_0111,rear_gap_on_background,anchor_04_front5,700.0,5.0,20.0,0.0,15.0,D1_0004,Rear-gap overlay on roughness background anchor.
+D1_0112,front_gap_on_background,anchor_05_front15,700.0,15.0,20.0,0.5,0.0,D1_0005,Front-gap overlay on roughness background anchor.
+D1_0113,front_gap_on_background,anchor_05_front15,700.0,15.0,20.0,1.0,0.0,D1_0005,Front-gap overlay on roughness background anchor.
+D1_0114,front_gap_on_background,anchor_05_front15,700.0,15.0,20.0,2.0,0.0,D1_0005,Front-gap overlay on roughness background anchor.
+D1_0115,front_gap_on_background,anchor_05_front15,700.0,15.0,20.0,3.0,0.0,D1_0005,Front-gap overlay on roughness background anchor.
+D1_0116,front_gap_on_background,anchor_05_front15,700.0,15.0,20.0,5.0,0.0,D1_0005,Front-gap overlay on roughness background anchor.
+D1_0117,front_gap_on_background,anchor_05_front15,700.0,15.0,20.0,10.0,0.0,D1_0005,Front-gap overlay on roughness background anchor.
+D1_0118,front_gap_on_background,anchor_05_front15,700.0,15.0,20.0,15.0,0.0,D1_0005,Front-gap overlay on roughness background anchor.
+D1_0119,rear_gap_on_background,anchor_05_front15,700.0,15.0,20.0,0.0,0.5,D1_0005,Rear-gap overlay on roughness background anchor.
+D1_0120,rear_gap_on_background,anchor_05_front15,700.0,15.0,20.0,0.0,1.0,D1_0005,Rear-gap overlay on roughness background anchor.
+D1_0121,rear_gap_on_background,anchor_05_front15,700.0,15.0,20.0,0.0,2.0,D1_0005,Rear-gap overlay on roughness background anchor.
+D1_0122,rear_gap_on_background,anchor_05_front15,700.0,15.0,20.0,0.0,3.0,D1_0005,Rear-gap overlay on roughness background anchor.
+D1_0123,rear_gap_on_background,anchor_05_front15,700.0,15.0,20.0,0.0,5.0,D1_0005,Rear-gap overlay on roughness background anchor.
+D1_0124,rear_gap_on_background,anchor_05_front15,700.0,15.0,20.0,0.0,10.0,D1_0005,Rear-gap overlay on roughness background anchor.
+D1_0125,rear_gap_on_background,anchor_05_front15,700.0,15.0,20.0,0.0,15.0,D1_0005,Rear-gap overlay on roughness background anchor.
+D1_0126,front_gap_on_background,anchor_06_rear10,700.0,10.0,10.0,0.5,0.0,D1_0006,Front-gap overlay on roughness background anchor.
+D1_0127,front_gap_on_background,anchor_06_rear10,700.0,10.0,10.0,1.0,0.0,D1_0006,Front-gap overlay on roughness background anchor.
+D1_0128,front_gap_on_background,anchor_06_rear10,700.0,10.0,10.0,2.0,0.0,D1_0006,Front-gap overlay on roughness background anchor.
+D1_0129,front_gap_on_background,anchor_06_rear10,700.0,10.0,10.0,3.0,0.0,D1_0006,Front-gap overlay on roughness background anchor.
+D1_0130,front_gap_on_background,anchor_06_rear10,700.0,10.0,10.0,5.0,0.0,D1_0006,Front-gap overlay on roughness background anchor.
+D1_0131,front_gap_on_background,anchor_06_rear10,700.0,10.0,10.0,10.0,0.0,D1_0006,Front-gap overlay on roughness background anchor.
+D1_0132,front_gap_on_background,anchor_06_rear10,700.0,10.0,10.0,15.0,0.0,D1_0006,Front-gap overlay on roughness background anchor.
+D1_0133,rear_gap_on_background,anchor_06_rear10,700.0,10.0,10.0,0.0,0.5,D1_0006,Rear-gap overlay on roughness background anchor.
+D1_0134,rear_gap_on_background,anchor_06_rear10,700.0,10.0,10.0,0.0,1.0,D1_0006,Rear-gap overlay on roughness background anchor.
+D1_0135,rear_gap_on_background,anchor_06_rear10,700.0,10.0,10.0,0.0,2.0,D1_0006,Rear-gap overlay on roughness background anchor.
+D1_0136,rear_gap_on_background,anchor_06_rear10,700.0,10.0,10.0,0.0,3.0,D1_0006,Rear-gap overlay on roughness background anchor.
+D1_0137,rear_gap_on_background,anchor_06_rear10,700.0,10.0,10.0,0.0,5.0,D1_0006,Rear-gap overlay on roughness background anchor.
+D1_0138,rear_gap_on_background,anchor_06_rear10,700.0,10.0,10.0,0.0,10.0,D1_0006,Rear-gap overlay on roughness background anchor.
+D1_0139,rear_gap_on_background,anchor_06_rear10,700.0,10.0,10.0,0.0,15.0,D1_0006,Rear-gap overlay on roughness background anchor.
+D1_0140,front_gap_on_background,anchor_07_rear30,700.0,10.0,30.0,0.5,0.0,D1_0007,Front-gap overlay on roughness background anchor.
+D1_0141,front_gap_on_background,anchor_07_rear30,700.0,10.0,30.0,1.0,0.0,D1_0007,Front-gap overlay on roughness background anchor.
+D1_0142,front_gap_on_background,anchor_07_rear30,700.0,10.0,30.0,2.0,0.0,D1_0007,Front-gap overlay on roughness background anchor.
+D1_0143,front_gap_on_background,anchor_07_rear30,700.0,10.0,30.0,3.0,0.0,D1_0007,Front-gap overlay on roughness background anchor.
+D1_0144,front_gap_on_background,anchor_07_rear30,700.0,10.0,30.0,5.0,0.0,D1_0007,Front-gap overlay on roughness background anchor.
+D1_0145,front_gap_on_background,anchor_07_rear30,700.0,10.0,30.0,10.0,0.0,D1_0007,Front-gap overlay on roughness background anchor.
+D1_0146,front_gap_on_background,anchor_07_rear30,700.0,10.0,30.0,15.0,0.0,D1_0007,Front-gap overlay on roughness background anchor.
+D1_0147,rear_gap_on_background,anchor_07_rear30,700.0,10.0,30.0,0.0,0.5,D1_0007,Rear-gap overlay on roughness background anchor.
+D1_0148,rear_gap_on_background,anchor_07_rear30,700.0,10.0,30.0,0.0,1.0,D1_0007,Rear-gap overlay on roughness background anchor.
+D1_0149,rear_gap_on_background,anchor_07_rear30,700.0,10.0,30.0,0.0,2.0,D1_0007,Rear-gap overlay on roughness background anchor.
+D1_0150,rear_gap_on_background,anchor_07_rear30,700.0,10.0,30.0,0.0,3.0,D1_0007,Rear-gap overlay on roughness background anchor.
+D1_0151,rear_gap_on_background,anchor_07_rear30,700.0,10.0,30.0,0.0,5.0,D1_0007,Rear-gap overlay on roughness background anchor.
+D1_0152,rear_gap_on_background,anchor_07_rear30,700.0,10.0,30.0,0.0,10.0,D1_0007,Rear-gap overlay on roughness background anchor.
+D1_0153,rear_gap_on_background,anchor_07_rear30,700.0,10.0,30.0,0.0,15.0,D1_0007,Rear-gap overlay on roughness background anchor.

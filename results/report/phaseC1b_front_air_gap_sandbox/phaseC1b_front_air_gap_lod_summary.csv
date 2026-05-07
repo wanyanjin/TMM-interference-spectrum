@@ -1,0 +1,6 @@
+﻿d_gap_front_nm,max_abs_deltaR_stack,max_abs_deltaR_total,best_window,exceeds_0p2pct_stack,exceeds_0p2pct_total,lod_comment
+1.0,0.004344516195274678,0.004011893182463075,front,True,True,detectable
+2.0,0.008730242897441148,0.008062659454445203,front,True,True,detectable
+3.0,0.013154192109070859,0.012149964129128055,front,True,True,detectable
+5.0,0.022091674834229358,0.020410037784203,front,True,True,detectable
+10.0,0.04476780220128252,0.04138225788868738,front,True,True,detectable

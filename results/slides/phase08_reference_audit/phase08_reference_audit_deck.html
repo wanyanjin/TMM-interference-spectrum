@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Phase 08 反射率校准与 TMM 审计</title>
+  <link rel="stylesheet" href="../../../node_modules/reveal.js/dist/reveal.css" />
+  <link rel="stylesheet" href="../../../node_modules/katex/dist/katex.min.css" />
+  <link rel="stylesheet" href="assets/theme.css" />
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+      <section data-qa-watch="slide-1">
+        <h1 class="slide-title">Phase 08 反射率校准与 TMM 审计</h1>
+        <p class="slide-subtitle">本 deck 继续读取现有 <span class="en">pvk_x01</span> 结果；新增的理论审计章节只证明公式与实现自洽，不改核心主计算链。</p>
+        <div class="deck-grid-2">
+          <div class="card soft">
+            <h2 class="card-title">本轮目标</h2>
+            <ul class="bullet-list">
+              <li>保留实验反射率校准链。</li>
+              <li>新增手写公式审计，证明理论反射率不是黑箱输出。</li>
+              <li>让 slide deck 与 technical report 共同消费同一份审计 JSON。</li>
+            </ul>
+          </div>
+          <div class="card soft">
+            <h2 class="card-title">当前边界</h2>
+            <ul class="bullet-list">
+              <li>数据集：0429</li>
+              <li>结果集：<span class="en">pvk_x01</span></li>
+              <li>审计波长：<span class="en">599.987374448794 nm</span></li>
+              <li>不重算 <span class="en">src/core/reference_comparison.py</span> 主结果。</li>
+            </ul>
+          </div>
+        </div>
+        <div class="metric-strip">
+          <div class="metric-card"><div class="metric-label">R_exp by glass/Ag</div><div class="metric-value" style="color:var(--color-glassag)">0.290941</div></div>
+          <div class="metric-card"><div class="metric-label">R_exp by Ag mirror</div><div class="metric-value" style="color:var(--color-agmirror)">0.263950</div></div>
+          <div class="metric-card"><div class="metric-label">R_TMM GlassPVK fixed</div><div class="metric-value" style="color:var(--color-tmm-fixed)">0.128762</div></div>
+        </div>
+      </section>
+
+      <section data-qa-watch="slide-2">
+        <h1 class="slide-title">Incoherent Cascade</h1>
+        <p class="slide-subtitle">厚玻璃前表面与后侧相干薄膜栈之间采用强度级联，而不是整体相干求和。</p>
+        <div class="deck-grid-2">
+          <div class="stack-col">
+            <div class="card formula-card">
+              <div class="formula-label">当前简化式</div>
+              <div>$$R_{\mathrm{total}} = R_{\mathrm{front}} + \frac{(1-R_{\mathrm{front}})^2 R_{\mathrm{stack}}}{1-R_{\mathrm{front}}R_{\mathrm{stack}}}$$</div>
+            </div>
+            <div class="card formula-card">
+              <div class="formula-label">数字代入</div>
+              <div>$$R_{\mathrm{total}} = 0.041931 + \frac{(1-0.041931)^2 \times 0.094224}{1-0.041931\times 0.094224}$$</div>
+            </div>
+            <div class="card formula-card">
+              <div class="formula-label">结果</div>
+              <div>$$R_{\mathrm{TMM,GlassPVK,Fixed}} = 0.128762$$</div>
+            </div>
+          </div>
+          <div class="stack-col">
+            <div class="card diagram-card">
+              <div class="cascade-diagram">
+                <div class="cascade-node">
+                  <div class="cascade-node-title">Air / Glass</div>
+                  <div class="cascade-node-note">前表面 Fresnel</div>
+                  <div class="cascade-node-note">R_front = 0.041931</div>
+                </div>
+                <div class="arrow">→</div>
+                <div class="cascade-node mid">
+                  <div class="cascade-node-title">1 mm glass</div>
+                  <div class="cascade-node-note">非相干隔离层</div>
+                  <div class="cascade-node-note">P ≈ 1</div>
+                </div>
+                <div class="arrow">→</div>
+                <div class="cascade-node end">
+                  <div class="cascade-node-title">Glass / PVK / Air</div>
+                  <div class="cascade-node-note">后侧相干薄膜栈</div>
+                  <div class="cascade-node-note">R_stack = 0.094224</div>
+                </div>
+              </div>
+              <div class="diagram-caption">前表面贡献 Fresnel 强度，后侧薄膜条纹在 <span class="en">R_stack</span> 中处理。</div>
+            </div>
+            <div class="card">
+              <h2 class="card-title">术语解释</h2>
+              <ul class="bullet-list compact-list">
+                <li><span class="en">R_front</span>：<span class="en">Air/Glass</span> 前表面 Fresnel 反射率。</li>
+                <li><span class="en">R_stack</span>：<span class="en">Glass/PVK/Air</span> 后侧薄膜栈的相干反射率。</li>
+                <li><span class="en">P</span>：厚玻璃单程传播强度保留因子；当前实现取 <span class="en">P≈1</span>。</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section data-qa-watch="slide-3">
+        <h1 class="slide-title">600 nm Trace: Counts to R_exp</h1>
+        <p class="slide-subtitle">左右两列分别展开 <span class="en">glass/Ag</span> 与 <span class="en">Ag mirror</span> 参比链，强调“公式 + 数字代入 + 结果”。</p>
+        <div class="deck-grid-2">
+          <div class="trace-col">
+            <div class="card">
+              <h2 class="card-title">glass/Ag chain</h2>
+              <div class="trace-chain">
+                
+    <div class="trace-step" data-qa-watch="1">
+      <div class="trace-step-tag glassag">1</div>
+      <div class="trace-step-body">
+        <div class="trace-step-title">通用公式</div>
+        <div>$R_{\mathrm{exp}}^{\mathrm{glass/Ag}} = \frac{I_{\mathrm{PVK}}/t_{\mathrm{PVK}}}{I_{\mathrm{glass/Ag}}/t_{\mathrm{glass/Ag}}} \cdot R_{\mathrm{TMM}}^{\mathrm{glass/Ag}}$</div>
+      </div>
+    </div>
+    
+    <div class="trace-step" data-qa-watch="2">
+      <div class="trace-step-tag glassag">2</div>
+      <div class="trace-step-body">
+        <div class="trace-step-title">数值代入</div>
+        <div>$= \frac{8055.260/20}{27229.900/20} \cdot 0.983494$</div>
+      </div>
+    </div>
+    
+    <div class="trace-step" data-qa-watch="3">
+      <div class="trace-step-tag glassag">3</div>
+      <div class="trace-step-body">
+        <div class="trace-step-title">counts ratio</div>
+        <div>$\frac{I_{\mathrm{PVK}}/t}{I_{\mathrm{glass/Ag}}/t} = 0.295824$</div>
+      </div>
+    </div>
+    
+    <div class="trace-step" data-qa-watch="4">
+      <div class="trace-step-tag glassag">4</div>
+      <div class="trace-step-body">
+        <div class="trace-step-title">乘以 R_TMM_GlassAg</div>
+        <div>$0.295824 \times 0.983494$</div>
+      </div>
+    </div>
+    
+    <div class="trace-step" data-qa-watch="5">
+      <div class="trace-step-tag glassag">5</div>
+      <div class="trace-step-body">
+        <div class="trace-step-title">得到 R_exp_by_glassAg</div>
+        <div>$R_{\mathrm{exp}}^{\mathrm{glass/Ag}} = 0.290941$</div>
+      </div>
+    </div>
+    
+              </div>
+            </div>
+          </div>
+          <div class="trace-col">
+            <div class="card">
+              <h2 class="card-title">Ag mirror chain</h2>
+              <div class="trace-chain">
+                
+    <div class="trace-step" data-qa-watch="1">
+      <div class="trace-step-tag agmirror">1</div>
+      <div class="trace-step-body">
+        <div class="trace-step-title">通用公式</div>
+        <div>$R_{\mathrm{exp}}^{\mathrm{Ag\ mirror}} = \frac{I_{\mathrm{PVK}}/t_{\mathrm{PVK}}}{I_{\mathrm{Ag\ mirror,corr}}/t_{\mathrm{Ag\ mirror}}} \cdot R_{\mathrm{TMM}}^{\mathrm{Ag\ mirror}}$</div>
+      </div>
+    </div>
+    
+    <div class="trace-step" data-qa-watch="2">
+      <div class="trace-step-tag agmirror">2</div>
+      <div class="trace-step-body">
+        <div class="trace-step-title">数值代入</div>
+        <div>$= \frac{8055.260/20}{30159.106/20} \cdot 0.988237$</div>
+      </div>
+    </div>
+    
+    <div class="trace-step" data-qa-watch="3">
+      <div class="trace-step-tag agmirror">3</div>
+      <div class="trace-step-body">
+        <div class="trace-step-title">counts ratio</div>
+        <div>$\frac{I_{\mathrm{PVK}}/t}{I_{\mathrm{Ag\ mirror,corr}}/t} = 0.267092$</div>
+      </div>
+    </div>
+    
+    <div class="trace-step" data-qa-watch="4">
+      <div class="trace-step-tag agmirror">4</div>
+      <div class="trace-step-body">
+        <div class="trace-step-title">乘以 R_TMM_AgMirror</div>
+        <div>$0.267092 \times 0.988237$</div>
+      </div>
+    </div>
+    
+    <div class="trace-step" data-qa-watch="5">
+      <div class="trace-step-tag agmirror">5</div>
+      <div class="trace-step-body">
+        <div class="trace-step-title">得到 R_exp_by_AgMirror</div>
+        <div>$R_{\mathrm{exp}}^{\mathrm{Ag\ mirror}} = 0.263950$</div>
+      </div>
+    </div>
+    
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="metric-strip">
+          <div class="metric-card"><div class="metric-label">R_TMM_GlassPVK_Fixed</div><div class="metric-value" style="color:var(--color-tmm-fixed)">0.128762</div></div>
+          <div class="metric-card"><div class="metric-label">Ag frame dropped / used</div><div class="metric-value">1 / 99</div></div>
+          <div class="metric-card"><div class="metric-label">BK frames</div><div class="metric-value">100</div></div>
+        </div>
+      </section>
+
+      <section data-qa-watch="slide-4">
+        <h1 class="slide-title">Why Audit Theoretical TMM?</h1>
+        <p class="slide-subtitle">实验反射率显著高于理论值，因此必须先确认理论反射率链路不是公式或库调用错误。</p>
+        <div class="deck-grid-3">
+          <div class="card audit-pillar">
+            <div class="pillar-index">01</div>
+            <h2 class="card-title">手写单层公式</h2>
+            <p class="body-text">把 <span class="en">Glass / PVK / Air</span> 与 <span class="en">Glass / Ag / Air</span> 的振幅反射式完整写开，显式展示 <span class="en">r01</span>、<span class="en">r12</span>、<span class="en">delta</span> 与 <span class="en">exp(2i delta)</span>。</p>
+          </div>
+          <div class="card audit-pillar">
+            <div class="pillar-index">02</div>
+            <h2 class="card-title">Python tmm.coh_tmm</h2>
+            <p class="body-text">用同一层序、同一厚度、同一波长、同一 <span class="en">s polarization</span> 做独立计算，排除“手写式推导错了”的风险。</p>
+          </div>
+          <div class="card audit-pillar">
+            <div class="pillar-index">03</div>
+            <h2 class="card-title">当前 CSV 输出</h2>
+            <p class="body-text">再与当前 Phase 08 理论 CSV 对比，确认 slide 中展示的理论值和现有主链输出一致，不存在二次抄写误差。</p>
+          </div>
+        </div>
+        <div class="callout-row">
+          <div class="callout-card">结论标准：所有关键比较以 <span class="en">abs_diff ≤ 1e-8</span> 为 PASS。</div>
+          <div class="callout-card">审计范围：证明“公式与实现自洽”，不证明“nk 与实验语义已经完全正确”。</div>
+        </div>
+      </section>
+
+      <section data-qa-watch="slide-5">
+        <h1 class="slide-title">Glass / PVK / Air Manual Coherent Formula</h1>
+        <p class="slide-subtitle">主公式固定采用 Steven Byrnes / python <span class="en">tmm</span> convention：<span class="en">exp(-iωt)</span>、前进方向 <span class="en">+z</span>、展示用 <span class="en">s polarization</span>。</p>
+        <div class="deck-grid-2">
+          <div class="stack-col">
+            <div class="card formula-card tall">
+              <div class="formula-label">interface amplitudes</div>
+              <div>$$r_{01} = \frac{N_0-N_1}{N_0+N_1}, \qquad r_{12} = \frac{N_1-N_2}{N_1+N_2}$$</div>
+            </div>
+            <div class="card formula-card tall">
+              <div class="formula-label">phase</div>
+              <div>$$\delta = \frac{2\pi N_1 d_1}{\lambda}$$</div>
+            </div>
+            <div class="card formula-card tall">
+              <div class="formula-label">main formula</div>
+              <div>$$r_{\mathrm{stack}} = \frac{r_{01} + r_{12} e^{2 i \delta}}{1 + r_{01} r_{12} e^{2 i \delta}}, \qquad R_{\mathrm{stack}} = |r_{\mathrm{stack}}|^2$$</div>
+            </div>
+          </div>
+          <div class="stack-col">
+            <div class="card diagram-card">
+              <div class="layer-stack">
+                <div class="layer-box glass">Glass<br/><span>incident semi-infinite medium</span></div>
+                <div class="layer-box pvk">PVK<br/><span>d = 700.00 nm</span></div>
+                <div class="layer-box air">Air<br/><span>N = 1 + 0i</span></div>
+              </div>
+              <div class="diagram-caption">这一页只处理后侧相干薄膜栈，不把厚玻璃前表面混进相位项。</div>
+            </div>
+            <div class="card">
+              <h2 class="card-title">600 nm 处材料复折射率</h2>
+              <div class="mini-metric-grid">
+                <div class="mini-metric"><span>N_glass</span><strong>1.515000 + 0.000000i</strong></div>
+                <div class="mini-metric"><span>N_pvk</span><strong>2.699975 + 0.545588i</strong></div>
+                <div class="mini-metric"><span>N_air</span><strong>1.000000 + 0.000000i</strong></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section data-qa-watch="slide-6">
+        <h1 class="slide-title">600 nm Numerical Substitution</h1>
+        <p class="slide-subtitle">这里展示的是“公式 + 数字代入 + 结果”，并显式标出真实取值波长 <span class="en">599.987374448794 nm</span>，不是强行代到精确 <span class="en">600.000 nm</span>。</p>
+        <div class="deck-grid-2">
+          <div class="stack-col">
+            <div class="card formula-card">
+              <div class="formula-label">numerical chain</div>
+              <div>$$N_0 = 1.515000 + 0.000000i, \quad N_1 = 2.699975 + 0.545588i$$</div>
+              <div>$$r_{01} = -0.292981 + -0.091517i, \quad r_{12} = 0.470959 + 0.078011i$$</div>
+              <div>$$\delta = 19.792270 + 3.999451i, \quad e^{2 i\delta} = -0.000104 + 0.000319i$$</div>
+              <div>$$r_{\mathrm{stack}} = -0.293041 + -0.091382i$$</div>
+              <div>$$R_{\mathrm{stack}} = 0.094223672254$$</div>
+            </div>
+            <div class="card">
+              <h2 class="card-title">核心数值</h2>
+              <div class="mini-metric-grid">
+                <div class="mini-metric"><span>lambda_used_nm</span><strong>599.987374448794</strong></div>
+                <div class="mini-metric"><span>d_PVK</span><strong>700.000 nm</strong></div>
+                <div class="mini-metric"><span>R_stack_manual</span><strong>0.094223672254</strong></div>
+              </div>
+            </div>
+          </div>
+          <div class="stack-col">
+            <div class="card source-card">
+              <h2 class="card-title">取值来源：反射率曲线</h2>
+              <img src="assets/value_locator_reflectance.svg" alt="reflectance locator" />
+              <div class="source-caption">单点审计波长和实验 / 理论曲线使用同一根虚线标出。</div>
+            </div>
+            <div class="card source-card">
+              <h2 class="card-title">取值来源：n,k 材料表</h2>
+              <img src="assets/value_locator_nk.svg" alt="nk locator" />
+              <div class="source-caption">材料表上的同一波长定位说明代入来源是可追溯的，不是手工挑值。</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section data-qa-watch="slide-7">
+        <h1 class="slide-title">Manual Formula vs tmm.coh_tmm</h1>
+        <p class="slide-subtitle">主公式采用 <span class="en">exp(+2i delta)</span>；<span class="en">exp(-2i delta)</span> 只保留为 convention sanity check，不作为主物理逻辑。</p>
+        <div class="deck-grid-2">
+          <div class="card table-card">
+            <h2 class="card-title">Glass / PVK / Air consistency check</h2>
+            <table class="audit-table"><thead><tr><th>quantity</th><th>value</th></tr></thead><tbody><tr><td>R_stack_manual</td><td>0.094223672254</td></tr><tr><td>R_stack_tmm</td><td>0.094223672254</td></tr><tr><td>abs_diff</td><td>2.776e-17</td></tr><tr><td>rel_diff</td><td>2.946e-16</td></tr><tr><td>result</td><td><span class="status-chip pass">PASS</span></td></tr></tbody></table>
+          </div>
+          <div class="stack-col">
+            <div class="card formula-card tall">
+              <div class="formula-label">sanity check only</div>
+              <div>$$R_{\mathrm{stack}}^{e^{-2i\delta}} = 10.623591669636$$</div>
+            </div>
+            <div class="card">
+              <h2 class="card-title">说明</h2>
+              <ul class="bullet-list compact-list">
+                <li>主公式与 <span class="en">tmm.coh_tmm</span> 在当前口径下通过 <span class="en"><span class="status-chip pass">PASS</span></span>。</li>
+                <li><span class="en">exp(-2i delta)</span> 分支被保留，只是为了避免符号 convention 被误写成“自动择优”。</li>
+                <li>当前报告明确采用 Byrnes / <span class="en">tmm</span> convention。</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section data-qa-watch="slide-8">
+        <h1 class="slide-title">Thick Glass Incoherent Cascade</h1>
+        <p class="slide-subtitle">先写通用式，再说明当前 Phase 08 为何可以退化到现有实现里的简化式。</p>
+        <div class="deck-grid-2">
+          <div class="stack-col">
+            <div class="card formula-card tall">
+              <div class="formula-label">general formula</div>
+              <div>$$R_{\mathrm{total}} = R_{01} + \frac{T_{01} T_{10} P^2 R_{\mathrm{stack}}}{1 - R_{10} P^2 R_{\mathrm{stack}}}$$</div>
+            </div>
+            <div class="card formula-card tall">
+              <div class="formula-label">current simplification</div>
+              <div>$$R_{\mathrm{total}} = R_{\mathrm{front}} + \frac{(1-R_{\mathrm{front}})^2 R_{\mathrm{stack}}}{1-R_{\mathrm{front}}R_{\mathrm{stack}}}$$</div>
+            </div>
+            <div class="card">
+              <h2 class="card-title">简化条件</h2>
+              <ul class="bullet-list compact-list">
+                <li><span class="en">Glass k ≈ 0</span></li>
+                <li><span class="en">P ≈ 1</span></li>
+                <li><span class="en">R01 = R10 = R_front</span></li>
+                <li><span class="en">T01 · T10 = (1 - R_front)^2</span></li>
+              </ul>
+            </div>
+          </div>
+          <div class="stack-col">
+            <div class="card table-card">
+              <h2 class="card-title">Numerical substitution</h2>
+              <table class="audit-table"><thead><tr><th>quantity</th><th>value</th></tr></thead><tbody><tr><td>R_front</td><td>0.041931314696</td></tr><tr><td>R_stack</td><td>0.094223672254</td></tr><tr><td>T01</td><td>0.958068685304</td></tr><tr><td>T10</td><td>0.958068685304</td></tr><tr><td>P</td><td>1.000000000000</td></tr><tr><td>R_total_general</td><td>0.128761870208</td></tr><tr><td>R_total_simplified</td><td>0.128761870208</td></tr><tr><td>R_TMM_GlassPVK_Fixed_csv</td><td>0.128761870208</td></tr><tr><td>abs_diff</td><td>0.000e+00</td></tr><tr><td>result</td><td><span class="status-chip pass">PASS</span></td></tr></tbody></table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section data-qa-watch="slide-9">
+        <h1 class="slide-title">Reference Theory Audit</h1>
+        <p class="slide-subtitle">同一口径继续审计 <span class="en">glass/Ag</span> 与 <span class="en">Ag mirror</span> 理论参比链，确认不是某一个 reference 独自“失真”。</p>
+        <div class="stack-col">
+          <div class="card table-card">
+            <table class="audit-table compact"><thead><tr><th>case</th><th>manual</th><th>tmm</th><th>csv</th><th>abs_diff</th><th>result</th></tr></thead><tbody><tr><td>glass/Ag stack</td><td>0.983481888037</td><td>0.983481888037</td><td>—</td><td>0.000e+00</td><td><span class="status-chip pass">PASS</span></td></tr><tr><td>glass/Ag total</td><td>0.983493821013</td><td>—</td><td>0.983493821013</td><td>1.110e-16</td><td><span class="status-chip pass">PASS</span></td></tr><tr><td>Ag mirror</td><td>0.988236844080</td><td>0.988236844080</td><td>0.988236844080</td><td>3.331e-16</td><td><span class="status-chip pass">PASS</span></td></tr></tbody></table>
+          </div>
+          <div class="callout-row">
+            <div class="callout-card">理论计算链路在当前模型假设下自洽。</div>
+            <div class="callout-card">实验-理论差异更可能来自 <span class="en">nk</span> 适用性、显微收光/散射、参比有效响应或 <span class="en">specular-only</span> 假设边界。</div>
+          </div>
+          <div class="card soft">
+            <h2 class="card-title">Ag mirror caveat</h2>
+            <p class="body-text">This only audits consistency with the current model; whether the physical Ag mirror is equivalent to Air / 100 nm Ag / Air still needs sample-level confirmation.</p>
+          </div>
+        </div>
+      </section>
+
+      <section data-qa-watch="slide-10">
+        <h1 class="slide-title">TMM Calculation Flow</h1>
+        <p class="slide-subtitle">上半页讲计算流程，下半页说明单点 trace 的数值到底从哪条曲线、哪张材料表取来。</p>
+        <div class="flow-slide-grid">
+          <div class="step-flow">
+            <div class="step-box blue"><div class="step-index">01</div><div class="step-name">nk table</div><div class="step-note">读取对齐后的 Glass、PVK、Ag 光学常数表，并锁定同一波长采样。</div></div>
+            <div class="step-box cyan"><div class="step-index">02</div><div class="step-name">complex n(λ)+ik(λ)</div><div class="step-note">把每种材料写成复折射率，显式保留吸收项，而不是只看 n。</div></div>
+            <div class="step-box purple"><div class="step-index">03</div><div class="step-name">coherent stack</div><div class="step-note">在 Glass/PVK/Air 后侧薄膜栈中计算相位延迟与振幅叠加。</div></div>
+            <div class="step-box gold"><div class="step-index">04</div><div class="step-name">front-surface Fresnel</div><div class="step-note">单独求 Air/Glass 前表面 Fresnel 反射，保持与薄膜干涉层分离。</div></div>
+            <div class="step-box green"><div class="step-index">05</div><div class="step-name">incoherent cascade</div><div class="step-note">把 1 mm 玻璃当作非相干隔离层，用强度级联组合前后两部分。</div></div>
+            <div class="step-box blue"><div class="step-index">06</div><div class="step-name">R_TMM(λ)</div><div class="step-note">输出可与实验反射率逐点对比的理论曲线。</div></div>
+          </div>
+          <div class="source-grid">
+            <div class="card source-card">
+              <h2 class="card-title">取值来源：反射率曲线</h2>
+              <img src="assets/value_locator_reflectance.svg" alt="reflectance locator" />
+              <div class="source-caption">虚线固定在 <span class="en">599.987 nm</span>，对应单点 trace 中使用的最近数据点。</div>
+            </div>
+            <div class="card source-card">
+              <h2 class="card-title">取值来源：n,k 材料表</h2>
+              <img src="assets/value_locator_nk.svg" alt="nk locator" />
+              <div class="source-caption">同一根虚线在材料表上也落到相同波长，保证代入的 <span class="en">PVK n,k</span> 与反射率 trace 来自同一数据口径。</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section data-qa-watch="slide-11">
+        <h1 class="slide-title">Risk Source Map</h1>
+        <p class="slide-subtitle">公式链已经过审计，但这不等于实验-理论差异已经被定位到单一原因。</p>
+        <div class="quad-grid">
+          <div class="card risk-box" style="background:#fef2f2"><h3>实验链路</h3><div class="risk-note">低证据 / 低可控性</div><ul><li>背景扣除与 ROI 语义</li><li>glass/Ag 与 Ag mirror 切换一致性</li><li>现场标准片与重复性 QC</li></ul></div>
+          <div class="card risk-box" style="background:#fffaeb"><h3>n,k 适用性</h3><div class="risk-note">低证据 / 高可控性</div><ul><li>PVK 文献常数是否代表当前样品</li><li>Ag 常数与实际镜面状态的偏离</li><li>需要 envelope 而不是单点信任</li></ul></div>
+          <div class="card risk-box" style="background:#eff8ff"><h3>模型边界</h3><div class="risk-note">高证据 / 低可控性</div><ul><li>specular-only 假设</li><li>厚玻璃非相干近似</li><li>显微场景是否可直接等价于理想平面波</li></ul></div>
+          <div class="card risk-box" style="background:#ecfdf3"><h3>显微收光</h3><div class="risk-note">高证据 / 高可控性</div><ul><li>NA 与空间平均</li><li>散射与非镜面贡献</li><li>objective / alignment 对实测值的放大效应</li></ul></div>
+        </div>
+        <div class="risk-summary"><strong>当前优先事项：</strong>先做 <span class="en">n,k audit + envelope</span>，并补 <span class="en">glass only / standard wafer / field QC</span>，不要把“公式自洽”误判为“物理链路已闭环”。</div>
+      </section>
+
+      <section data-qa-watch="slide-12">
+        <h1 class="slide-title">Key Curves and QA Boundary</h1>
+        <p class="slide-subtitle">保留现有全谱结果图，同时说明 technical report 承担更高信息密度的查阅角色。</p>
+        <div class="deck-grid-2">
+          <div class="stack-col">
+            <div class="card"><img class="hero-image" src="../../figures/phase08/reference_comparison/phase08_0429_dual_reference_reflectance_exp_vs_tmm_pvk_x01.png" alt="reflectance compare" /></div>
+            <div class="card"><img class="hero-image hero-image-small" src="../../figures/phase08/reference_comparison/phase08_0429_ag_bk_qc_pvk_x01.png" alt="Ag BK QC" /></div>
+          </div>
+          <div class="stack-col">
+            <div class="card"><img class="hero-image" src="../../figures/phase08/reference_comparison/phase08_0429_residual_pvk_x01.png" alt="residual compare" /></div>
+            <div class="card soft">
+              <h2 class="card-title">Technical report 负责“查”</h2>
+              <ul class="bullet-list compact-list">
+                <li>保留 convention、完整公式、差值表与 caveat。</li>
+                <li>消费同一份理论审计 JSON 与 markdown，不手填数字。</li>
+                <li>与 deck 明确分工：deck 讲主结论，report 查证据。</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+  <script src="../../../node_modules/reveal.js/dist/reveal.js"></script>
+  <script src="../../../node_modules/katex/dist/katex.min.js"></script>
+  <script src="../../../node_modules/katex/dist/contrib/auto-render.min.js"></script>
+  <script src="../../../node_modules/mermaid/dist/mermaid.min.js"></script>
+  <script src="assets/qa-watchdog.js"></script>
+  <script src="assets/deck.js"></script>
+</body>
+</html>
