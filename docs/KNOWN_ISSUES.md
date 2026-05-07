@@ -1,42 +1,7 @@
 # KNOWN_ISSUES.md
 
-本文档记录当前可见的结构债务、科学风险与环境复现风险，并单列“待核对”事项。
-
----
-
-## 1. 结构债务
-
-1. `data/raw/` 尚未成为统一原始数据入口，`test_data/` 仍承担部分原始样本夹具职责。
-2. 文献原文目录当前主要在 `reference/`，与目标规范目录 `resources/references/` 仍有偏差。
-3. 根目录缺少稳定的新人恢复入口文档，整体仓库 SOP 仍主要依赖 `AGENTS.md`、`PROJECT_STATE.md` 与 CLI 文档组合。
-4. `src/scripts/` 中仍有大量“分析 + 建模 + 出图 + 报告”耦合脚本，正式工具结构仍在逐步建立。
-5. 旧脚本仍未完全迁移到正式工具单元结构，`src/scripts/step*.py` 仍是大量历史流程入口。
-6. `src/core/` 旧模块可能暂未完全满足新 core 沙箱规则；新代码必须遵守，旧代码逐步迁移。
-7. `reflectance_qc` 当前仅实现最小 CSV/TXT adapter，尚未实现真正的 H5/Zarr reader adapter。
-8. `reflectance_qc` 当前无 GUI，PySide6 + pyqtgraph 只完成技术路线与边界约束，未进入界面实现。
-9. 仓库尚未建立完整 GUI 测试策略。
-
----
-
-## 2. 科学与建模风险
-
-1. 材料 `n/k` 在测量窗口外的外推仍是敏感点，需要持续标注适用范围与不确定性。
-2. 参比模型存在语义差异（`glass/Ag`、`Ag mirror` 等），必须显式区分，避免混用。
-3. 反演参数贴边风险需要持续跟踪，避免把数值收敛直接当作物理可信。
-4. `reflectance_qc` 当前采用 unity reference 的初步 reflectance 近似，只适合现场筛查，不等同于最终物理定标结论。
-
----
-
-## 3. 环境与复现风险
-
-1. 当前仅有 `requirements.txt`，未锁 Python 版本与依赖版本，跨机环境仍有漂移风险。
-2. 部分历史脚本曾使用本机/云盘路径约定，跨平台运行仍有路径偏差风险。
-3. 全仓库自动化测试仍存在历史失败项，尚未完成统一治理。
-
----
-
-## 4. 待核对
-
-1. 某些 `PROJECT_STATE.md` 中的历史数值结论，仍需与实际结果文件逐项对齐验证。
-2. 部分历史汇报资产与脚本版本是否严格同步，仍需补核。
-3. 数字 Phase 与 A-D 专题 Phase 的时间线映射是否完全规范化，仍需进一步梳理。
+1. `reflectance_qc` GUI 目前为实验态，不是完整 TMM 拟合系统。
+2. 目前输入 adapter 仅覆盖 CSV/TXT，尚未实现 H5/Zarr。
+3. 本机环境缺少完整科学计算依赖时，CLI/workflow 无法运行（如 `numpy` 缺失）。
+4. 当前 Windows 环境存在系统临时目录 ACL 问题，`pytest tmp_path` 可能触发 `PermissionError`。
+5. GUI 自动化测试依赖 `PySide6`；缺失时测试将被 `pytest.importorskip` 跳过。
