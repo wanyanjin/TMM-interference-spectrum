@@ -138,3 +138,23 @@ resources/aligned_full_stack_nk.csv
 - `Glass(1 mm)` 通过 coherency list 标记为非相干厚基底。
 - `PVK(700 nm)` 作为相干单层参与干涉计算。
 - 当前脚本复用现有对齐 `nk` 表，不新增 raw 数据入口。
+
+---
+
+## 7. Phase 09E refractiveindex.info 材料接入链路
+
+```text
+refractiveindex.info material pages
+  -> src/scripts/step09e_fetch_refractiveindex_materials.py
+  -> resources/refractiveindex_info/raw/<Material>/*.csv
+  -> resources/refractiveindex_info/raw/<Material>/*.yml
+  -> resources/refractiveindex_info/normalized/*.csv
+  -> resources/refractiveindex_info/refractiveindex_info_index.json
+```
+
+说明：
+
+- 当前首批材料为 `Si` 与 `SiO2`
+- raw 层同时保存网站 `CSV` 导出与 `Full database record`
+- 标准化层统一输出 `Wavelength_nm / n / k`
+- `SiO2/Malitson` 使用公式型来源，在 `400-1100 nm` 上重新评价 `n` 并显式取 `k = 0`

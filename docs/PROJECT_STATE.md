@@ -2,22 +2,26 @@
 
 ## Current Snapshot
 - Date: 2026-05-09
-- Phase: Phase 09D
-- Focus: 基于现有 `aligned_full_stack_nk.csv` 输出双层结构 TMM 干涉谱。
+- Phase: Phase 09E
+- Focus: 引入 `refractiveindex.info` 作为 `Si` / `SiO2` 优先材料来源。
 
 ## 当前新增脚本
-- `src/scripts/step09d_two_layer_interference_spectra.py`
-  - 输入：`resources/aligned_full_stack_nk.csv`
-  - 结构一：`Air / Glass(1 mm, incoherent) / PVK(700 nm, coherent) / Air`
-  - 结构二：`Air / PVK(700 nm, coherent) / Glass(1 mm, incoherent) / Air`
-  - 波段：`400-1100 nm`
-  - 输出：`R/T/A` CSV、manifest JSON、Markdown 报告、PNG/PDF 图
+- `src/scripts/step09e_fetch_refractiveindex_materials.py`
+  - 输入来源：
+    - `https://refractiveindex.info/?shelf=main&book=Si&page=Schinke`
+    - `https://refractiveindex.info/?shelf=main&book=SiO2&page=Malitson`
+  - 输出：
+    - raw CSV 导出
+    - raw YAML full database record
+    - 标准化 `n/k` CSV
+    - `refractiveindex_info_index.json`
 
 ## 输出路径
-- `data/processed/phase09/two_layer_interference/`
-- `results/figures/phase09/two_layer_interference/`
-- `results/report/phase09_two_layer_interference/`
+- `resources/refractiveindex_info/raw/Si/`
+- `resources/refractiveindex_info/raw/SiO2/`
+- `resources/refractiveindex_info/normalized/`
+- `resources/refractiveindex_info/refractiveindex_info_index.json`
 
 ## 已知边界
-- 当前结果是理想法向 specular TMM，不含角度平均、粗糙层与散射。
-- `1 mm` 玻璃按非相干厚基底处理，因此输出的是厚基底级联后的包络谱，不保留全相干玻璃超密条纹。
+- 当前只固化材料来源与标准化 CSV，不修改 `aligned_full_stack_nk.csv`。
+- `SiO2` 采用 bulk fused silica 基线；标准化 CSV 在 `400-1100 nm` 上显式取 `k = 0`，不等于所有 SiO2 工艺都无吸收。

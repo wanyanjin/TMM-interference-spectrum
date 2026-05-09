@@ -1,0 +1,49 @@
+{
+  "fetched_at_utc": "2026-05-09T15:35:08+00:00",
+  "source_site": "https://refractiveindex.info",
+  "database_citation": "M. N. Polyanskiy. Refractiveindex.info database of optical constants. Sci. Data 11, 94 (2024). https://doi.org/10.1038/s41597-023-02898-2",
+  "entries": [
+    {
+      "material": "Si",
+      "page_label": "Schinke et al. 2015: n,k 0.25-1.45 um",
+      "page_url": "https://refractiveindex.info/?shelf=main&book=Si&page=Schinke",
+      "csv_url": "https://refractiveindex.info/data_csv.php?datafile=database/data/main/Si/nk/Schinke.yml",
+      "full_record_url": "https://refractiveindex.info/database/data/main/Si/nk/Schinke.yml",
+      "raw_files": {
+        "csv_export": "resources/refractiveindex_info/raw/Si/Si_Schinke_et_al_2015.csv",
+        "full_database_record": "resources/refractiveindex_info/raw/Si/Si_Schinke_et_al_2015.yml"
+      },
+      "normalized_csv": "resources/refractiveindex_info/normalized/si_schinke_2015_nk.csv",
+      "normalized_kind": "tabulated_nk",
+      "wavelength_range_nm": {
+        "min": 250.0,
+        "max": 1450.0,
+        "count": 121
+      },
+      "references": "1) C. Schinke, P. C. Peest, J. Schmidt, R. Brendel,  K. Bothe, M. R. Vogt, I. Kröger, S. Winter, A. Schirmacher, S. Lim, H. T. Nguyen, D. MacDonald.\nUncertainty analysis for the coefficient of band-to-band absorption of crystalline silicon.\n<a href=\"https://doi.org/10.1063%2F1.4923379\"><i>AIP Advances</i> <b>5</b>, 67168 (2015)</a><br>\n2) M. R. Vogt.\n<i>Development of physical models for the simulation of optical properties of solar cell modules</i>.\n<a href=\"https://www.tib.eu/en/search/id/TIBKAT%3A852464657\">PhD. Thesis (2015)</a>",
+      "comments": "Relative uncertainties of the absorption coefficient: 0.4% at 0.250 µm, 11% at 0.6 µm, 1.4% at 1 µm, 12% at 1.2 µm and 180% at 1.45 µm. Temperature: 295 K.",
+      "notes": "Normalized CSV preserves the full tabulated Schinke 2015 wavelength coverage."
+    },
+    {
+      "material": "SiO2",
+      "page_label": "Malitson 1965: n 0.21-6.7 um",
+      "page_url": "https://refractiveindex.info/?shelf=main&book=SiO2&page=Malitson",
+      "csv_url": "https://refractiveindex.info/data_csv.php?datafile=database/data/main/SiO2/nk/Malitson.yml",
+      "full_record_url": "https://refractiveindex.info/database/data/main/SiO2/nk/Malitson.yml",
+      "raw_files": {
+        "csv_export": "resources/refractiveindex_info/raw/SiO2/SiO2_Malitson_1965.csv",
+        "full_database_record": "resources/refractiveindex_info/raw/SiO2/SiO2_Malitson_1965.yml"
+      },
+      "normalized_csv": "resources/refractiveindex_info/normalized/sio2_malitson_1965_nk_400_1100nm.csv",
+      "normalized_kind": "formula_1_with_zero_k",
+      "wavelength_range_nm": {
+        "min": 400.0,
+        "max": 1100.0,
+        "count": 701
+      },
+      "references": "1) I. H. Malitson.\nInterspecimen comparison of the refractive index of fused silica.\n<a href=\"https://doi.org/10.1364/JOSA.55.001205\"><i>J. Opt. Soc. Am.</i> <b>55</b>, 1205-1208 (1965)</a><br>\n2) C. Z. Tan.\nDetermination of refractive index of silica glass for infrared wavelengths by IR spectroscopy.\n<a href=\"https://doi.org/10.1016/S0022-3093(97)00438-9\"><i>J. Non-Cryst. Solids</i> <b>223</b>, 158-163 (1998)</a><br>\n* Sellmeier formula is reported in Ref. 1 for the 0.21–3.71 μm wavelength range. Ref. 2 verifies the validity of the formula up to 6.7 μm.",
+      "comments": "Fused silica, 20 °C",
+      "notes": "Bulk fused silica baseline; n is evaluated on 400-1100 nm / 1 nm grid and k is set to 0 in this band."
+    }
+  ]
+}
