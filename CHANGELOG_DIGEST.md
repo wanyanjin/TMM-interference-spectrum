@@ -14,3 +14,8 @@
 - GUI 通过 `run_reflectance_qc_workflow` 执行计算，禁止 GUI 重写 core 逻辑。
 - 保留 processed result viewer 作为辅助模式。
 - 新增 `Open Output Folder`，并保持 GUI 导出到受控目录。
+
+## Phase 09D
+- 新增 `src/scripts/step09d_two_layer_interference_spectra.py`，使用现有 `aligned_full_stack_nk.csv` 生成双层结构 TMM 干涉谱。
+- 输出 `Glass(1 mm)/PVK(700 nm)` 与 `PVK(700 nm)/Glass(1 mm)` 在 `400-1100 nm` 的 `R/T/A` CSV、manifest、Markdown 报告与 PNG/PDF 图。
+- 玻璃统一按厚基底非相干处理，保持与仓库现有 Phase 08/09 厚玻璃建模口径一致。

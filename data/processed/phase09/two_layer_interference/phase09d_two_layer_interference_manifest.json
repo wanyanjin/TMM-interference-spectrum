@@ -1,0 +1,71 @@
+{
+  "phase": "Phase 09D",
+  "inputs": {
+    "nk_csv": "resources/aligned_full_stack_nk.csv",
+    "wavelength_range_nm": [
+      400.0,
+      1100.0
+    ],
+    "glass_thickness_nm": 1000000.0,
+    "pvk_thickness_nm": 700.0,
+    "incident_angle_deg": 0.0,
+    "polarization": "s"
+  },
+  "structures": [
+    {
+      "label": "glass_1mm_pvk_700nm",
+      "structure": "Air / Glass(1 mm, incoherent) / PVK(700 nm, coherent) / Air",
+      "d_list_nm": [
+        "inf",
+        1000000.0,
+        700.0,
+        "inf"
+      ],
+      "c_list": [
+        "i",
+        "i",
+        "c",
+        "i"
+      ]
+    },
+    {
+      "label": "pvk_700nm_glass_1mm",
+      "structure": "Air / PVK(700 nm, coherent) / Glass(1 mm, incoherent) / Air",
+      "d_list_nm": [
+        "inf",
+        700.0,
+        1000000.0,
+        "inf"
+      ],
+      "c_list": [
+        "i",
+        "c",
+        "i",
+        "i"
+      ]
+    }
+  ],
+  "outputs": {
+    "csv": "data/processed/phase09/two_layer_interference/phase09d_two_layer_interference_spectra.csv",
+    "figure_png": "results/figures/phase09/two_layer_interference/phase09d_two_layer_interference_spectra.png",
+    "figure_pdf": "results/figures/phase09/two_layer_interference/phase09d_two_layer_interference_spectra.pdf",
+    "report_md": "results/report/phase09_two_layer_interference/phase09d_two_layer_interference_report.md"
+  },
+  "summary": {
+    "point_count": 701,
+    "wavelength_min_nm": 400.0,
+    "wavelength_max_nm": 1100.0,
+    "reflectance_min_glass_1mm_pvk_700nm": 0.07100519276574505,
+    "reflectance_max_glass_1mm_pvk_700nm": 0.41000664578849066,
+    "transmittance_min_glass_1mm_pvk_700nm": 1.2119694217951442e-11,
+    "transmittance_max_glass_1mm_pvk_700nm": 0.9195123092415745,
+    "absorptance_min_glass_1mm_pvk_700nm": 0.0,
+    "absorptance_max_glass_1mm_pvk_700nm": 0.8764649020320737,
+    "reflectance_min_pvk_700nm_glass_1mm": 0.08048769075842521,
+    "reflectance_max_pvk_700nm_glass_1mm": 0.41000664578849016,
+    "transmittance_min_pvk_700nm_glass_1mm": 1.2119694217951442e-11,
+    "transmittance_max_pvk_700nm_glass_1mm": 0.919512309241575,
+    "absorptance_min_pvk_700nm_glass_1mm": 0.0,
+    "absorptance_max_pvk_700nm_glass_1mm": 0.7794062547285417
+  }
+}

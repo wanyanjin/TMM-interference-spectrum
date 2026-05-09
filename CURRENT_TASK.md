@@ -1,19 +1,23 @@
 # CURRENT_TASK.md
 
 ## 当前任务
-`Phase 09C-2：reflectance_qc GUI 原始光谱一键 QC 整改`
+`Phase 09D：双层结构 TMM 干涉谱输出`
 
 ## 本轮目标
-- 将 GUI 从 processed-only viewer 改为默认 Raw spectra QC。
-- 让 GUI 通过 `run_reflectance_qc_workflow` 执行一键计算。
-- 保留 processed viewer 作为辅助模式。
+- 基于现有 `resources/aligned_full_stack_nk.csv` 计算：
+  - `Glass(1 mm) / PVK(700 nm)`
+  - `PVK(700 nm) / Glass(1 mm)`
+- 波长范围固定为 `400-1100 nm`
+- 输出 `csv`、`manifest json`、`markdown report` 与折线图
 
 ## 完成状态
-- 已改为双模式：Raw spectra QC（默认）+ Processed result viewer。
-- Raw 模式可输入 sample/reference、曝光、波段并触发 workflow。
-- workflow 成功后 GUI 自动加载 `processed_reflectance.csv` 与 `qc_summary.json`。
-- 增加 `Open Output Folder`（Windows）。
+- 新增 `src/scripts/step09d_two_layer_interference_spectra.py`
+- 输出目录：
+  - `data/processed/phase09/two_layer_interference/`
+  - `results/figures/phase09/two_layer_interference/`
+  - `results/report/phase09_two_layer_interference/`
+- 玻璃按 `1 mm` 非相干厚基底处理，PVK 按 `700 nm` 相干单层处理
+- 已生成两种层序的 `R/T/A` 光谱并导出图
 
 ## 待办
-1. 在依赖完整环境复跑 CLI smoke 与 GUI smoke。
-2. 清理并提交 Phase 09C-2 相关文件。
+1. 清理并提交 Phase 09D 相关文件。

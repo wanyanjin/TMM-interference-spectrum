@@ -117,3 +117,24 @@ sample/reference CSV
 - `core.reflectance_qc` 只接收 `SpectrumData` 和配置对象，不识别 CSV/TXT 后缀。
 - CLI 只解析参数并调用 workflow，不复制 QC 计算与导出逻辑。
 - 当前输出为 `processed_reflectance.csv`、`qc_summary.json`、`qc_report.md`，不输出 PNG 图。
+
+---
+
+## 6. Phase 09D 双层干涉谱链路
+
+```text
+resources/aligned_full_stack_nk.csv
+  -> src/scripts/step09d_two_layer_interference_spectra.py
+  -> data/processed/phase09/two_layer_interference/phase09d_two_layer_interference_spectra.csv
+  -> data/processed/phase09/two_layer_interference/phase09d_two_layer_interference_manifest.json
+  -> results/figures/phase09/two_layer_interference/phase09d_two_layer_interference_spectra.png
+  -> results/figures/phase09/two_layer_interference/phase09d_two_layer_interference_spectra.pdf
+  -> results/report/phase09_two_layer_interference/phase09d_two_layer_interference_report.md
+```
+
+说明：
+
+- 使用 `tmm.inc_tmm` 计算 `R/T/A`，法向入射、`s` 偏振。
+- `Glass(1 mm)` 通过 coherency list 标记为非相干厚基底。
+- `PVK(700 nm)` 作为相干单层参与干涉计算。
+- 当前脚本复用现有对齐 `nk` 表，不新增 raw 数据入口。
