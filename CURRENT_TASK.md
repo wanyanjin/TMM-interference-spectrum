@@ -1,30 +1,22 @@
 # CURRENT_TASK.md
 
 ## 当前任务
-`Phase 09E：refractiveindex.info 材料来源接入`
+`Phase 09F：Si/Air 单界面反射率模拟`
 
 ## 本轮目标
-- 将 `Si` 与 `SiO2` 从 `refractiveindex.info` 收入仓库
-- 保存 raw `CSV` 与 `Full database record`
-- 生成标准化 `n/k` CSV 与索引 manifest
-- 将材料来源优先级规则写入项目规范
+- 基于现有 `Si` 标准化 `n/k` 数据模拟 `Si/Air` 在 `400-1100 nm` 的反射率
+- 输出 `csv`、`manifest json`、`markdown report` 与折线图
 
 ## 完成状态
-- 已新增正式抓取脚本：`src/scripts/step09e_fetch_refractiveindex_materials.py`
-- 目标材料：
-  - `Si -> Schinke 2015`
-  - `SiO2 -> Malitson 1965`
+- 已新增正式脚本：`src/scripts/step09f_si_air_interface_reflectance.py`
+- 输入数据：
+  - `resources/refractiveindex_info/normalized/si_schinke_2015_nk.csv`
 - 输出目录：
-  - `resources/refractiveindex_info/raw/`
-  - `resources/refractiveindex_info/normalized/`
-- 已生成：
-  - raw `CSV` 与 `Full database record`
-  - 标准化 `n/k` CSV
-  - `refractiveindex_info_index.json`
+  - `data/processed/phase09/si_air_interface/`
+  - `results/figures/phase09/si_air_interface/`
+  - `results/report/phase09_si_air_interface/`
 - 已补：
   - 单元测试
-  - CLI 文档
-  - 材料来源优先级规则
 
 ## 待办
-1. 清理并提交 Phase 09E 相关文件。
+1. 运行脚本并提交 Phase 09F 相关文件。

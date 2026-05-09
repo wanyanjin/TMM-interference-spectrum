@@ -158,3 +158,23 @@ refractiveindex.info material pages
 - raw 层同时保存网站 `CSV` 导出与 `Full database record`
 - 标准化层统一输出 `Wavelength_nm / n / k`
 - `SiO2/Malitson` 使用公式型来源，在 `400-1100 nm` 上重新评价 `n` 并显式取 `k = 0`
+
+---
+
+## 8. Phase 09F Si/Air 单界面反射率链路
+
+```text
+resources/refractiveindex_info/normalized/si_schinke_2015_nk.csv
+  -> src/scripts/step09f_si_air_interface_reflectance.py
+  -> data/processed/phase09/si_air_interface/phase09f_si_air_reflectance.csv
+  -> data/processed/phase09/si_air_interface/phase09f_si_air_reflectance_manifest.json
+  -> results/figures/phase09/si_air_interface/phase09f_si_air_reflectance.png
+  -> results/figures/phase09/si_air_interface/phase09f_si_air_reflectance.pdf
+  -> results/report/phase09_si_air_interface/phase09f_si_air_reflectance_report.md
+```
+
+说明：
+
+- 使用法向入射 Fresnel 公式计算 `Air / Si` 单界面反射率
+- 输入 `Si` 光学常数来自 `refractiveindex.info` 的 `Schinke 2015` 标准化 CSV
+- 当前输出仅代表理想单界面，不包含氧化层或多层干涉

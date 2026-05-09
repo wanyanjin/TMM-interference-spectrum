@@ -1,0 +1,27 @@
+{
+  "phase": "Phase 09F",
+  "generated_at_utc": "2026-05-09T15:39:42+00:00",
+  "input_csv": "resources/refractiveindex_info/normalized/si_schinke_2015_nk.csv",
+  "interface": "Air / Si",
+  "incidence": {
+    "angle_deg": 0.0,
+    "polarization": "unpolarized_equivalent_at_normal_incidence"
+  },
+  "formula": "R = |(n_air - n_si)/(n_air + n_si)|^2",
+  "outputs": {
+    "csv": "data/processed/phase09/si_air_interface/phase09f_si_air_reflectance.csv",
+    "figure_png": "results/figures/phase09/si_air_interface/phase09f_si_air_reflectance.png",
+    "figure_pdf": "results/figures/phase09/si_air_interface/phase09f_si_air_reflectance.pdf",
+    "report_md": "results/report/phase09_si_air_interface/phase09f_si_air_reflectance_report.md"
+  },
+  "summary": {
+    "wavelength_min_nm": 400.0,
+    "wavelength_max_nm": 1100.0,
+    "point_count": 71,
+    "reflectance_min": 0.31355071703823634,
+    "reflectance_max": 0.48847617132352733,
+    "reflectance_400nm": 0.48847617132352733,
+    "reflectance_600nm": 0.353323761960691,
+    "reflectance_1100nm": 0.31355071703823634
+  }
+}

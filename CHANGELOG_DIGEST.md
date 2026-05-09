@@ -24,3 +24,7 @@
 - 新增 `refractiveindex.info` 材料来源接入闭环，首批固化 `Si` 与 `SiO2`。
 - 保存网站 `CSV` 导出与 `Full database record`（YAML），并生成标准化 `n/k` CSV 与索引 manifest。
 - 在 `AGENTS.md` 中新增材料 `n/k` 查询优先级：先查 `refractiveindex.info`，不足时再转其他来源。
+
+## Phase 09F
+- 新增 `src/scripts/step09f_si_air_interface_reflectance.py`，基于 `Si / Schinke 2015` 标准化 `n/k` 数据计算 `Si/Air` 单界面在 `400-1100 nm` 的法向反射率。
+- 输出 `csv`、manifest、Markdown 报告和 PNG/PDF 图到受控目录。
