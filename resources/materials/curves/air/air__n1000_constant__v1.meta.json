@@ -1,0 +1,24 @@
+{
+  "material_id": "air__n1000_constant__v1",
+  "material_family": "air",
+  "display_name": "air__n1000_constant__v1",
+  "source_type": "constant_nk",
+  "source_path": "resources/materials/constants/air__n1000_constant__v1.json",
+  "wavelength_range_nm": {
+    "min": 400,
+    "max": 1100
+  },
+  "has_extrapolation": false,
+  "confidence_level": "B",
+  "recommended_use": [
+    "forward_simulation",
+    "qualitative_comparison",
+    "experimental_intuition"
+  ],
+  "not_recommended_use": [
+    "final_quantitative_fitting_without_validation"
+  ],
+  "notes": "Split from Phase05c aligned full-stack n-k table. This is a derived engineering table, not a raw material truth source.",
+  "version": "v1",
+  "status": "experimental"
+}

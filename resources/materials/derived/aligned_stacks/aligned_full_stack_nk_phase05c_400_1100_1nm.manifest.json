@@ -1,0 +1,19 @@
+{
+  "derived_table_id": "aligned_full_stack_nk_phase05c_400_1100_1nm",
+  "source_path": "resources/aligned_full_stack_nk.csv",
+  "wavelength_grid": {
+    "min_nm": 400,
+    "max_nm": 1100,
+    "step_nm": 1
+  },
+  "materials": {
+    "Glass": "glass__n1515_constant__v1",
+    "ITO": "ito__phase05c_aligned__v1",
+    "NiOx": "niox__phase05c_aligned__v1",
+    "PVK": "pvk__csfapi_phase05c_aligned__v1",
+    "C60": "c60__phase05c_aligned__v1",
+    "SnOx": "snox__phase05c_aligned__v1",
+    "Ag": "ag__phase05c_aligned__v1"
+  },
+  "compatibility_note": "Original resources/aligned_full_stack_nk.csv is kept for Phase07/Phase08 backward compatibility."
+}

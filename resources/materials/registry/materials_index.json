@@ -1,0 +1,86 @@
+{
+  "schema_version": "1.0",
+  "materials": [
+    {
+      "material_id": "glass__n1515_constant__v1",
+      "material_family": "glass",
+      "display_name": "glass__n1515_constant__v1",
+      "curve_path": "resources/materials/curves/glass/glass__n1515_constant__v1.csv",
+      "meta_path": "resources/materials/curves/glass/glass__n1515_constant__v1.meta.json",
+      "status": "experimental",
+      "confidence_level": "C"
+    },
+    {
+      "material_id": "ito__phase05c_aligned__v1",
+      "material_family": "ito",
+      "display_name": "ito__phase05c_aligned__v1",
+      "curve_path": "resources/materials/curves/ito/ito__phase05c_aligned__v1.csv",
+      "meta_path": "resources/materials/curves/ito/ito__phase05c_aligned__v1.meta.json",
+      "status": "experimental",
+      "confidence_level": "C"
+    },
+    {
+      "material_id": "niox__phase05c_aligned__v1",
+      "material_family": "niox",
+      "display_name": "niox__phase05c_aligned__v1",
+      "curve_path": "resources/materials/curves/niox/niox__phase05c_aligned__v1.csv",
+      "meta_path": "resources/materials/curves/niox/niox__phase05c_aligned__v1.meta.json",
+      "status": "experimental",
+      "confidence_level": "C"
+    },
+    {
+      "material_id": "pvk__csfapi_phase05c_aligned__v1",
+      "material_family": "pvk",
+      "display_name": "pvk__csfapi_phase05c_aligned__v1",
+      "curve_path": "resources/materials/curves/pvk/pvk__csfapi_phase05c_aligned__v1.csv",
+      "meta_path": "resources/materials/curves/pvk/pvk__csfapi_phase05c_aligned__v1.meta.json",
+      "status": "experimental",
+      "confidence_level": "C"
+    },
+    {
+      "material_id": "c60__phase05c_aligned__v1",
+      "material_family": "c60",
+      "display_name": "c60__phase05c_aligned__v1",
+      "curve_path": "resources/materials/curves/c60/c60__phase05c_aligned__v1.csv",
+      "meta_path": "resources/materials/curves/c60/c60__phase05c_aligned__v1.meta.json",
+      "status": "experimental",
+      "confidence_level": "C"
+    },
+    {
+      "material_id": "snox__phase05c_aligned__v1",
+      "material_family": "snox",
+      "display_name": "snox__phase05c_aligned__v1",
+      "curve_path": "resources/materials/curves/snox/snox__phase05c_aligned__v1.csv",
+      "meta_path": "resources/materials/curves/snox/snox__phase05c_aligned__v1.meta.json",
+      "status": "experimental",
+      "confidence_level": "C"
+    },
+    {
+      "material_id": "ag__phase05c_aligned__v1",
+      "material_family": "ag",
+      "display_name": "ag__phase05c_aligned__v1",
+      "curve_path": "resources/materials/curves/ag/ag__phase05c_aligned__v1.csv",
+      "meta_path": "resources/materials/curves/ag/ag__phase05c_aligned__v1.meta.json",
+      "status": "experimental",
+      "confidence_level": "C"
+    },
+    {
+      "material_id": "air__n1000_constant__v1",
+      "material_family": "air",
+      "display_name": "air__n1000_constant__v1",
+      "curve_path": "resources/materials/curves/air/air__n1000_constant__v1.csv",
+      "meta_path": "resources/materials/curves/air/air__n1000_constant__v1.meta.json",
+      "status": "experimental",
+      "confidence_level": "B"
+    },
+    {
+      "material_id": "sam__n150_constant__v1",
+      "material_family": "sam",
+      "display_name": "sam__n150_constant__v1",
+      "curve_path": "resources/materials/curves/sam/sam__n150_constant__v1.csv",
+      "meta_path": "resources/materials/curves/sam/sam__n150_constant__v1.meta.json",
+      "status": "experimental",
+      "confidence_level": "B"
+    }
+  ]
+}

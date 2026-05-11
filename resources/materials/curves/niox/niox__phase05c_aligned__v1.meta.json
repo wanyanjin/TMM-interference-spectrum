@@ -1,0 +1,24 @@
+{
+  "material_id": "niox__phase05c_aligned__v1",
+  "material_family": "niox",
+  "display_name": "niox__phase05c_aligned__v1",
+  "source_type": "derived_aligned_table",
+  "source_path": "resources/aligned_full_stack_nk.csv",
+  "wavelength_range_nm": {
+    "min": 400,
+    "max": 1100
+  },
+  "has_extrapolation": true,
+  "confidence_level": "C",
+  "recommended_use": [
+    "forward_simulation",
+    "qualitative_comparison",
+    "experimental_intuition"
+  ],
+  "not_recommended_use": [
+    "final_quantitative_fitting_without_validation"
+  ],
+  "notes": "Split from Phase05c aligned full-stack n-k table. This is a derived engineering table, not a raw material truth source.",
+  "version": "v1",
+  "status": "experimental"
+}
