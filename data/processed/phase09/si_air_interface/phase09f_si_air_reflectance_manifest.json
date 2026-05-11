@@ -1,6 +1,6 @@
 {
   "phase": "Phase 09F",
-  "generated_at_utc": "2026-05-09T15:39:42+00:00",
+  "generated_at_utc": "2026-05-11T06:13:58+00:00",
   "input_csv": "resources/refractiveindex_info/normalized/si_schinke_2015_nk.csv",
   "interface": "Air / Si",
   "incidence": {

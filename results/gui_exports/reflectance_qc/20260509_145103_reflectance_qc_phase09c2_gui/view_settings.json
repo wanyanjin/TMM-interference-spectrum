@@ -1,0 +1,20 @@
+{
+  "input_processed_reflectance_csv": "D:\\code\\TMM-interference-spectrum\\data\\processed\\phase09\\reflectance_qc\\20260509_145103_reflectance_qc_phase09c2_gui\\processed_reflectance.csv",
+  "input_qc_summary_json": "D:\\code\\TMM-interference-spectrum\\data\\processed\\phase09\\reflectance_qc\\20260509_145103_reflectance_qc_phase09c2_gui\\qc_summary.json",
+  "x_range": [
+    500.0,
+    700.0
+  ],
+  "y_range": [
+    0.3371183657214649,
+    0.4049704645317952
+  ],
+  "autoscale_mode": "robust_auto",
+  "visible_point_count": 472,
+  "valid_point_count": 472,
+  "invalid_fraction": 0.0,
+  "highlighted_flags": [],
+  "timestamp": "2026-05-09T14:51:15",
+  "run_id": "20260509_145103_reflectance_qc_phase09c2_gui",
+  "application_version_or_phase": "Phase 09C-1"
+}

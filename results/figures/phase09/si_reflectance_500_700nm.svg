@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800">
+<rect width="100%" height="100%" fill="white"/>
+<text x="600.0" y="40" text-anchor="middle" font-size="28" font-family="Arial">Si Air/Si Reflectance (500-700 nm)</text>
+<line x1="100.00" y1="80" x2="100.00" y2="700" stroke="#dddddd"/>
+<text x="100.00" y="745" text-anchor="middle" font-size="18" font-family="Arial">500</text>
+<line x1="355.00" y1="80" x2="355.00" y2="700" stroke="#dddddd"/>
+<text x="355.00" y="745" text-anchor="middle" font-size="18" font-family="Arial">550</text>
+<line x1="610.00" y1="80" x2="610.00" y2="700" stroke="#dddddd"/>
+<text x="610.00" y="745" text-anchor="middle" font-size="18" font-family="Arial">600</text>
+<line x1="865.00" y1="80" x2="865.00" y2="700" stroke="#dddddd"/>
+<text x="865.00" y="745" text-anchor="middle" font-size="18" font-family="Arial">650</text>
+<line x1="1120.00" y1="80" x2="1120.00" y2="700" stroke="#dddddd"/>
+<text x="1120.00" y="745" text-anchor="middle" font-size="18" font-family="Arial">700</text>
+<line x1="100" y1="700.00" x2="1120" y2="700.00" stroke="#e6e6e6"/>
+<text x="82" y="706.00" text-anchor="end" font-size="18" font-family="Arial">0.0</text>
+<line x1="100" y1="576.00" x2="1120" y2="576.00" stroke="#e6e6e6"/>
+<text x="82" y="582.00" text-anchor="end" font-size="18" font-family="Arial">0.2</text>
+<line x1="100" y1="452.00" x2="1120" y2="452.00" stroke="#e6e6e6"/>
+<text x="82" y="458.00" text-anchor="end" font-size="18" font-family="Arial">0.4</text>
+<line x1="100" y1="328.00" x2="1120" y2="328.00" stroke="#e6e6e6"/>
+<text x="82" y="334.00" text-anchor="end" font-size="18" font-family="Arial">0.6</text>
+<line x1="100" y1="204.00" x2="1120" y2="204.00" stroke="#e6e6e6"/>
+<text x="82" y="210.00" text-anchor="end" font-size="18" font-family="Arial">0.8</text>
+<line x1="100" y1="80.00" x2="1120" y2="80.00" stroke="#e6e6e6"/>
+<text x="82" y="86.00" text-anchor="end" font-size="18" font-family="Arial">1.0</text>
+<line x1="100" y1="700" x2="1120" y2="700" stroke="black" stroke-width="1.5"/>
+<line x1="100" y1="80" x2="100" y2="700" stroke="black" stroke-width="1.5"/>
+<polyline fill="none" stroke="#0b6e4f" stroke-width="3.5" points="100.00,459.94 151.00,462.88 202.00,465.58 253.00,467.97 304.00,470.22 355.00,472.25 406.00,474.13 457.00,475.90 508.00,477.51 559.00,479.01 610.00,480.39 661.00,481.73 712.00,482.95 763.00,484.11 814.00,485.22 865.00,486.28 916.00,487.27 967.00,488.21 1018.00,489.15 1069.00,490.03 1120.00,490.79"/>
+<text x="600.0" y="782" text-anchor="middle" font-size="22" font-family="Arial">Wavelength (nm)</text>
+<text x="28" y="400.0" transform="rotate(-90 28 400.0)" text-anchor="middle" font-size="22" font-family="Arial">Reflectance R (0-1)</text>
+<rect x="950" y="90" width="170" height="56" fill="white" stroke="#cccccc"/>
+<line x1="970" y1="118" x2="1020" y2="118" stroke="#0b6e4f" stroke-width="3.5"/>
+<text x="1030" y="124" font-size="18" font-family="Arial">R_air_si</text>
+</svg>

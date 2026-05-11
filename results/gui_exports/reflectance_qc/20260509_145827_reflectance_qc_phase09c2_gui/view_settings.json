@@ -1,0 +1,20 @@
+{
+  "input_processed_reflectance_csv": "D:\\onedrive\\Data\\PL\\2026\\0508\\smaple\\processed\\Si-500ms-before-1 2026 五月 08 14_34_07_reflection.csv",
+  "input_qc_summary_json": "D:\\onedrive\\Data\\PL\\2026\\0508\\smaple\\processed\\Si-500ms-before-1 2026 五月 08 14_34_07_reflection_qc_summary.json",
+  "x_range": [
+    450.0,
+    750.0
+  ],
+  "y_range": [
+    0.3288671879013361,
+    0.4739311303022594
+  ],
+  "autoscale_mode": "robust_auto",
+  "visible_point_count": 708,
+  "valid_point_count": 708,
+  "invalid_fraction": 0.0,
+  "highlighted_flags": [],
+  "timestamp": "2026-05-09T15:00:57",
+  "run_id": "20260509_145827_reflectance_qc_phase09c2_gui",
+  "application_version_or_phase": "Phase 09C-1"
+}

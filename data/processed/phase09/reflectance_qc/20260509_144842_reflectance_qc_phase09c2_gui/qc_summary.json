@@ -1,0 +1,47 @@
+{
+  "overall_status": "PASS",
+  "metrics": {
+    "point_count": 472.0,
+    "valid_point_count": 472.0,
+    "invalid_fraction": 0.0,
+    "reference_low_fraction": 0.0,
+    "reference_near_saturation_fraction": 0.0,
+    "sample_near_saturation_fraction": 0.0,
+    "reflectance_lt_minus_0p02_fraction": 0.0,
+    "reflectance_gt_1p05_fraction": 0.0,
+    "reflectance_gt_1p2_fraction": 0.0,
+    "median_reflectance_500_750": 0.356868454047776,
+    "reflectance_600nm": 0.3572549814379702
+  },
+  "flags": [],
+  "metadata": {
+    "interpolation_used": false,
+    "alignment_basis": "sample_grid",
+    "wavelength_min_nm": 500.0,
+    "wavelength_max_nm": 700.0,
+    "point_count": 472,
+    "reference_type": "unity",
+    "exposure_normalization_enabled": false
+  },
+  "manifest": {
+    "tool_name": "reflectance_qc",
+    "run_id": "20260509_144842_reflectance_qc_phase09c2_gui",
+    "parameters": {
+      "sample_exposure_ms": 20.0,
+      "reference_exposure_ms": 20.0,
+      "exposure_normalization_enabled": false,
+      "wavelength_min_nm": 500.0,
+      "wavelength_max_nm": 700.0
+    },
+    "inputs": {
+      "sample_path": "D:\\onedrive\\Data\\PL\\2026\\0508\\smaple\\processed\\Si-500ms-before-1 2026 五月 08 14_34_07.csv",
+      "reference_path": "D:\\onedrive\\Data\\PL\\2026\\0508\\smaple\\processed\\Ag-500ms-after-1 2026 五月 08 14_46_38-1.csv"
+    },
+    "outputs": {
+      "processed_csv": "D:\\code\\TMM-interference-spectrum\\data\\processed\\phase09\\reflectance_qc\\20260509_144842_reflectance_qc_phase09c2_gui\\processed_reflectance.csv",
+      "qc_summary_json": "D:\\code\\TMM-interference-spectrum\\data\\processed\\phase09\\reflectance_qc\\20260509_144842_reflectance_qc_phase09c2_gui\\qc_summary.json",
+      "qc_report_md": "D:\\code\\TMM-interference-spectrum\\results\\report\\phase09_reflectance_qc\\20260509_144842_reflectance_qc_phase09c2_gui\\qc_report.md"
+    },
+    "warnings": []
+  }
+}

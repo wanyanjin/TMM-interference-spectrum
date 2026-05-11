@@ -1,0 +1,80 @@
+{
+  "current_window_qc": {
+    "wavelength_min": 450.0,
+    "wavelength_max": 750.0,
+    "point_count": 708,
+    "valid_point_count": 708,
+    "invalid_fraction": 0.0,
+    "median_reflectance": 0.35678267813334946,
+    "mean_reflectance": 0.3668732563964141,
+    "reflectance_600nm": 0.357280613690147,
+    "reflectance_600nm_note": null,
+    "reflectance_gt_1p2_fraction": 0.0,
+    "reflectance_lt_0_fraction": 0.0,
+    "non_finite_count": 0,
+    "reference_low_fraction": 0.0
+  },
+  "full_range_qc": {
+    "overall_status": "FAIL",
+    "metrics": {
+      "point_count": 1340.0,
+      "valid_point_count": 1229.0,
+      "invalid_fraction": 0.08283582089552244,
+      "reference_low_fraction": 0.0,
+      "reference_near_saturation_fraction": 0.0,
+      "sample_near_saturation_fraction": 0.0,
+      "reflectance_lt_minus_0p02_fraction": 0.03731343283582089,
+      "reflectance_gt_1p05_fraction": 0.11940298507462686,
+      "reflectance_gt_1p2_fraction": 0.10149253731343283,
+      "median_reflectance_500_750": 0.3501272932849919,
+      "reflectance_600nm": 0.35725498143797024
+    },
+    "flags": [
+      {
+        "name": "reflectance_gt_1p2",
+        "severity": "fail",
+        "message": "More than 1% of points exceed reflectance 1.20"
+      },
+      {
+        "name": "reflectance_lt_minus_0p02",
+        "severity": "fail",
+        "message": "More than 1% of points fall below reflectance -0.02"
+      },
+      {
+        "name": "reflectance_gt_1p05",
+        "severity": "warn",
+        "message": "More than 1% of points exceed reflectance 1.05"
+      }
+    ],
+    "metadata": {
+      "interpolation_used": false,
+      "alignment_basis": "sample_grid",
+      "wavelength_min_nm": 314.82578387667604,
+      "wavelength_max_nm": 881.782144490951,
+      "point_count": 1340,
+      "reference_type": "unity",
+      "exposure_normalization_enabled": true
+    },
+    "manifest": {
+      "tool_name": "reflectance_qc",
+      "run_id": "20260509_145827_reflectance_qc_phase09c2_gui",
+      "parameters": {
+        "sample_exposure_ms": 500.0,
+        "reference_exposure_ms": 500.0,
+        "exposure_normalization_enabled": true,
+        "wavelength_min_nm": null,
+        "wavelength_max_nm": null
+      },
+      "inputs": {
+        "sample_path": "D:\\onedrive\\Data\\PL\\2026\\0508\\smaple\\processed\\Si-500ms-before-1 2026 五月 08 14_34_07.csv",
+        "reference_path": "D:\\onedrive\\Data\\PL\\2026\\0508\\smaple\\processed\\Ag-500ms-after-1 2026 五月 08 14_46_38-1.csv"
+      },
+      "outputs": {
+        "processed_csv": "D:\\onedrive\\Data\\PL\\2026\\0508\\smaple\\processed\\Si-500ms-before-1 2026 五月 08 14_34_07_reflection.csv",
+        "qc_summary_json": "D:\\onedrive\\Data\\PL\\2026\\0508\\smaple\\processed\\Si-500ms-before-1 2026 五月 08 14_34_07_reflection_qc_summary.json",
+        "qc_report_md": "D:\\onedrive\\Data\\PL\\2026\\0508\\smaple\\processed\\Si-500ms-before-1 2026 五月 08 14_34_07_reflection_qc_report.md"
+      },
+      "warnings": []
+    }
+  }
+}
