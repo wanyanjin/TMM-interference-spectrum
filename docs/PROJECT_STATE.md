@@ -2,10 +2,10 @@
 
 ## Current Snapshot
 - Date: 2026-05-11
-- Phase: Phase 10A
-- Focus: Material database normalization and registry scaffold
+- Phase: Phase 10A-2
+- Focus: Optical constants lifecycle governance scaffold
 
 ## Notes
-- Legacy resources/aligned_full_stack_nk.csv is preserved for backward compatibility.
-- Canonical material database now lives under resources/materials/.
-
+- `resources/aligned_full_stack_nk.csv` is preserved for backward compatibility.
+- Canonical materials DB remains `resources/materials/`.
+- Import lifecycle now governed by OPTICAL_CONSTANTS_STORAGE_GUIDE.

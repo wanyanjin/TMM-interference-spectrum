@@ -8,3 +8,5 @@
 | `reflectance_qc` | experimental | Phase 09C-2 | `src/cli/reflectance_qc.py` | experimental (`src/gui/reflectance_qc/app.py`) | `src/workflows/reflectance_qc_workflow.py` | `src/core/reflectance_qc.py` | `docs/cli/reflectance_qc.md`, `docs/tools/reflectance_qc.md`, `docs/gui/reflectance_qc_gui.md` | GUI supports raw spectra QC and processed result viewer; still not a full TMM fitting GUI. |
 
 | material_registry | experimental | Phase 10A | src/cli/material_registry.py | planned | src/workflows/material_registry_workflow.py | n/a | docs/cli/material_registry.md, docs/tools/material_registry.md | Material database normalization and registry QC. |
+
+| `material_import` | planned | Phase 10A-3 | `src/cli/material_import.py` (planned) | no | planned | n/a | `docs/architecture/OPTICAL_CONSTANTS_STORAGE_GUIDE.md` | Will implement governed import lifecycle from inbox to registry. |
