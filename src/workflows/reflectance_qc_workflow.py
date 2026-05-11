@@ -29,6 +29,8 @@ class ReflectanceQCWorkflowConfig:
     exposure_normalization_enabled: bool = False
     wavelength_min_nm: float | None = None
     wavelength_max_nm: float | None = None
+    output_dir: Path | None = None
+    output_basename: str | None = None
 
 
 def run_reflectance_qc_workflow(config: ReflectanceQCWorkflowConfig) -> dict[str, Any]:
@@ -44,11 +46,16 @@ def run_reflectance_qc_workflow(config: ReflectanceQCWorkflowConfig) -> dict[str
     result = compute_reflectance_qc(sample=sample, reference=reference, config=qc_config)
 
     run_id = _build_run_id("reflectance_qc", config.output_tag)
-    processed_dir = config.output_root / "data" / "processed" / "phase09" / "reflectance_qc" / run_id
-    report_dir = config.output_root / "results" / "report" / "phase09_reflectance_qc" / run_id
-    processed_csv = processed_dir / "processed_reflectance.csv"
-    qc_summary_json = processed_dir / "qc_summary.json"
-    qc_report_md = report_dir / "qc_report.md"
+    if config.output_dir is None:
+        processed_dir = config.output_root / "data" / "processed" / "phase09" / "reflectance_qc" / run_id
+        report_dir = config.output_root / "results" / "report" / "phase09_reflectance_qc" / run_id
+    else:
+        processed_dir = config.output_dir
+        report_dir = config.output_dir
+    basename = config.output_basename or "processed_reflectance"
+    processed_csv = processed_dir / f"{basename}.csv"
+    qc_summary_json = processed_dir / f"{basename}_qc_summary.json"
+    qc_report_md = report_dir / f"{basename}_qc_report.md"
 
     manifest = ToolRunManifest(
         tool_name="reflectance_qc",

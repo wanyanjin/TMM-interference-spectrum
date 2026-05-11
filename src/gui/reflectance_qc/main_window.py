@@ -157,6 +157,12 @@ class ReflectanceQCMainWindow(QMainWindow):
         self.raw_x_min = QLineEdit("500")
         self.raw_x_max = QLineEdit("700")
         form.addRow("Wavelength min/max", self._row(self.raw_x_min, self.raw_x_max))
+        self.output_dir_edit = QLineEdit("")
+        self.btn_output_dir = QPushButton("Output folder")
+        self.btn_output_dir.clicked.connect(self._pick_output_dir)
+        form.addRow(self.btn_output_dir, self.output_dir_edit)
+        self.output_basename_edit = QLineEdit("")
+        form.addRow("Output basename", self.output_basename_edit)
         self.output_tag_edit = QLineEdit("phase09c2_gui")
         form.addRow("Output tag", self.output_tag_edit)
         self.btn_run_qc = QPushButton("Run QC")
@@ -193,6 +199,15 @@ class ReflectanceQCMainWindow(QMainWindow):
         path, _ = QFileDialog.getOpenFileName(self, "Select CSV/TXT", "", "Data Files (*.csv *.txt)")
         if path:
             target.setText(path)
+            if target is self.sample_path_edit:
+                sample_path = Path(path)
+                self.output_dir_edit.setText(str(sample_path.parent))
+                self.output_basename_edit.setText(f"{sample_path.stem}_reflection")
+
+    def _pick_output_dir(self) -> None:
+        selected = QFileDialog.getExistingDirectory(self, "Select output folder", self.output_dir_edit.text().strip() or "")
+        if selected:
+            self.output_dir_edit.setText(selected)
 
     def _parse_range(self, preset_text: str, x_min_text: str, x_max_text: str) -> tuple[float | None, float | None]:
         preset = preset_text.replace(" nm", "")
@@ -217,6 +232,8 @@ class ReflectanceQCMainWindow(QMainWindow):
                 wavelength_preset=self.raw_range_preset.currentText(),
                 wavelength_min_text=self.raw_x_min.text().strip(),
                 wavelength_max_text=self.raw_x_max.text().strip(),
+                output_dir=Path(self.output_dir_edit.text().strip()) if self.output_dir_edit.text().strip() else None,
+                output_basename=self.output_basename_edit.text().strip() or None,
             )
             self.btn_run_qc.setEnabled(False)
             self.statusBar().showMessage("Running reflectance QC...")
@@ -273,8 +290,16 @@ class ReflectanceQCMainWindow(QMainWindow):
 
         if view_name == "Calculated reflectance":
             y = visible["calculated_reflectance"].to_numpy(dtype=float)
+            y = self._normalize_reflectance_fraction(y)
             robust_valid = ~(anomaly["non_finite_reflectance"] | anomaly["invalid_mask"] | anomaly["reflectance_lt_0"] | anomaly["reflectance_gt_1p2"])
-            y_label = "Reflectance"
+            robust_valid = np.array(
+                robust_valid.to_numpy() if hasattr(robust_valid, "to_numpy") else robust_valid,
+                dtype=bool,
+                copy=True,
+            )
+            robust_valid &= np.isfinite(y)
+            robust_valid &= (y >= -0.05) & (y <= 1.5)
+            y_label = "Reflectance (0-1)"
         elif view_name == "Sample/reference ratio":
             y = visible["sample_reference_ratio"].to_numpy(dtype=float)
             robust_valid = ~(anomaly["invalid_mask"])
@@ -299,7 +324,7 @@ class ReflectanceQCMainWindow(QMainWindow):
     def _apply_y_mode(self, y: np.ndarray, robust_valid: np.ndarray) -> None:
         mode = self.y_mode.currentText()
         if mode == "Physical reflectance range":
-            self.plot_widget.set_y_range(-0.05, 1.2)
+            self.plot_widget.set_y_range(0.0, 1.2)
             return
         if mode == "Manual":
             y_min, y_max = float(self.y_min.text()), float(self.y_max.text())
@@ -362,3 +387,13 @@ class ReflectanceQCMainWindow(QMainWindow):
             os.startfile(str(path))
             return
         QMessageBox.information(self, "Platform note", f"Open manually: {path}")
+
+    @staticmethod
+    def _normalize_reflectance_fraction(values: np.ndarray) -> np.ndarray:
+        finite = values[np.isfinite(values)]
+        if finite.size == 0:
+            return values
+        # Some historical outputs are stored/displayed in per-mille-like scale.
+        if float(np.nanmedian(finite)) > 2.0:
+            return values / 1000.0
+        return values

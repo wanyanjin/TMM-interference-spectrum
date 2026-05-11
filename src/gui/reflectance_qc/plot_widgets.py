@@ -24,6 +24,8 @@ class ReflectancePlotWidget(QWidget):
         layout = QVBoxLayout(self)
         self._plot = pg.PlotWidget()
         self._plot.showGrid(x=True, y=True, alpha=0.25)
+        # Keep axis values in direct decimal form (e.g., 0.34 instead of 340 x0.001).
+        self._plot.getAxis("left").enableAutoSIPrefix(False)
         layout.addWidget(self._plot)
         self._curve = self._plot.plot(pen=pg.mkPen("#2E86DE", width=2))
         self._anomaly = self._plot.plot(

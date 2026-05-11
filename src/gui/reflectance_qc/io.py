@@ -107,6 +107,8 @@ def build_workflow_config_from_gui(
     wavelength_preset: str,
     wavelength_min_text: str,
     wavelength_max_text: str,
+    output_dir: Path | None = None,
+    output_basename: str | None = None,
 ) -> ReflectanceQCWorkflowConfig:
     if not sample_path.exists():
         raise FileNotFoundError(f"Sample CSV not found: {sample_path}")
@@ -138,4 +140,6 @@ def build_workflow_config_from_gui(
         exposure_normalization_enabled=exposure_normalization_enabled,
         wavelength_min_nm=wavelength_min_nm,
         wavelength_max_nm=wavelength_max_nm,
+        output_dir=output_dir,
+        output_basename=output_basename,
     )
