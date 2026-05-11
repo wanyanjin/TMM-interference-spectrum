@@ -1,0 +1,7 @@
+{
+  "material": "SiO2 fused silica",
+  "source": "Malitson 1965 Sellmeier approximation",
+  "usage": "native oxide sensitivity approximation for Air/SiO2/Si only",
+  "temperature_note": "room-temperature approximation",
+  "notes": "Not an exact native-oxide ellipsometric model."
+}
