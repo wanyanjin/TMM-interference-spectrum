@@ -28,3 +28,4 @@
 ## Phase 09F
 - 新增 `src/scripts/step09f_si_air_interface_reflectance.py`，基于 `Si / Schinke 2015` 标准化 `n/k` 数据计算 `Si/Air` 单界面在 `400-1100 nm` 的法向反射率。
 - 输出 `csv`、manifest、Markdown 报告和 PNG/PDF 图到受控目录。
+- **工具正式化**：新增 `si_reference_curve` 正式工具单元（`domain`/`core`/`workflow`/`cli`），支持多层氧化层对比模拟与自动化测试。
